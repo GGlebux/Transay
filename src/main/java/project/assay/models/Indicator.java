@@ -24,7 +24,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Indicator {
-
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id")

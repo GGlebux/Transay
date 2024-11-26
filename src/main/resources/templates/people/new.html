@@ -21,7 +21,7 @@
   <br/>
 
   <label for="birth">Enter Date of Birthday (dd/MM/yyyy): </label>
-  <input type="text" th:field="*{dateOfBirth}" id="birth"/>
+  <input type="date" th:field="*{dateOfBirth}" id="birth"/>
   <div style="color:red" th:if="${#fields.hasErrors('dateOfBirth')}" th:errors="*{dateOfBirth}">dateOfBirth Error</div>
   <br/>
 

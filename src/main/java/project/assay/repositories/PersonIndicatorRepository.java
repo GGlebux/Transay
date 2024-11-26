@@ -13,4 +13,10 @@ import project.assay.models.PersonIndicatorId;
 public interface PersonIndicatorRepository extends JpaRepository<PersonIndicator, PersonIndicatorId> {
   @Query("SELECT pi FROM PersonIndicator pi WHERE pi.id.personId = :personId")
   List<PersonIndicator> findByPersonId(@Param("personId") Integer personId);
+
+  @Query("SELECT pi.currentValue FROM PersonIndicator pi WHERE pi.id.personId = :personId AND pi.id.indicatorId = :indicatorId")
+  Double findCurrentValue(@Param("personId") Integer personId, @Param("indicatorId") Integer indicatorId);
+
+  @Query("SELECT pi FROM PersonIndicator pi WHERE pi.id.personId = :personId AND pi.id.indicatorId = :indicatorId")
+  PersonIndicator findByPersonIdAndIndicatorId(Integer personId, Integer indicatorId);
 }

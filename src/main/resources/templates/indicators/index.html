@@ -6,20 +6,14 @@
 </head>
 <body>
 <form th:method="GET" th:action="@{/}">
-  <<button>Home</button>
+  <
+  <button>Home</button>
 </form>
 
 <div th:each="indicator : ${fullIndicators}">
-  <a th:text="${'Name='+ indicator.getIndicator().getName()
-            + ', Max=' + indicator.getIndicator().getMaxValue()
-            + ', Min=' + indicator.getIndicator().getMinValue()
-            + ', Current=' + indicator.getCurrentValue()}">IndicatorInfo</a>
+  <a th:href="@{/indicators/{id}(id=${indicator.getIndicator().getId()})}"
+     th:text="${indicator.getIndicator().getName() + ' = ' + indicator.getCurrentValue()}">IndicatorInfo</a>
 </div>
-
-<form th:method="GET" th:action="@{/indicators/edit/{id}(id=${person.getId()})}">
-  <input type="submit" value="Edit"/>
-</form>
-
 
 <form th:method="GET" th:action="@{/indicators/new}">
   <input type="submit" value="Add new">

@@ -2,9 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Title</title>
+  <title>Edit Indicators</title>
 </head>
 <body>
+<form th:method="GET" th:action="@{/indicators}">
+  <
+  <button>Indicators</button>
+</form>
+<form th:method="PATCH" th:action="@{/indicators/{id}(id=${person.getId()})}" th:object="${person}">
+  <div th:each="indicator,iterStat : ${personIndicators}">
+    <label th:text="${indicator.indicator.name} + ': '"></label>
+    <input type="number" th:field="*{personIndicators[__${iterStat.index}__].currentValue}" step="0.1">
+    <button type="button" th:method="DELETE">fd</button>
+  </div>
+  <button type="submit">Save Changes</button>
+</form>
 
 </body>
 </html>

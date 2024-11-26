@@ -56,26 +56,14 @@ public class PeopleService {
     peopleRepository.deleteById(id);
   }
 
-  public List<IndicatorWithCurrentValue> getIndicatorsById(int id) {
 
-    List<PersonIndicator> personIndicators = personIndicatorRepository.findByPersonId(id);
-    List<IndicatorWithCurrentValue> fullIndicators = new ArrayList<>();
-
-    for (PersonIndicator personIndicator : personIndicators) {
-      Indicator indicator = indicatorRepository.getIndicatorById(
-          personIndicator.getId().getIndicatorId());
-      fullIndicators.add(
-          new IndicatorWithCurrentValue(indicator, personIndicator.getCurrentValue()));
-    }
-    return fullIndicators;
-  }
 
   public int getDaysOfAge(int id) {
     Optional<Person> person = peopleRepository.findById(id);
     if (person.isPresent()) {
       Date birthDate = person.get().getDateOfBirth();
       Date currentDate = new Date();
-      return (int) Duration.between(currentDate.toInstant(), birthDate.toInstant()).toDays();
+      return (int) Duration.between(birthDate.toInstant(), currentDate.toInstant()).toDays();
     }
     return 0;
   }
