@@ -10,5 +10,4 @@ import project.assay.models.PersonIndicator;
 @Repository
 public interface PeopleRepository extends JpaRepository<Person, Integer> {
 
-  public List<PersonIndicator> getPeopleIndicatorById(int personId);
 }

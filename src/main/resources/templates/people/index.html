@@ -28,9 +28,13 @@
 </div>
 
 <div th:unless="${person}">
+  <br>
+  <a style="color: red">Profile not found (create)</a>
+  <br><hr>
   <form th:method="GET" th:action="@{/people/new}">
     <input type="submit" value="Create new">
   </form>
+
 </div>
 </body>
 </html>

@@ -14,6 +14,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -21,6 +22,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.springframework.format.annotation.DateTimeFormat;
 
 
 @Entity
@@ -43,8 +45,9 @@ public class Person {
   private String gender;
 
   @Column(name = "date_of_birth")
-  private Date dateOfBirth;
+  @DateTimeFormat(pattern = "yyyy/MM/dd")
+  private LocalDate dateOfBirth;
 
-  @OneToMany(mappedBy = "id.personId", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   private List<PersonIndicator> personIndicators;
 }

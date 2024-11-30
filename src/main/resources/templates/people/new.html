@@ -6,21 +6,20 @@
 </head>
 <body>
 <form th:method="POST" th:action="@{/people}" th:object="${person}">
-  <label for="name">Enter Name: </label>
+  <label for="name">Name: </label>
   <input type="text" th:field="*{name}" id="name"/>
   <div style="color:red" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Name Error</div>
   <br/>
 
-  <label for="gender">Enter gender: </label>
+  <label for="gender">Gender: </label>
   <select th:object="${person}" th:field="*{gender}" id="gender">
     <option th:value="'male'">Male</option>
     <option th:value="'female'">Female</option>
-    <option th:value="'both'">Both</option>
   </select>
   <div style="color:red" th:if="${#fields.hasErrors('gender')}" th:errors="*{gender}">gender Error</div>
   <br/>
 
-  <label for="birth">Enter Date of Birthday (dd/MM/yyyy): </label>
+  <label for="birth">Date of Birthday: </label>
   <input type="date" th:field="*{dateOfBirth}" id="birth"/>
   <div style="color:red" th:if="${#fields.hasErrors('dateOfBirth')}" th:errors="*{dateOfBirth}">dateOfBirth Error</div>
   <br/>

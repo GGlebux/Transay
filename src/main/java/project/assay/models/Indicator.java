@@ -47,7 +47,7 @@ public class Indicator {
   @Column(name = "min_value")
   private double minValue;
 
-  @OneToMany(mappedBy = "id.indicatorId", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "indicator", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   private List<PersonIndicator> personIndicators;
 
   @Override

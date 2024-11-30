@@ -5,18 +5,35 @@
   <title>Indicators</title>
 </head>
 <body>
+
 <form th:method="GET" th:action="@{/}">
-  <
-  <button>Home</button>
+  <<button>Home</button>
 </form>
 
-<div th:each="indicator : ${fullIndicators}">
-  <a th:href="@{/indicators/{id}(id=${indicator.getIndicator().getId()})}"
-     th:text="${indicator.getIndicator().getName() + ' = ' + indicator.getCurrentValue()}">IndicatorInfo</a>
+<div th:if="${!pi.isEmpty()}">
+  <br>
+  <div th:each="p : ${pi}">
+    <a th:href="@{/indicators/{id}(id=${p.getId()})}"
+       th:text="${p.getIndicator().getName() + ' = ' + p.getCurrentValue()}">IndicatorInfo</a>
+  </div>
+  <br>
 </div>
+
+<a th:unless="${!pi.isEmpty()}">
+  <br>
+  There are no indicators! (add)
+  <br>
+</a>
+
+<hr>
 
 <form th:method="GET" th:action="@{/indicators/new}">
   <input type="submit" value="Add new">
+</form>
+
+
+<form th:method="GET" th:action="@{/indicators/decrypt}">
+  <input type="submit" value="Decrypt!">
 </form>
 
 </body>

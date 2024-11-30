@@ -6,15 +6,18 @@
 </head>
 <body>
 <form th:method="GET" th:action="@{/indicators}">
-  <
-  <button>Indicators</button>
+  <<button>List of Indicators</button>
 </form>
-<form th:method="PATCH" th:action="@{/indicators/{id}(id=${person.getId()})}" th:object="${person}">
-  <div th:each="indicator,iterStat : ${personIndicators}">
-    <label th:text="${indicator.indicator.name} + ': '"></label>
-    <input type="number" th:field="*{personIndicators[__${iterStat.index}__].currentValue}" step="0.1">
-    <button type="button" th:method="DELETE">fd</button>
-  </div>
+
+<form th:method="PATCH" th:action="@{/indicators/{id}(id=${pi.getId()})}">
+  <p style="font-weight: bold" th:text="${pi.getIndicator().getName()}">Name</p>
+  <p th:text="${'Min value: ' + pi.getIndicator().getMinValue()}"></p>
+  <p th:text="${'Max value: ' + pi.getIndicator().getMaxValue()}"></p>
+
+  <label for="value" th:text="'Current value: '"></label>
+  <input type="number" th:object="${pi}" th:field="*{currentValue}" step="0.1" id="value">
+
+  <br><hr>
   <button type="submit">Save Changes</button>
 </form>
 

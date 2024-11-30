@@ -1,69 +1,71 @@
 package project.assay.services;
 
-import jakarta.validation.Valid;
 import java.time.Duration;
-import java.util.ArrayList;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import project.assay.models.Indicator;
-import project.assay.models.IndicatorWithCurrentValue;
+import org.springframework.transaction.annotation.Transactional;
 import project.assay.models.Person;
-import project.assay.models.PersonIndicator;
 import project.assay.repositories.IndicatorRepository;
 import project.assay.repositories.PeopleRepository;
-import project.assay.repositories.PersonIndicatorRepository;
+import project.assay.repositories.MainRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class PeopleService {
 
   private final PeopleRepository peopleRepository;
   private final IndicatorRepository indicatorRepository;
-  private final PersonIndicatorRepository personIndicatorRepository;
+  private final MainRepository mainRepository;
 
   @Autowired
   public PeopleService(PeopleRepository peopleRepository, IndicatorRepository indicatorRepository,
-      PersonIndicatorRepository personIndicatorRepository) {
+      MainRepository mainRepository) {
     this.peopleRepository = peopleRepository;
     this.indicatorRepository = indicatorRepository;
-    this.personIndicatorRepository = personIndicatorRepository;
+    this.mainRepository = mainRepository;
   }
 
   public List<Person> findAll() {
     return peopleRepository.findAll();
   }
 
-  public Person findOne() {
-    return this.findAll().stream().findAny().orElse(null);
+  public Optional<Person> findOne() {
+    return this.findAll().stream().findAny();
   }
 
   public Person findById(int id) {
     return peopleRepository.findById(id).orElse(null);
   }
 
+  @Transactional
   public void save(Person person) {
     peopleRepository.save(person);
   }
 
+  @Transactional
   public void update(int id, Person person) {
     person.setId(id);
     peopleRepository.save(person);
   }
 
+  @Transactional
   public void delete(int id) {
     peopleRepository.deleteById(id);
   }
 
-
-
   public int getDaysOfAge(int id) {
     Optional<Person> person = peopleRepository.findById(id);
     if (person.isPresent()) {
-      Date birthDate = person.get().getDateOfBirth();
-      Date currentDate = new Date();
-      return (int) Duration.between(birthDate.toInstant(), currentDate.toInstant()).toDays();
+      LocalDate birthDate = person.get().getDateOfBirth();
+      LocalDate today = LocalDate.now();
+      System.out.println(ChronoUnit.DAYS.between(birthDate, today));
+      return (int) ChronoUnit.DAYS.between(birthDate, today);
     }
     return 0;
   }

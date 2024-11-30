@@ -2,7 +2,7 @@ package project.assay.controllers;
 
 
 import jakarta.validation.Valid;
-import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,8 +28,9 @@ public class PeopleController {
   }
 
   @GetMapping()
-  public String index(Model model) {
-    model.addAttribute("person", peopleService.findOne());
+  public String index(@ModelAttribute("error") String error, Model model) {
+    Optional<Person> person = peopleService.findOne();
+    person.ifPresent(value -> model.addAttribute("person", value));
     return "people/index";
   }
 
