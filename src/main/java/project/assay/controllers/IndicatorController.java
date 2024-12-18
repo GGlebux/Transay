@@ -1,19 +1,18 @@
 package project.assay.controllers;
 
 
+import jakarta.validation.Valid;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+import project.assay.dto.IndicatorDTO;
+import project.assay.exceptions.IndicatorNotFoundException;
 import project.assay.models.Indicator;
 import project.assay.models.Person;
 import project.assay.models.PersonIndicator;
@@ -21,96 +20,106 @@ import project.assay.services.IndicatorService;
 import project.assay.services.MainService;
 import project.assay.services.PeopleService;
 import project.assay.services.TranscriptService;
+import project.assay.utils.IndicatorErrorResponce;
 
-@Controller
-@RequestMapping("/indicators")
+import static project.assay.utils.DayConverter.*;
+
+@RestController
+@RequestMapping("/indicators/{pid}")
 public class IndicatorController {
+
   private final IndicatorService indicatorService;
   private final PeopleService peopleService;
   private final TranscriptService transcriptService;
   private final MainService mainService;
+  private final ModelMapper modelMapper;
 
   @Autowired
   public IndicatorController(IndicatorService indicatorService, PeopleService peopleService,
       TranscriptService transcriptService,
-      MainService mainService) {
+      MainService mainService, ModelMapper modelMapper) {
     this.indicatorService = indicatorService;
     this.peopleService = peopleService;
     this.transcriptService = transcriptService;
     this.mainService = mainService;
+    this.modelMapper = modelMapper;
   }
 
   @GetMapping
-  public String index(Model model) {
-    Optional<Person> person = peopleService.findOne();
-    if (person.isPresent()) {
-      List<PersonIndicator> personIndicators = mainService.findPI(person.get().getId());
-      model.addAttribute("pi", personIndicators);
-      return "indicators/index";
-    }
-    else {
-      return "redirect:/people";
-    }
+  public List<IndicatorDTO> index(@PathVariable("pid") int pid) {
+    Person person = peopleService.findById(pid);
+    List<PersonIndicator> personIndicators = mainService.findPI(person.getId());
+    return personIndicators.stream().map(this::convertToIndicatorDTO).toList();
   }
 
   @GetMapping("/{id}")
-  public String show(@PathVariable int id, Model model) {
-    PersonIndicator pi = mainService.findById(id);
-    model.addAttribute("pi", pi);
-    return "indicators/show";
+  public IndicatorDTO show(@PathVariable int id) {
+    return convertToIndicatorDTO(mainService.findById(id));
   }
 
-  @GetMapping("/{id}/edit")
-  public String edit(@PathVariable int id, Model model) {
-    PersonIndicator pi = mainService.findById(id);
-    model.addAttribute("pi", pi);
-    return "indicators/edit";
+  @PostMapping()
+  public ResponseEntity<HttpStatus> create(@RequestBody @Valid IndicatorDTO indicatorDTO,
+      @PathVariable("pid") int pid) {
+    mainService.save(convertToPersonIndicator(indicatorDTO, pid));
+    return ResponseEntity.ok(HttpStatus.CREATED);
   }
 
-  @GetMapping("/new")
-  public String newIndicator(@ModelAttribute("pi") PersonIndicator indicator, Model model) {
-    Optional<Person> person = peopleService.findOne();
-    if (person.isPresent()) {
-      List<Indicator> all = indicatorService.findAllCorrect(person.get());
-      model.addAttribute("all", all);
-      System.out.println("КОРРЕКТНЫЕЕ==" + all);
-    }
-    return "indicators/new";
+  @PatchMapping("/{id}")
+  public ResponseEntity<HttpStatus> update(@RequestBody @Valid IndicatorDTO indicatorDTO,
+      @PathVariable("pid") int pid, @PathVariable int id) {
+    mainService.updateValue(id, convertToPersonIndicator(indicatorDTO, pid));
+    return ResponseEntity.ok(HttpStatus.OK);
   }
 
-  @PostMapping("{id}")
-  public String create(@PathVariable int id, PersonIndicator pi, Model model) {
-    Optional<Person> person = peopleService.findOne();
-    if (person.isPresent()) {
-      pi.setPerson(person.get());
-      mainService.save(pi);
-    }
-    return "redirect:/indicators";
-  }
-
-  @PatchMapping("{id}")
-  public String update(@ModelAttribute("pi") PersonIndicator pi, @PathVariable int id, Model model) {
-    mainService.updateValue(id, pi);
-    return "redirect:/indicators";
-  }
-
-  @DeleteMapping("{id}")
-  public String delete(@PathVariable int id) {
+  @DeleteMapping("/{id}")
+  public ResponseEntity<HttpStatus> delete(@PathVariable int id) {
     mainService.delete(id);
-    return "redirect:/indicators";
+    return ResponseEntity.ok(HttpStatus.OK);
+  }
+
+  @GetMapping("/correct")
+  public List<String> correct(@PathVariable("pid") int pid) {
+    Person person = peopleService.findById(pid);
+    List<Indicator> indicators = indicatorService.findAllCorrect(person);
+    return indicators.stream().map(Indicator::getName).toList();
   }
 
   @GetMapping("/decrypt")
-  public String decrypt(Model model) {
-    Optional<Person> person = peopleService.findOne();
-    if (person.isPresent()) {
-      List<PersonIndicator> personIndicators = mainService.findPI(person.get().getId());
-      Map<String, List<String>> map = transcriptService.getDecrypt(personIndicators);
-      if (!map.isEmpty()) {
-        model.addAttribute("map", map);
-      }
+  public Map<String, List<String>> decrypt(@PathVariable("pid") int pid) {
+    Person person = peopleService.findById(pid);
+    List<PersonIndicator> personIndicators = mainService.findPI(person.getId());
+    return transcriptService.getDecrypt(personIndicators);
+  }
 
-    }
-    return "indicators/decrypt";
+  private IndicatorDTO convertToIndicatorDTO(PersonIndicator personIndicator) {
+    Indicator indicator = personIndicator.getIndicator();
+    Map<String, Integer> maxPeriod = convertToPeriod(indicator.getMaxAge());
+    Map<String, Integer> minPeriod = convertToPeriod(indicator.getMinAge());
+
+    IndicatorDTO result = modelMapper.map(indicator, IndicatorDTO.class);
+    result.setCurrentValue(personIndicator.getCurrentValue());
+    result.setMaxAge(maxPeriod);
+    result.setMinAge(minPeriod);
+    result.setId(personIndicator.getId());
+    return result;
+  }
+
+  private PersonIndicator convertToPersonIndicator(IndicatorDTO indicatorDTO, int personId) {
+    Person person = peopleService.findById(personId);
+    Indicator indicator = indicatorService.findOneCorrect(indicatorDTO.getName(), personId);
+    PersonIndicator personIndicator = new PersonIndicator();
+    personIndicator.setPerson(person);
+    personIndicator.setIndicator(indicator);
+    personIndicator.setCurrentValue(indicatorDTO.getCurrentValue());
+    return personIndicator;
+  }
+
+  @ExceptionHandler
+  public ResponseEntity<IndicatorErrorResponce> handleException(IndicatorNotFoundException e) {
+    IndicatorErrorResponce responce = new IndicatorErrorResponce(
+        "Indicator with this id not found!",
+        LocalDateTime.now()
+    );
+    return new ResponseEntity<>(responce, HttpStatus.NOT_FOUND);
   }
 }

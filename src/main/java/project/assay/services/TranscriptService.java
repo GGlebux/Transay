@@ -58,8 +58,6 @@ public class TranscriptService {
       double min = indicator.getMinValue();
       double max = indicator.getMaxValue();
 
-      System.out.println("Имя= " + iName + " Min= " + min +" Текущее= "+ current + " Max= " + max);
-
       Optional<Transcript> transcript = transcriptRepository.findByName(iName);
       if (transcript.isPresent()) {
         if (current <= min) {
@@ -68,8 +66,6 @@ public class TranscriptService {
           decryptMap.put(iName, findByName(iName).get().getRaise());
         }
       }
-
-
     }
     return decryptMap;
   }

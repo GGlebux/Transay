@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import project.assay.exceptions.IndicatorNotFoundException;
 import project.assay.models.Indicator;
 import project.assay.models.Person;
 import project.assay.models.PersonIndicator;
@@ -28,7 +29,7 @@ public class MainService {
 
   public PersonIndicator findById(int id) {
     Optional<PersonIndicator> personIndicator = mainRepository.findById(id);
-    return personIndicator.orElse(null);
+    return personIndicator.orElseThrow(IndicatorNotFoundException::new);
   }
 
   public List<Indicator> findOwnerIndicator(int personId) {

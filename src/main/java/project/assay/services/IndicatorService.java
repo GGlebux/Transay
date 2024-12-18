@@ -27,9 +27,13 @@ public class IndicatorService {
     return indicatorRepository.getIndicatorById(id);
   }
 
-//  public Indicator findOneCorrect(Indicator indicator) {
-//    return indicatorRepository.getOneCorrect(indicator.getName(), indicator.getGender(), indicator.getMaxAge());
-//  }
+  public Indicator findOneCorrect(String indicatorName, int personId) {
+    Person person = peopleService.findById(personId);
+    String gender = person.getGender();
+    int age = peopleService.getDaysOfAge(personId);
+    return indicatorRepository.findOneCorrect(indicatorName, gender, age);
+  }
+
 
   public List<Indicator> findAllCorrect(Person person) {
     int age = peopleService.getDaysOfAge(person.getId());

@@ -11,7 +11,7 @@ import project.assay.models.Indicator;
 public interface IndicatorRepository extends JpaRepository<Indicator, Integer> {
 
   @Query("SELECT i FROM Indicator i WHERE i.name = :name and (i.gender = :gender or i.gender = 'both') and :age BETWEEN i.minAge and i.maxAge")
-  public Indicator getOneCorrect(@Param("name") String name,
+  public Indicator findOneCorrect(@Param("name") String name,
       @Param("gender") String gender,
       @Param("age") Integer age);
 
