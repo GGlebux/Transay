@@ -1,4 +1,4 @@
-package project.assay.utils;
+package project.assay.utils.responces;
 
 import java.time.LocalDateTime;
 import lombok.Data;

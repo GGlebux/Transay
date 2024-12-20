@@ -1,40 +1,40 @@
 //package project.assay.models;
 //
-//
 //import jakarta.persistence.Column;
-//import jakarta.persistence.Convert;
 //import jakarta.persistence.Entity;
 //import jakarta.persistence.GeneratedValue;
 //import jakarta.persistence.GenerationType;
 //import jakarta.persistence.Id;
+//import jakarta.persistence.JoinColumn;
+//import jakarta.persistence.ManyToOne;
 //import jakarta.persistence.Table;
-//import java.util.List;
 //import lombok.AllArgsConstructor;
 //import lombok.Getter;
 //import lombok.NoArgsConstructor;
 //import lombok.Setter;
-//import project.assay.utils.JsonStringListConverter;
+//
 //
 //@Entity
-//@Table(name = "transcript")
+//@Table(name = "person_info")
 //@Setter
 //@Getter
 //@NoArgsConstructor
 //@AllArgsConstructor
-//public class Transcript {
+//public class PersonInfo {
 //  @Id
 //  @GeneratedValue(strategy = GenerationType.IDENTITY)
 //  @Column(name = "id")
 //  private int id;
 //
-//  @Column(name = "name")
-//  private String name;
+//  @ManyToOne
+//  @JoinColumn(name = "person_id", referencedColumnName = "id")
+//  private Person person;
 //
-//  @Convert(converter = JsonStringListConverter.class)
-//  @Column(name = "fall", columnDefinition = "jsonb")
-//  private List<String> fall;
+//  @ManyToOne
+//  @JoinColumn(name = "indicator_id", referencedColumnName = "id")
+//  private Indicator indicator;
 //
-//  @Convert(converter = JsonStringListConverter.class)
-//  @Column(name = "raise", columnDefinition = "jsonb")
-//  private List<String> raise;
+//  @ManyToOne
+//  @JoinColumn(name = "referent_id", referencedColumnName = "id")
+//  private Referent referent;
 //}

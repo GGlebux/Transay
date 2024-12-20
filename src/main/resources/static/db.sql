@@ -34,7 +34,7 @@ create table transcript (
 
 
 INSERT INTO transcript (name, fall, raise) VALUES (
-      'hemoglobin.json',
+      'hemoglobin',
       '[
         "дефицит белка/меди/марганца/витамина С/витамина В1/В9/В12",
         "недостаточное поступление железа и/или его плохое усвоение",
