@@ -1,5 +1,6 @@
 package project.assay.models;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -46,10 +47,10 @@ public class Person {
   private LocalDate dateOfBirth;
 
   @Column(name = "is_gravid")
-  private boolean isGravid;
+  private Boolean isGravid;
 
-  @OneToMany(mappedBy = "owner")
-  private List<ExcludedReasons> excludedReasons;
+  @OneToMany(mappedBy = "owner", cascade = CascadeType.REMOVE)
+  private List<Reason> excludedReasons;
 
 //  @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 //  private List<PersonInfo> personIndicators;

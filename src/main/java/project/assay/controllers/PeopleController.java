@@ -3,7 +3,6 @@ package project.assay.controllers;
 
 import jakarta.validation.Valid;
 
-import java.io.IOException;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -18,73 +17,81 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import project.assay.dto.PersonDTO;
+import project.assay.dto.ReasonDTO;
 import project.assay.exceptions.PersonNotCreatedException;
 import project.assay.exceptions.PersonNotFoundException;
 import project.assay.models.Person;
+import project.assay.models.Reason;
 import project.assay.services.PeopleService;
-import project.assay.utils.converters.JsonToListConverter;
 import project.assay.utils.responces.PersonErrorResponce;
 
+/**
+ * REST Контроллер для работы с сущностью Person. Предоставляет API endpoint`ы для клиента
+ *
+ * @author GGlebux
+ */
 @RestController
 @RequestMapping("/profile")
 public class PeopleController {
 
   private final PeopleService peopleService;
   private final ModelMapper modelMapper;
-  private final JsonToListConverter jsonToListConverter;
+
 
   @Autowired
-  public PeopleController(PeopleService peopleService, ModelMapper modelMapper,
-      JsonToListConverter jsonToListConverter) {
+  public PeopleController(PeopleService peopleService, ModelMapper modelMapper) {
     this.peopleService = peopleService;
     this.modelMapper = modelMapper;
-    this.jsonToListConverter = jsonToListConverter;
   }
 
-  @GetMapping("/{id}")
-  public ResponseEntity<PersonDTO> show(@PathVariable("id") int id) throws IOException {
-    Person person = peopleService.findById(id);
+  @GetMapping("/{personId}")
+  public ResponseEntity<PersonDTO> show(@PathVariable("personId") int personId) {
+    Person person = peopleService.findById(personId);
     return ResponseEntity.ok(converToPersonDTO(person));
   }
 
   @PostMapping
   public ResponseEntity<Integer> create(@RequestBody @Valid PersonDTO personDTO,
-      BindingResult bindingResult) throws IOException {
+      BindingResult bindingResult) {
     throwValidException(bindingResult);
-    if (bindingResult.hasErrors()) {
-
-    }
     Person savedPerson = peopleService.save(converToPerson(personDTO));
-    return ResponseEntity.created(URI.create("/profile/" + savedPerson.getId())).build();
+    return ResponseEntity.created(URI.create("/profile/" + savedPerson.getId())).body(savedPerson.getId());
   }
 
-  @PatchMapping("/{id}")
+  @PatchMapping("/{personId}")
   public ResponseEntity<HttpStatus> update(@RequestBody @Valid PersonDTO personDTO,
-      @PathVariable("id") int id,
-      BindingResult bindingResult) throws IOException {
+      @PathVariable("personId") int personId,
+      BindingResult bindingResult) {
+    Person person = peopleService.findById(personId);
     throwValidException(bindingResult);
-    peopleService.update(id, converToPerson(personDTO));
+    peopleService.update(personId, converToPerson(personDTO));
     return ResponseEntity.ok(HttpStatus.ACCEPTED);
   }
 
-  @DeleteMapping("/{id}")
-  public ResponseEntity<HttpStatus> delete(@PathVariable("id") int id) {
-    peopleService.delete(id);
+  @DeleteMapping("/{personId}")
+  public ResponseEntity<HttpStatus> delete(@PathVariable("personId") int personId) {
+    peopleService.delete(personId);
     return ResponseEntity.ok(HttpStatus.OK);
   }
 
-  private Person converToPerson(PersonDTO personDTO) throws IOException {
-    Person person = modelMapper.map(personDTO, Person.class);
-
-    return person;
+  private Person converToPerson(PersonDTO personDTO) {
+    return modelMapper.map(personDTO, Person.class);
   }
 
-  private PersonDTO converToPersonDTO(Person person) throws IOException {
+  private PersonDTO converToPersonDTO(Person person) {
+    List<ReasonDTO> reasons = converToReasonDTO(person.getExcludedReasons());
     PersonDTO personDTO = modelMapper.map(person, PersonDTO.class);
+    personDTO.setExcludedReasons(reasons);
     return personDTO;
   }
 
+  private List<ReasonDTO> converToReasonDTO(List<Reason> reasons) {
+    return reasons.stream().map((reason -> modelMapper.map(reason, ReasonDTO.class))).toList();
+  }
 
+  private ReasonDTO convertToReason(ReasonDTO reasonDTO) {
+    return modelMapper.map(reasonDTO, ReasonDTO.class);
+  }
 
   private void throwValidException(BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {

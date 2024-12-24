@@ -24,9 +24,8 @@ public class PeopleService {
   }
 
   public Person findById(int id) {
-    // ToDo найти по id, а не любого
     Optional<Person> person = peopleRepository.findById(id);
-    return person.orElseThrow(PersonNotFoundException::new);
+    return person.orElseThrow(() -> new PersonNotFoundException("Person with id=" + id + " not found!"));
   }
 
   @Transactional
@@ -36,13 +35,15 @@ public class PeopleService {
 
   @Transactional
   public void update(int id, Person person) {
+    Optional<Person> personFromDB = peopleRepository.findById(id);
+    personFromDB.orElseThrow(() -> new PersonNotFoundException("Person with id=" + id + " not found!"));
     person.setId(id);
     peopleRepository.save(person);
   }
 
   @Transactional
   public void delete(int id) {
-    peopleRepository.findById(id).orElseThrow(PersonNotFoundException::new);
+    peopleRepository.findById(id).orElseThrow(() -> new PersonNotFoundException("Person with id=" + id + " not found!"));;
     peopleRepository.deleteById(id);
   }
 

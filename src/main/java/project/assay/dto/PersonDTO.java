@@ -1,12 +1,11 @@
 package project.assay.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.List;
+import jdk.jfr.BooleanFlag;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -24,7 +23,7 @@ public class PersonDTO {
   @JsonFormat(pattern = "yyyy-MM-dd")
   private LocalDate dateOfBirth;
 
-  private boolean isGravid;
+  private Boolean isGravid;
 
-  private List<String> excludedReasons;
+  private List<ReasonDTO> excludedReasons;
 }
