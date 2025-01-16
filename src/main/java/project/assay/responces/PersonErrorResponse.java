@@ -1,4 +1,4 @@
-package project.assay.utils.responces;
+package project.assay.responces;
 
 import lombok.Data;
 

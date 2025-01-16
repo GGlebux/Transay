@@ -1,18 +1,22 @@
 package project.assay.models;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import project.assay.utils.converters.JsonToListConverter;
 
 @Entity
 @Table(name = "referent")
@@ -41,7 +45,20 @@ public class Referent {
   @OneToOne(mappedBy = "referent")
   private PersonInfo personInfo;
 
-  @OneToOne
-  @JoinColumn(name = "transcript_id", referencedColumnName = "id")
-  private Transcript transcript;
+  @Convert(converter = JsonToListConverter.class)
+  @Column(name = "transcript", columnDefinition = "jsonb")
+  @JdbcTypeCode(SqlTypes.JSON)
+  private List<String> description;
+
+  @Override
+  public String toString() {
+    return "Referent{" +
+        "id=" + id +
+        ", currentValue=" + currentValue +
+        ", regDate=" + regDate +
+        ", units='" + units + '\'' +
+        ", status='" + status + '\'' +
+        ", description=" + description +
+        '}';
+  }
 }

@@ -1,5 +1,7 @@
 package project.assay.services;
 
+import static project.assay.utils.converters.StaticMethods.getDaysOfAge;
+
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,21 +29,35 @@ public class IndicatorService {
     return indicatorRepository.getIndicatorById(id);
   }
 
-  public Indicator findOneCorrect(String indicatorName, int personId) {
-    Person person = peopleService.findById(personId);
+  public Indicator findOneCorrect(String indicatorName, Person person) {
     String gender = person.getGender();
-    int age = peopleService.getDaysOfAge(personId);
+    int age = getDaysOfAge(person.getDateOfBirth());
     return indicatorRepository.findOneCorrect(indicatorName, gender, age);
   }
 
 
   public List<Indicator> findAllCorrect(Person person) {
-    int age = peopleService.getDaysOfAge(person.getId());
+    int age = getDaysOfAge(person.getDateOfBirth());
     return indicatorRepository.findAllCorrect(person.getGender(), age);
   }
+
 
   @Transactional
   public Indicator save(Indicator indicator) {
     return indicatorRepository.save(indicator);
+  }
+
+  public String checkValue(Indicator indicator, double value) {
+    double minValue = indicator.getMinValue();
+    double maxValue = indicator.getMaxValue();
+    if (value < minValue) {
+      return "lower";
+    }
+    else if (value > maxValue) {
+      return "upper";
+    }
+    else {
+      return "ok";
+    }
   }
 }

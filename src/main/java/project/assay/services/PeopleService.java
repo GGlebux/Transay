@@ -1,8 +1,6 @@
 package project.assay.services;
 
 
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,7 +23,8 @@ public class PeopleService {
 
   public Person findById(int id) {
     Optional<Person> person = peopleRepository.findById(id);
-    return person.orElseThrow(() -> new PersonNotFoundException("Person with id=" + id + " not found!"));
+    return person.orElseThrow(
+        () -> new PersonNotFoundException("Person with id=" + id + " not found!"));
   }
 
   @Transactional
@@ -36,24 +35,18 @@ public class PeopleService {
   @Transactional
   public void update(int id, Person person) {
     Optional<Person> personFromDB = peopleRepository.findById(id);
-    personFromDB.orElseThrow(() -> new PersonNotFoundException("Person with id=" + id + " not found!"));
+    personFromDB.orElseThrow(
+        () -> new PersonNotFoundException("Person with id=" + id + " not found!"));
     person.setId(id);
     peopleRepository.save(person);
   }
 
   @Transactional
   public void delete(int id) {
-    peopleRepository.findById(id).orElseThrow(() -> new PersonNotFoundException("Person with id=" + id + " not found!"));
+    peopleRepository.findById(id)
+        .orElseThrow(() -> new PersonNotFoundException("Person with id=" + id + " not found!"));
     peopleRepository.deleteById(id);
   }
 
-  public int getDaysOfAge(int id) {
-    Optional<Person> person = peopleRepository.findById(id);
-    if (person.isPresent()) {
-      LocalDate birthDate = person.get().getDateOfBirth();
-      LocalDate today = LocalDate.now();
-      return (int) ChronoUnit.DAYS.between(birthDate, today);
-    }
-    return 0;
-  }
+
 }

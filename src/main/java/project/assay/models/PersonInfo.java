@@ -1,5 +1,6 @@
 package project.assay.models;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -32,11 +33,21 @@ public class PersonInfo {
   @JoinColumn(name = "indicator_id", referencedColumnName = "id")
   private Indicator indicator;
 
-  @OneToOne
+  @OneToOne(cascade = CascadeType.REMOVE)
   @JoinColumn(name = "referent_id", referencedColumnName = "id")
   private Referent referent;
 
   @ManyToOne
   @JoinColumn(name = "person_id", referencedColumnName = "id")
   private Person person;
+
+  @Override
+  public String toString() {
+    return "PersonInfo{" +
+        "id=" + id +
+        ", indicator=" + indicator.getId() +
+        ", referent=" + referent.getId() +
+        ", person=" + person.getId() +
+        '}';
+  }
 }

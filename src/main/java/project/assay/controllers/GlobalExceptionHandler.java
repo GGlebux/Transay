@@ -12,7 +12,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import project.assay.exceptions.PersonNotFoundException;
-import project.assay.utils.responces.PersonErrorResponse;
+import project.assay.responces.PersonErrorResponse;
 import project.assay.exceptions.PersonNotCreatedException;
 
 @ControllerAdvice
@@ -49,10 +49,7 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
   }
 
-  /**
-   * @param ex
-   * @return
-   */
+
   @ExceptionHandler(InvalidFormatException.class)
   public ResponseEntity<String> handleInvalidFormatException(InvalidFormatException ex) {
     String errorField = ex.getPath().getFirst().getFieldName();

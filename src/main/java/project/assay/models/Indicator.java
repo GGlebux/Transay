@@ -47,4 +47,18 @@ public class Indicator {
 
   @OneToOne(mappedBy = "indicator")
   private PersonInfo personInfo;
+
+  @Override
+  public String toString() {
+    return "Indicator{" +
+        "maxValue=" + maxValue +
+        ", minValue=" + minValue +
+        ", maxAge=" + maxAge +
+        ", minAge=" + minAge +
+        ", isGravid=" + isGravid +
+        ", gender='" + gender + '\'' +
+        ", name='" + name + '\'' +
+        ", id=" + id +
+        '}';
+  }
 }
