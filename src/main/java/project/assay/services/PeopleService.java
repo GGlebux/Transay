@@ -1,8 +1,8 @@
 package project.assay.services;
 
+
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,7 +43,7 @@ public class PeopleService {
 
   @Transactional
   public void delete(int id) {
-    peopleRepository.findById(id).orElseThrow(() -> new PersonNotFoundException("Person with id=" + id + " not found!"));;
+    peopleRepository.findById(id).orElseThrow(() -> new PersonNotFoundException("Person with id=" + id + " not found!"));
     peopleRepository.deleteById(id);
   }
 

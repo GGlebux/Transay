@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import java.time.LocalDate;
 
 import jakarta.validation.constraints.NotEmpty;
@@ -18,6 +19,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 
 @Entity
@@ -26,6 +28,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class Person {
 
   @Id
@@ -39,6 +42,7 @@ public class Person {
   private String name;
 
   @Column(name = "gender")
+  @Pattern(regexp = "^(male|female)$", message = "Gender should be 'male' or 'female'")
   @NotEmpty(message = "Gender should not be empty")
   private String gender;
 
@@ -52,6 +56,6 @@ public class Person {
   @OneToMany(mappedBy = "owner", cascade = CascadeType.REMOVE)
   private List<Reason> excludedReasons;
 
-//  @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-//  private List<PersonInfo> personIndicators;
+  @OneToMany(mappedBy = "person", cascade = CascadeType.ALL)
+  private List<PersonInfo> personInfoList;
 }

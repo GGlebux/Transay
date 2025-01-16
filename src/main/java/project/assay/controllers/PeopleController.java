@@ -4,7 +4,6 @@ package project.assay.controllers;
 import jakarta.validation.Valid;
 
 import java.net.URI;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 
@@ -17,13 +16,12 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import project.assay.dto.PersonDTO;
+import project.assay.dto.PersonUpdateDTO;
 import project.assay.dto.ReasonDTO;
 import project.assay.exceptions.PersonNotCreatedException;
-import project.assay.exceptions.PersonNotFoundException;
 import project.assay.models.Person;
 import project.assay.models.Reason;
 import project.assay.services.PeopleService;
-import project.assay.utils.responces.PersonErrorResponce;
 
 /**
  * REST Контроллер для работы с сущностью Person. Предоставляет API endpoint`ы для клиента
@@ -51,20 +49,20 @@ public class PeopleController {
   }
 
   @PostMapping
-  public ResponseEntity<Integer> create(@RequestBody @Valid PersonDTO personDTO,
+  public ResponseEntity<String> create(@RequestBody @Valid PersonDTO personDTO,
       BindingResult bindingResult) {
     throwValidException(bindingResult);
-    Person savedPerson = peopleService.save(converToPerson(personDTO));
-    return ResponseEntity.created(URI.create("/profile/" + savedPerson.getId())).body(savedPerson.getId());
+    Person savedPerson = peopleService.save(convertToPerson(personDTO));
+    return ResponseEntity.created(URI.create("/profile/" + savedPerson.getId()))
+        .body("Created a person with id=" + savedPerson.getId());
   }
 
   @PatchMapping("/{personId}")
-  public ResponseEntity<HttpStatus> update(@RequestBody @Valid PersonDTO personDTO,
-      @PathVariable("personId") int personId,
-      BindingResult bindingResult) {
-    Person person = peopleService.findById(personId);
+  public ResponseEntity<HttpStatus> update(@RequestBody @Valid PersonUpdateDTO personUpdateDTO,
+      @PathVariable("personId") int personId, BindingResult bindingResult) {
     throwValidException(bindingResult);
-    peopleService.update(personId, converToPerson(personDTO));
+    Person person = peopleService.findById(personId);
+    peopleService.update(personId, convertToPerson(personUpdateDTO, person));
     return ResponseEntity.ok(HttpStatus.ACCEPTED);
   }
 
@@ -74,8 +72,14 @@ public class PeopleController {
     return ResponseEntity.ok(HttpStatus.OK);
   }
 
-  private Person converToPerson(PersonDTO personDTO) {
+  private Person convertToPerson(PersonDTO personDTO) {
     return modelMapper.map(personDTO, Person.class);
+  }
+
+  private Person convertToPerson(PersonUpdateDTO personUpdateDTO, Person preparedPerson) {
+    modelMapper.getConfiguration().setSkipNullEnabled(true);
+    modelMapper.map(personUpdateDTO, preparedPerson);
+    return preparedPerson;
   }
 
   private PersonDTO converToPersonDTO(Person person) {
@@ -86,6 +90,7 @@ public class PeopleController {
   }
 
   private List<ReasonDTO> converToReasonDTO(List<Reason> reasons) {
+
     return reasons.stream().map((reason -> modelMapper.map(reason, ReasonDTO.class))).toList();
   }
 
@@ -102,23 +107,5 @@ public class PeopleController {
       }
       throw new PersonNotCreatedException(errMsg.toString());
     }
-  }
-
-  @ExceptionHandler
-  private ResponseEntity<PersonErrorResponce> handleException(PersonNotFoundException e) {
-    PersonErrorResponce responce = new PersonErrorResponce(
-        e.getMessage(),
-        LocalDateTime.now()
-    );
-    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responce);
-  }
-
-  @ExceptionHandler
-  private ResponseEntity<PersonErrorResponce> handleException(PersonNotCreatedException e) {
-    PersonErrorResponce responce = new PersonErrorResponce(
-        e.getMessage(),
-        LocalDateTime.now()
-    );
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responce);
   }
 }

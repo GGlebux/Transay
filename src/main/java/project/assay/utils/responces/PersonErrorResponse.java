@@ -5,11 +5,11 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class PersonErrorResponce {
+public class PersonErrorResponse {
     private String errorMessage;
     private LocalDateTime timestamp;
 
-    public PersonErrorResponce(String errorMessage, LocalDateTime timestamp) {
+    public PersonErrorResponse(String errorMessage, LocalDateTime timestamp) {
         this.errorMessage = errorMessage;
         this.timestamp = timestamp;
     }

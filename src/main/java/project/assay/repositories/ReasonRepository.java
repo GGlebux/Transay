@@ -7,5 +7,6 @@ import project.assay.models.Reason;
 
 @Repository
 public interface ReasonRepository extends JpaRepository<Reason, Integer> {
-  public List<Reason> findByOwnerId(int personId);
+
+  List<Reason> findByOwnerId(int personId);
 }
