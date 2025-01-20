@@ -1,3 +1,6 @@
+INSERT INTO person(name, gender, date_of_birth) VALUES ('GGLEBUX', 'male', '2006-08-16');
+
+
 INSERT INTO transcript (name, fall, raise)
 VALUES ('hemoglobin',
         '[

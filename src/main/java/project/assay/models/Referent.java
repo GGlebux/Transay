@@ -1,5 +1,6 @@
 package project.assay.models;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -42,13 +43,13 @@ public class Referent {
   @Column(name = "status")
   private String status;
 
-  @OneToOne(mappedBy = "referent")
+  @OneToOne(mappedBy = "referent", cascade = CascadeType.PERSIST)
   private PersonInfo personInfo;
 
   @Convert(converter = JsonToListConverter.class)
   @Column(name = "transcript", columnDefinition = "jsonb")
   @JdbcTypeCode(SqlTypes.JSON)
-  private List<String> description;
+  private List<String> reasons;
 
   @Override
   public String toString() {
@@ -58,7 +59,7 @@ public class Referent {
         ", regDate=" + regDate +
         ", units='" + units + '\'' +
         ", status='" + status + '\'' +
-        ", description=" + description +
+        ", description=" + reasons +
         '}';
   }
 }

@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import project.assay.dto.IndicatorDTO;
 import project.assay.dto.ReferentDTO;
@@ -35,8 +34,8 @@ import project.assay.services.ReferentService;
  *
  */
 @RestController
-@RequestMapping("/indicator")
-public class IndicatorController {
+@RequestMapping("/referent")
+public class PersonInfoController {
 
   private final IndicatorService indicatorService;
   private final PeopleService peopleService;
@@ -45,7 +44,7 @@ public class IndicatorController {
   private final PersonInfoService personInfoService;
 
   @Autowired
-  public IndicatorController(IndicatorService indicatorService, PeopleService peopleService,
+  public PersonInfoController(IndicatorService indicatorService, PeopleService peopleService,
       ReferentService referentService,
       ModelMapper modelMapper, PersonInfoService personInfoService) {
     this.indicatorService = indicatorService;
@@ -65,39 +64,42 @@ public class IndicatorController {
     return indicators.stream().map(this::convertToIndicatorDTO).toList();
   }
 
+  // ToDo: Исправить ошибку при дублировании элементов
   @GetMapping("/{personId}")
   public List<ReferentDTO> showPersonInfo(@PathVariable("personId") int personId) {
-
     List<PersonInfo> referents = personInfoService.findAllById(personId);
     return referents.stream().map(this::convertToReferentDTO).toList();
   }
 
-  @PostMapping("/{personId}")
+  @PostMapping("/{personId}/{indicatorId}")
   public ResponseEntity<HttpStatus> create(@RequestBody @Valid ReferentDTO referentDTO,
       @PathVariable("personId") int personId,
-      @RequestParam("indicatorId") int indicatorId,
+      @PathVariable("indicatorId") int indicatorId,
       BindingResult bindingResult) {
 
     Person person = peopleService.findById(personId);
     Indicator indicator = indicatorService.findById(indicatorId);
-    Referent referent = convertToReferent(referentDTO);
-
-    referentService.save(referent, indicator);
 
     PersonInfo personInfo = new PersonInfo();
+
+    Referent referent = convertToReferent(referentDTO);
+    referent.setPersonInfo(personInfo);
+
     personInfo.setPerson(person);
     personInfo.setIndicator(indicator);
     personInfo.setReferent(referent);
+
+    referentService.save(referent, indicator);
     personInfoService.save(personInfo);
 
     return ResponseEntity.ok(HttpStatus.CREATED);
   }
 
-  // ToDo: Сделать рабочий метод
+  // ToDo: Исправить ошибку при дублировании элементов
   @DeleteMapping("/{personId}")
   public ResponseEntity<HttpStatus> delete(@PathVariable("personId") int personId,
-      @RequestParam("indicatorId") int indicatorId) {
-    personInfoService.deleteByIds(personId, indicatorId);
+      @RequestBody PersonInfo personInfo) {
+    personInfoService.delete(personInfo);
     return ResponseEntity.ok(HttpStatus.OK);
   }
 
@@ -112,8 +114,8 @@ public class IndicatorController {
   private ReferentDTO convertToReferentDTO(PersonInfo personInfo) {
     ReferentDTO result = new ReferentDTO();
     modelMapper.getConfiguration().setSkipNullEnabled(true);
-    modelMapper.map(personInfo.getReferent(), result);
     modelMapper.map(personInfo.getIndicator(), result);
+    modelMapper.map(personInfo.getReferent(), result);
     return result;
   }
 

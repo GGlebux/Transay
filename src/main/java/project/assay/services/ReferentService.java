@@ -24,7 +24,7 @@ public class ReferentService {
   }
 
   @Transactional
-  public int save(Referent referent, Indicator indicator) {
+  public void save(Referent referent, Indicator indicator) {
     // Если клиент не указал дату анализа, то ставим по умолчанию текущую
     if (Objects.isNull(referent.getRegDate())) {
       referent.setRegDate(LocalDate.now());
@@ -38,13 +38,18 @@ public class ReferentService {
     switch (verdict) {
       case "lower":
         referent.setStatus("lower");
-        referent.setDescription(transcript.getFall()); break;
+        referent.setReasons(transcript.getFall()); break;
       case "upper":
         referent.setStatus("upper");
-        referent.setDescription(transcript.getRaise()); break;
+        referent.setReasons(transcript.getRaise()); break;
       case "ok":
         referent.setStatus("ok"); break;
     }
-    return referentRepository.save(referent).getId();
+    referentRepository.save(referent);
+  }
+
+  @Transactional
+  public void delete(Referent referent) {
+    referentRepository.delete(referent);
   }
 }

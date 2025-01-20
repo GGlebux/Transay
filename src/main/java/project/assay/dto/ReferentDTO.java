@@ -29,6 +29,6 @@ public class ReferentDTO {
   private String status;
 
   @Convert(converter = JsonToListConverter.class)
-  private List<String> description;
+  private List<String> reasons;
 
 }

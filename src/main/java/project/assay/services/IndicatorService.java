@@ -12,27 +12,20 @@ import project.assay.repositories.IndicatorRepository;
 
 @Service
 public class IndicatorService {
+
   private final IndicatorRepository indicatorRepository;
-  private final PeopleService peopleService;
 
   @Autowired
   public IndicatorService(IndicatorRepository indicatorRepository, PeopleService peopleService) {
     this.indicatorRepository = indicatorRepository;
-    this.peopleService = peopleService;
   }
 
-  public List<Indicator> findAll(){
+  public List<Indicator> findAll() {
     return indicatorRepository.findAll();
   }
 
   public Indicator findById(int id) {
     return indicatorRepository.getIndicatorById(id);
-  }
-
-  public Indicator findOneCorrect(String indicatorName, Person person) {
-    String gender = person.getGender();
-    int age = getDaysOfAge(person.getDateOfBirth());
-    return indicatorRepository.findOneCorrect(indicatorName, gender, age);
   }
 
 
@@ -52,11 +45,9 @@ public class IndicatorService {
     double maxValue = indicator.getMaxValue();
     if (value < minValue) {
       return "lower";
-    }
-    else if (value > maxValue) {
+    } else if (value > maxValue) {
       return "upper";
-    }
-    else {
+    } else {
       return "ok";
     }
   }
