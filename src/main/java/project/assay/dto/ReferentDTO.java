@@ -1,6 +1,7 @@
 package project.assay.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.Convert;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
@@ -9,8 +10,12 @@ import lombok.Data;
 import project.assay.utils.converters.JsonToListConverter;
 
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ReferentDTO {
   private int id;
+
+  // Поле для определения id выбранного индикатора (indicatorId)
+  private int celectedId;
 
   private String name;
 

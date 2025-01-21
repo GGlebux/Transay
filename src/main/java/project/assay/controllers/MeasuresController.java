@@ -2,6 +2,7 @@ package project.assay.controllers;
 
 
 import jakarta.validation.Valid;
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.modelmapper.ModelMapper;
@@ -34,8 +35,8 @@ import project.assay.services.ReferentService;
  *
  */
 @RestController
-@RequestMapping("/referent")
-public class PersonInfoController {
+@RequestMapping("/people/{personId}/measures")
+public class MeasuresController {
 
   private final IndicatorService indicatorService;
   private final PeopleService peopleService;
@@ -44,7 +45,7 @@ public class PersonInfoController {
   private final PersonInfoService personInfoService;
 
   @Autowired
-  public PersonInfoController(IndicatorService indicatorService, PeopleService peopleService,
+  public MeasuresController(IndicatorService indicatorService, PeopleService peopleService,
       ReferentService referentService,
       ModelMapper modelMapper, PersonInfoService personInfoService) {
     this.indicatorService = indicatorService;
@@ -56,8 +57,10 @@ public class PersonInfoController {
 
   /**
    * Отображение списка корректных индикаторов для конкретного человека
+   *
+   * @param personId
    */
-  @GetMapping("/{personId}/correct")
+  @GetMapping("/correct")
   public List<IndicatorDTO> showCorrectList(@PathVariable("personId") int personId) {
     Person person = peopleService.findById(personId);
     List<Indicator> indicators = indicatorService.findAllCorrect(person);
@@ -65,20 +68,30 @@ public class PersonInfoController {
   }
 
   // ToDo: Исправить ошибку при дублировании элементов
-  @GetMapping("/{personId}")
+  /**
+   * Отображение списка референтных значений
+   *
+   * @param personId
+   */
+  @GetMapping
   public List<ReferentDTO> showPersonInfo(@PathVariable("personId") int personId) {
     List<PersonInfo> referents = personInfoService.findAllById(personId);
     return referents.stream().map(this::convertToReferentDTO).toList();
   }
 
-  @PostMapping("/{personId}/{indicatorId}")
-  public ResponseEntity<HttpStatus> create(@RequestBody @Valid ReferentDTO referentDTO,
+  /**
+   * Создает корректное реферетное значение для определенного человека
+   * @param referentDTO
+   * @param personId
+   * @return URI + String
+   */
+  @PostMapping
+  public ResponseEntity<String> create(@RequestBody @Valid ReferentDTO referentDTO,
       @PathVariable("personId") int personId,
-      @PathVariable("indicatorId") int indicatorId,
       BindingResult bindingResult) {
 
     Person person = peopleService.findById(personId);
-    Indicator indicator = indicatorService.findById(indicatorId);
+    Indicator indicator = indicatorService.findById(referentDTO.getCelectedId());
 
     PersonInfo personInfo = new PersonInfo();
 
@@ -90,16 +103,16 @@ public class PersonInfoController {
     personInfo.setReferent(referent);
 
     referentService.save(referent, indicator);
-    personInfoService.save(personInfo);
+    int resultId = personInfoService.save(personInfo);
 
-    return ResponseEntity.ok(HttpStatus.CREATED);
+    return ResponseEntity.created(URI.create("/people/" + personId + "/measures/" + resultId))
+        .body("Create measure with id=" + resultId);
   }
 
   // ToDo: Исправить ошибку при дублировании элементов
-  @DeleteMapping("/{personId}")
-  public ResponseEntity<HttpStatus> delete(@PathVariable("personId") int personId,
-      @RequestBody PersonInfo personInfo) {
-    personInfoService.delete(personInfo);
+  @DeleteMapping("/{measureId}")
+  public ResponseEntity<HttpStatus> delete(@PathVariable("measureId") int measureId) {
+    personInfoService.deleteById(measureId);
     return ResponseEntity.ok(HttpStatus.OK);
   }
 

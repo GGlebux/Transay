@@ -27,15 +27,15 @@ import project.assay.services.ReasonService;
  */
 
 @RestController
-@RequestMapping("/profile/{personId}/reason")
-public class ReasonController {
+@RequestMapping("/people/{personId}/reason")
+public class ReasonsController {
 
   private final ReasonService reasonService;
   private final PeopleService peopleService;
   private final ModelMapper modelMapper;
 
   @Autowired
-  public ReasonController(ReasonService reasonService, PeopleService peopleService,
+  public ReasonsController(ReasonService reasonService, PeopleService peopleService,
       ModelMapper modelMapper) {
     this.reasonService = reasonService;
     this.peopleService = peopleService;
@@ -54,7 +54,7 @@ public class ReasonController {
     Reason reason = modelMapper.map(reasonDTO, Reason.class);
     reason.setOwner(owner);
     reasonService.save(reason);
-    URI location = URI.create("/profile/" + personId + "/reason/" + reason.getId());
+    URI location = URI.create("/people/" + personId + "/reason/" + reason.getId());
     return ResponseEntity.created(location).body(reason.getId());
   }
 

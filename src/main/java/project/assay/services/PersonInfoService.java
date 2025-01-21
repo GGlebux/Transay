@@ -28,7 +28,13 @@ public class PersonInfoService {
   }
 
   @Transactional
-  public void save(PersonInfo personInfo) {
-    personInfoRepository.save(personInfo);
+  public void deleteById(int measureId) {
+    personInfoRepository.deleteById(measureId);
+  }
+
+  @Transactional
+  public int save(PersonInfo personInfo) {
+    PersonInfo personInfoId = personInfoRepository.save(personInfo);
+    return personInfoId.getId();
   }
 }

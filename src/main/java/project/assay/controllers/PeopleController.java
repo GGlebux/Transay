@@ -29,7 +29,7 @@ import project.assay.services.PeopleService;
  * @author GGlebux
  */
 @RestController
-@RequestMapping("/profile")
+@RequestMapping("/people")
 public class PeopleController {
 
   private final PeopleService peopleService;
@@ -42,21 +42,32 @@ public class PeopleController {
     this.modelMapper = modelMapper;
   }
 
+  /**
+   * @return PersonDTO - информация о конкретном человеке
+   */
   @GetMapping("/{personId}")
   public ResponseEntity<PersonDTO> show(@PathVariable("personId") int personId) {
     Person person = peopleService.findById(personId);
     return ResponseEntity.ok(converToPersonDTO(person));
   }
 
+  /**
+   * Создает человека
+   * @param personDTO
+   */
   @PostMapping
   public ResponseEntity<String> create(@RequestBody @Valid PersonDTO personDTO,
       BindingResult bindingResult) {
     throwValidException(bindingResult);
     Person savedPerson = peopleService.save(convertToPerson(personDTO));
-    return ResponseEntity.created(URI.create("/profile/" + savedPerson.getId()))
-        .body("Created a person with id=" + savedPerson.getId());
+    return ResponseEntity.created(URI.create("/people/" + savedPerson.getId()))
+        .body("Created person with id=" + savedPerson.getId());
   }
 
+  /**
+   * Обновляет данные человека
+   * @param personUpdateDTO
+   */
   @PatchMapping("/{personId}")
   public ResponseEntity<HttpStatus> update(@RequestBody @Valid PersonUpdateDTO personUpdateDTO,
       @PathVariable("personId") int personId, BindingResult bindingResult) {
@@ -66,10 +77,29 @@ public class PeopleController {
     return ResponseEntity.ok(HttpStatus.ACCEPTED);
   }
 
+  /**
+   * Удаляет человека
+   * @param personId
+   */
   @DeleteMapping("/{personId}")
   public ResponseEntity<HttpStatus> delete(@PathVariable("personId") int personId) {
     peopleService.delete(personId);
     return ResponseEntity.ok(HttpStatus.OK);
+  }
+
+  /**
+   * Возвращает клиенту ошибки валидации
+   * @param bindingResult
+   */
+  private void throwValidException(BindingResult bindingResult) {
+    if (bindingResult.hasErrors()) {
+      Map<String, String> errMsg = new HashMap<>();
+      List<FieldError> errors = bindingResult.getFieldErrors();
+      for (FieldError error : errors) {
+        errMsg.put(error.getField(), error.getDefaultMessage());
+      }
+      throw new PersonNotCreatedException(errMsg.toString());
+    }
   }
 
   private Person convertToPerson(PersonDTO personDTO) {
@@ -90,22 +120,10 @@ public class PeopleController {
   }
 
   private List<ReasonDTO> converToReasonDTO(List<Reason> reasons) {
-
     return reasons.stream().map((reason -> modelMapper.map(reason, ReasonDTO.class))).toList();
   }
 
   private ReasonDTO convertToReason(ReasonDTO reasonDTO) {
     return modelMapper.map(reasonDTO, ReasonDTO.class);
-  }
-
-  private void throwValidException(BindingResult bindingResult) {
-    if (bindingResult.hasErrors()) {
-      Map<String, String> errMsg = new HashMap<>();
-      List<FieldError> errors = bindingResult.getFieldErrors();
-      for (FieldError error : errors) {
-        errMsg.put(error.getField(), error.getDefaultMessage());
-      }
-      throw new PersonNotCreatedException(errMsg.toString());
-    }
   }
 }
