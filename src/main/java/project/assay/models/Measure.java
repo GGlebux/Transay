@@ -21,36 +21,35 @@ import org.hibernate.annotations.OnDeleteAction;
 
 
 @Entity
-@Table(name = "person_info")
+@Table(name = "measure")
 @Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class PersonInfo {
+public class Measure {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id")
   private int id;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
   @JoinColumn(name = "person_id", referencedColumnName = "id")
   private Person person;
 
-  @OneToOne
+  @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
   @JoinColumn(name = "indicator_id", referencedColumnName = "id")
   private Indicator indicator;
 
-  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-  @JoinColumn(name = "referent_id")
-  @OnDelete(action = OnDeleteAction.CASCADE)
+  @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  @JoinColumn(name = "referent_id", referencedColumnName = "id")
   private Referent referent;
 
 
   @Override
   public String toString() {
-    return "PersonInfo{" +
+    return "Measure{" +
         "id=" + id +
         ", indicator=" + indicator.getId() +
         ", referent=" + referent.getId() +

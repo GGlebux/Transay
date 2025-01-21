@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "excluded_reasons")
+@Table(name = "excluded_reason")
 @Setter
 @Getter
 @NoArgsConstructor

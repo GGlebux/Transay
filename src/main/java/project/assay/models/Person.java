@@ -57,5 +57,5 @@ public class Person {
   private List<Reason> excludedReasons;
 
   @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
-  private List<PersonInfo> personInfoList;
+  private List<Measure> measureList;
 }

@@ -1,6 +1,7 @@
 package project.assay.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.Convert;
 import jakarta.validation.constraints.NotNull;
@@ -11,29 +12,14 @@ import project.assay.utils.converters.JsonToListConverter;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ReferentDTO {
-  private int id;
-
+public class MeasureUpdateDTO {
   // Поле для определения id выбранного индикатора (indicatorId)
   private int celectedId;
-
-  private String name;
-
-  private double minValue;
 
   @NotNull(message = "currentValue shoud not be empty")
   private double currentValue;
 
-  private double maxValue;
-
   @JsonFormat(pattern = "yyyy-MM-dd")
   private LocalDate regDate;
-
-  private String units;
-
-  private String status;
-
-  @Convert(converter = JsonToListConverter.class)
-  private List<String> reasons;
 
 }

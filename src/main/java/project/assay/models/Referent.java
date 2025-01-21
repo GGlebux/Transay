@@ -43,9 +43,6 @@ public class Referent {
   @Column(name = "status")
   private String status;
 
-  @OneToOne(mappedBy = "referent", cascade = CascadeType.PERSIST)
-  private PersonInfo personInfo;
-
   @Convert(converter = JsonToListConverter.class)
   @Column(name = "transcript", columnDefinition = "jsonb")
   @JdbcTypeCode(SqlTypes.JSON)

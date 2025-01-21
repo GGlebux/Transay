@@ -46,7 +46,7 @@ public class Indicator {
   private double maxValue;
 
   @OneToOne(mappedBy = "indicator")
-  private PersonInfo personInfo;
+  private Measure measure;
 
   @Override
   public String toString() {

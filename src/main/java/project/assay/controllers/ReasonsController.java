@@ -2,6 +2,7 @@ package project.assay.controllers;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Set;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,7 +28,7 @@ import project.assay.services.ReasonService;
  */
 
 @RestController
-@RequestMapping("/people/{personId}/reason")
+@RequestMapping
 public class ReasonsController {
 
   private final ReasonService reasonService;
@@ -42,23 +43,35 @@ public class ReasonsController {
     this.modelMapper = modelMapper;
   }
 
-  @GetMapping
-  public ResponseEntity<List<Reason>> getAllReasons(@PathVariable("personId") int personId) {
-    return ResponseEntity.ok(reasonService.findByPersonId(personId));
+  @GetMapping("reason/all")
+  public ResponseEntity<List<String>> getAllReasons() {
+    List<String> reasons = reasonService.findAll();
+    if (reasons.isEmpty()) {
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+    return ResponseEntity.ok(reasons);
   }
 
-  @PostMapping
+  @GetMapping("/people/{personId}/reason")
+  public ResponseEntity<List<Reason>> getPersonReasons(@PathVariable("personId") int personId) {
+    List<Reason> reasons = reasonService.findByPersonId(personId);
+    if (reasons.isEmpty()) {
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+    return ResponseEntity.ok(reasons);
+  }
+
+  @PostMapping("/people/{personId}/reason")
   public ResponseEntity<Integer> createReason(@PathVariable("personId") int personId,
       @RequestBody ReasonDTO reasonDTO) {
     Person owner = peopleService.findById(personId);
     Reason reason = modelMapper.map(reasonDTO, Reason.class);
     reason.setOwner(owner);
     reasonService.save(reason);
-    URI location = URI.create("/people/" + personId + "/reason/" + reason.getId());
-    return ResponseEntity.created(location).body(reason.getId());
+    return ResponseEntity.ok(reason.getId());
   }
 
-  @DeleteMapping("/{reasonId}")
+  @DeleteMapping("/people/{personId}/reason/{reasonId}")
   public ResponseEntity<HttpStatus> deleteReason(@PathVariable("reasonId") int reasonId) {
     reasonService.delete(reasonId);
     return ResponseEntity.ok(HttpStatus.ACCEPTED);

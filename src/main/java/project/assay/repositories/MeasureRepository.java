@@ -4,10 +4,10 @@ import java.util.List;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import project.assay.models.PersonInfo;
+import project.assay.models.Measure;
 
 @Repository
-public interface PersonInfoRepository extends JpaRepository<PersonInfo, Integer> {
+public interface MeasureRepository extends JpaRepository<Measure, Integer> {
   @EntityGraph(attributePaths = {"person"})
-  List<PersonInfo> findByPersonId(int personId);
+  List<Measure> findByPersonId(int personId);
 }

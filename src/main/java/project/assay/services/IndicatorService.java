@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import project.assay.exceptions.IndicatorNotFoundException;
 import project.assay.models.Indicator;
 import project.assay.models.Person;
 import project.assay.repositories.IndicatorRepository;
@@ -25,13 +26,12 @@ public class IndicatorService {
   }
 
   public Indicator findById(int id) {
-    return indicatorRepository.getIndicatorById(id);
+    return indicatorRepository.getIndicatorById(id).orElseThrow(() -> new IndicatorNotFoundException("Indicator with id=" + id + " not found"));
   }
-
 
   public List<Indicator> findAllCorrect(Person person) {
     int age = getDaysOfAge(person.getDateOfBirth());
-    return indicatorRepository.findAllCorrect(person.getGender(), age);
+    return indicatorRepository.findAllCorrect(person.getGender(), person.getIsGravid(), age);
   }
 
 

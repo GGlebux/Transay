@@ -3,7 +3,7 @@ package project.assay.controllers;
 
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,16 +18,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import project.assay.dto.IndicatorDTO;
-import project.assay.dto.ReferentDTO;
-import project.assay.exceptions.IndicatorNotFoundException;
+import project.assay.dto.MeasureDTO;
+import project.assay.dto.MeasureUpdateDTO;
 import project.assay.models.Indicator;
 import project.assay.models.Person;
-import project.assay.models.PersonInfo;
+import project.assay.models.Measure;
 import project.assay.models.Referent;
-import project.assay.responces.IndicatorErrorResponce;
 import project.assay.services.IndicatorService;
 import project.assay.services.PeopleService;
-import project.assay.services.PersonInfoService;
+import project.assay.services.MeasureService;
 import project.assay.services.ReferentService;
 
 /**
@@ -42,77 +40,83 @@ public class MeasuresController {
   private final PeopleService peopleService;
   private final ReferentService referentService;
   private final ModelMapper modelMapper;
-  private final PersonInfoService personInfoService;
+  private final MeasureService measureService;
 
   @Autowired
   public MeasuresController(IndicatorService indicatorService, PeopleService peopleService,
       ReferentService referentService,
-      ModelMapper modelMapper, PersonInfoService personInfoService) {
+      ModelMapper modelMapper, MeasureService measureService) {
     this.indicatorService = indicatorService;
     this.peopleService = peopleService;
     this.referentService = referentService;
     this.modelMapper = modelMapper;
-    this.personInfoService = personInfoService;
+    this.measureService = measureService;
   }
 
   /**
    * Отображение списка корректных индикаторов для конкретного человека
    *
-   * @param personId
+   * @param personId id человека
    */
   @GetMapping("/correct")
-  public List<IndicatorDTO> showCorrectList(@PathVariable("personId") int personId) {
+  public ResponseEntity<List<IndicatorDTO>> showCorrectList(@PathVariable("personId") int personId) {
     Person person = peopleService.findById(personId);
     List<Indicator> indicators = indicatorService.findAllCorrect(person);
-    return indicators.stream().map(this::convertToIndicatorDTO).toList();
+    if (indicators.isEmpty()) {
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+    return ResponseEntity.ok(indicators.stream().map(this::convertToIndicatorDTO).toList());
   }
 
-  // ToDo: Исправить ошибку при дублировании элементов
-  /**
+    /**
    * Отображение списка референтных значений
    *
-   * @param personId
+   * @param personId id человека
    */
   @GetMapping
-  public List<ReferentDTO> showPersonInfo(@PathVariable("personId") int personId) {
-    List<PersonInfo> referents = personInfoService.findAllById(personId);
-    return referents.stream().map(this::convertToReferentDTO).toList();
+  public List<MeasureDTO> showMeasures(@PathVariable("personId") int personId) {
+    List<Measure> measures = measureService.findAllById(personId);
+    return measures.stream().map(this::convertToMeasureDTO).toList();
   }
 
   /**
    * Создает корректное реферетное значение для определенного человека
-   * @param referentDTO
-   * @param personId
+   * @param measureUpdateDTO конкретное референтое значение
+   * @param personId id человека
    * @return URI + String
    */
   @PostMapping
-  public ResponseEntity<String> create(@RequestBody @Valid ReferentDTO referentDTO,
+  public ResponseEntity<String> create(@RequestBody @Valid MeasureUpdateDTO measureUpdateDTO,
       @PathVariable("personId") int personId,
       BindingResult bindingResult) {
 
     Person person = peopleService.findById(personId);
-    Indicator indicator = indicatorService.findById(referentDTO.getCelectedId());
+    Indicator indicator = indicatorService.findById(measureUpdateDTO.getCelectedId());
 
-    PersonInfo personInfo = new PersonInfo();
+// ToDo: Добавить проверку того, что сохраняется верный индикатор для человека
+    Referent referent = convertToReferent(measureUpdateDTO);
+    referentService.enrich(referent, indicator);
+    referentService.save(referent);
 
-    Referent referent = convertToReferent(referentDTO);
-    referent.setPersonInfo(personInfo);
-
-    personInfo.setPerson(person);
-    personInfo.setIndicator(indicator);
-    personInfo.setReferent(referent);
-
-    referentService.save(referent, indicator);
-    int resultId = personInfoService.save(personInfo);
+    Measure measure = new Measure();
+    measure.setPerson(person);
+    measure.setIndicator(indicator);
+    measure.setReferent(referent);
+    int resultId = measureService.save(measure);
 
     return ResponseEntity.created(URI.create("/people/" + personId + "/measures/" + resultId))
         .body("Create measure with id=" + resultId);
   }
 
-  // ToDo: Исправить ошибку при дублировании элементов
+  /**
+   * Удаляет референтное значение и measure
+   * @param measureId id Measure
+   * @param personId id Человека
+   */
   @DeleteMapping("/{measureId}")
-  public ResponseEntity<HttpStatus> delete(@PathVariable("measureId") int measureId) {
-    personInfoService.deleteById(measureId);
+  public ResponseEntity<HttpStatus> delete(@PathVariable("measureId") int measureId,
+      @PathVariable String personId) {
+    measureService.deleteById(measureId);
     return ResponseEntity.ok(HttpStatus.OK);
   }
 
@@ -120,24 +124,15 @@ public class MeasuresController {
     return modelMapper.map(indicator, IndicatorDTO.class);
   }
 
-  private Referent convertToReferent(ReferentDTO referentDTO) {
-    return modelMapper.map(referentDTO, Referent.class);
+  private Referent convertToReferent(MeasureUpdateDTO measureUpdateDTO) {
+    return modelMapper.map(measureUpdateDTO, Referent.class);
   }
 
-  private ReferentDTO convertToReferentDTO(PersonInfo personInfo) {
-    ReferentDTO result = new ReferentDTO();
+  private MeasureDTO convertToMeasureDTO(Measure measure) {
+    MeasureDTO result = new MeasureDTO();
     modelMapper.getConfiguration().setSkipNullEnabled(true);
-    modelMapper.map(personInfo.getIndicator(), result);
-    modelMapper.map(personInfo.getReferent(), result);
+    modelMapper.map(measure.getIndicator(), result);
+    modelMapper.map(measure.getReferent(), result);
     return result;
-  }
-
-  @ExceptionHandler
-  public ResponseEntity<IndicatorErrorResponce> handleException(IndicatorNotFoundException e) {
-    IndicatorErrorResponce responce = new IndicatorErrorResponce(
-        "Indicator with this id not found!",
-        LocalDateTime.now()
-    );
-    return new ResponseEntity<>(responce, HttpStatus.NOT_FOUND);
   }
 }

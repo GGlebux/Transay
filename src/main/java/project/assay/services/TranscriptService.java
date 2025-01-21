@@ -1,5 +1,6 @@
 package project.assay.services;
 
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,10 @@ public class TranscriptService {
 
   public Transcript findByName(String name) {
     return transcriptRepository.findByName(name).orElse(null);
+  }
+
+  public List<Transcript> findAll() {
+    return transcriptRepository.findAll();
   }
 
 
