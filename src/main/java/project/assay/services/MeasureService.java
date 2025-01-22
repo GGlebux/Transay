@@ -8,6 +8,7 @@ import project.assay.models.Measure;
 import project.assay.repositories.MeasureRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class MeasureService {
 
   private final MeasureRepository measureRepository;

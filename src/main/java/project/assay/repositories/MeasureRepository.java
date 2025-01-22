@@ -8,6 +8,6 @@ import project.assay.models.Measure;
 
 @Repository
 public interface MeasureRepository extends JpaRepository<Measure, Integer> {
-  @EntityGraph(attributePaths = {"person"})
+  @EntityGraph(attributePaths = {"person", "indicator", "referent"})
   List<Measure> findByPersonId(int personId);
 }

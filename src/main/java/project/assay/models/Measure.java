@@ -38,8 +38,8 @@ public class Measure {
   @JoinColumn(name = "person_id", referencedColumnName = "id")
   private Person person;
 
-  @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
-  @JoinColumn(name = "indicator_id", referencedColumnName = "id")
+  @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+  @JoinColumn(name = "indicator_id")
   private Indicator indicator;
 
   @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
