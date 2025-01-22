@@ -1,4 +1,4 @@
-package project.assay.utils;
+package project.assay.utils.converters;
 
 import java.util.HashMap;
 import java.util.Map;

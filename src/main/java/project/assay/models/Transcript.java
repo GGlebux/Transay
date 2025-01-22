@@ -9,18 +9,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import project.assay.utils.JsonStringListConverter;
+import lombok.Data;
+import project.assay.utils.converters.JsonToListConverter;
 
 @Entity
 @Table(name = "transcript")
-@Setter
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
+@Data
 public class Transcript {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,11 +24,11 @@ public class Transcript {
   @Column(name = "name")
   private String name;
 
-  @Convert(converter = JsonStringListConverter.class)
+  @Convert(converter = JsonToListConverter.class)
   @Column(name = "fall", columnDefinition = "jsonb")
   private List<String> fall;
 
-  @Convert(converter = JsonStringListConverter.class)
+  @Convert(converter = JsonToListConverter.class)
   @Column(name = "raise", columnDefinition = "jsonb")
   private List<String> raise;
 }
