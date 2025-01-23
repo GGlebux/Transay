@@ -7,10 +7,13 @@ import jakarta.persistence.Convert;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.List;
+
+import lombok.Builder;
 import lombok.Data;
 import project.assay.utils.converters.JsonToListConverter;
 
 @Data
+@Builder(toBuilder = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MeasureDTO {
   private int id;
@@ -19,7 +22,7 @@ public class MeasureDTO {
 
   private double minValue;
 
-  @NotNull(message = "currentValue shoud not be empty")
+  @NotNull(message = "currentValue should not be empty")
   private double currentValue;
 
   private double maxValue;
