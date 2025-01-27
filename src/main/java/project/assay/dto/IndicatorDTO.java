@@ -11,4 +11,6 @@ public class IndicatorDTO {
   private double minValue;
 
   private double maxValue;
+
+  private String units;
 }
