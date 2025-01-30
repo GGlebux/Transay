@@ -4,8 +4,7 @@ package project.assay.controllers;
 import jakarta.validation.Valid;
 
 import java.net.URI;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeMap;
@@ -72,14 +71,14 @@ public class MeasuresController {
     }
 
     /**
-     * Отображение списка референтных значений
+     * Отображение списка референтных значений в отсортированном виде
      *
      * @param personId id человека
      */
     @GetMapping
-    public List<MeasureDTO> showMeasures(@PathVariable("personId") int personId) {
+    public Map<String, List<MeasureDTO>> showMeasures(@PathVariable("personId") int personId) {
         List<Measure> measures = measureService.findAllById(personId);
-        return measures.stream().map(this::convertToMeasureDTO).toList();
+        return createSummaryTable(measures);
     }
 
     /**
@@ -138,7 +137,6 @@ public class MeasuresController {
         Referent r = measure.getReferent();
         MeasureDTO result = MeasureDTO.builder()
                 .id(measure.getId())
-                .name(i.getName())
                 .minValue(i.getMinValue())
                 .currentValue(r.getCurrentValue())
                 .maxValue(i.getMaxValue())
@@ -148,5 +146,22 @@ public class MeasuresController {
                 .reasons(r.getReasons())
                 .build();
         return result;
+
+    }
+    private Map<String, List<MeasureDTO>> createSummaryTable(List<Measure> measures) {
+        Map<String, List<MeasureDTO>> summaryTable = new HashMap<>();
+        for (Measure measure : measures) {
+            Indicator indicator = measure.getIndicator();
+            String name = indicator.getName();
+            MeasureDTO measureDTO = convertToMeasureDTO(measure);
+            if (summaryTable.containsKey(name)) {
+                summaryTable.get(name).add(measureDTO);
+            } else {
+                List<MeasureDTO> measuresList = new ArrayList<>(List.of(measureDTO));
+                summaryTable.put(name, measuresList);
+            }
+
+        }
+        return summaryTable;
     }
 }

@@ -14,20 +14,15 @@ import project.assay.utils.converters.JsonToListConverter;
 
 @Data
 @Builder(toBuilder = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class MeasureDTO {
   private int id;
 
-  private String name;
-
   private double minValue;
 
-  @NotNull(message = "currentValue should not be empty")
   private double currentValue;
 
   private double maxValue;
 
-  @JsonFormat(pattern = "yyyy-MM-dd")
   private LocalDate regDate;
 
   private String units;
