@@ -10,7 +10,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -89,8 +88,7 @@ public class MeasuresController {
      */
     @PostMapping
     public ResponseEntity<String> create(@RequestBody @Valid MeasureUpdateDTO measureUpdateDTO,
-                                         @PathVariable("personId") int personId,
-                                         BindingResult bindingResult) {
+                                         @PathVariable("personId") int personId) {
 
         Person person = peopleService.findById(personId);
         Indicator indicator = indicatorService.findById(measureUpdateDTO.getCelectedId());
