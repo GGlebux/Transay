@@ -27,5 +27,5 @@ public class PersonDTO {
   @NotNull(message = "isGravid should not be empty")
   private Boolean isGravid;
 
-  private List<ReasonDTO> excludedReasons;
+  private List<ExcludedReasonDTO> excludedReasons;
 }

@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import java.util.Map;
-import java.util.Objects;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,10 +18,10 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import project.assay.dto.PersonDTO;
 import project.assay.dto.PersonUpdateDTO;
-import project.assay.dto.ReasonDTO;
+import project.assay.dto.ExcludedReasonDTO;
 import project.assay.exceptions.PersonNotCreatedException;
+import project.assay.models.ExcludedReason;
 import project.assay.models.Person;
-import project.assay.models.Reason;
 import project.assay.services.PeopleService;
 
 /**
@@ -114,17 +114,17 @@ public class PeopleController {
   }
 
   private PersonDTO converToPersonDTO(Person person) {
-    List<ReasonDTO> reasons = converToReasonDTO(person.getExcludedReasons());
+    List<ExcludedReasonDTO> reasons = converToReasonDTO(person.getExcludedExcludedReasons());
     PersonDTO personDTO = modelMapper.map(person, PersonDTO.class);
     personDTO.setExcludedReasons(reasons);
     return personDTO;
   }
 
-  private List<ReasonDTO> converToReasonDTO(List<Reason> reasons) {
-    return reasons.stream().map((reason -> modelMapper.map(reason, ReasonDTO.class))).toList();
+  private List<ExcludedReasonDTO> converToReasonDTO(List<ExcludedReason> excludedReasons) {
+    return excludedReasons.stream().map((reason -> modelMapper.map(reason, ExcludedReasonDTO.class))).toList();
   }
 
-  private ReasonDTO convertToReason(ReasonDTO reasonDTO) {
-    return modelMapper.map(reasonDTO, ReasonDTO.class);
+  private ExcludedReasonDTO convertToReason(ExcludedReasonDTO excludedReasonDTO) {
+    return modelMapper.map(excludedReasonDTO, ExcludedReasonDTO.class);
   }
 }

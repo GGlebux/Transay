@@ -8,10 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Table(name = "excluded_reason")
@@ -19,16 +16,18 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Reason {
+@Builder
+public class ExcludedReason {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id")
   private int id;
 
+  @Column(name = "reason")
+  private String reason;
+
   @ManyToOne
   @JoinColumn(name = "person_id", referencedColumnName = "id")
   private Person owner;
 
-  @Column(name = "reason")
-  private String reason;
 }

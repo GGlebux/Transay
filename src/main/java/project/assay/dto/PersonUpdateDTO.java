@@ -22,5 +22,5 @@ public class PersonUpdateDTO {
   @BooleanFlag
   private Boolean isGravid;
 
-  private List<ReasonDTO> excludedReasons;
+  private List<ExcludedReasonDTO> excludedReasons;
 }

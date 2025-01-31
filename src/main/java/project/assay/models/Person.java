@@ -54,7 +54,7 @@ public class Person {
   private Boolean isGravid;
 
   @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-  private List<Reason> excludedReasons;
+  private List<ExcludedReason> excludedExcludedReasons;
 
   @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
   private List<Measure> measureList;

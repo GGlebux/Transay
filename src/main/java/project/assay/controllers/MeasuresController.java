@@ -104,12 +104,11 @@ public class MeasuresController {
         referentService.enrich(referent, indicator);
         referentService.save(referent);
 
-        Measure measure = new Measure();
-        measure.setPerson(person);
-        measure.setIndicator(indicator);
-        measure.setReferent(referent);
+        Measure measure = Measure.builder()
+                .person(person)
+                .indicator(indicator)
+                .referent(referent).build();
         int resultId = measureService.save(measure);
-
         return ResponseEntity.created(URI.create("/people/" + personId + "/measures/" + resultId))
                 .body("Create measure with id=" + resultId);
     }
@@ -148,7 +147,6 @@ public class MeasuresController {
                 .status(r.getStatus())
                 .reasons(r.getReasons())
                 .build();
-
     }
 
     private Map<String, List<MeasureDTO>> createSummaryTable(List<Measure> measures) {
