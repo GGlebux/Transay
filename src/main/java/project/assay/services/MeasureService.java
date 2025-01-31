@@ -4,13 +4,11 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.assay.dto.MeasureUpdateDTO;
-import project.assay.models.Indicator;
-import project.assay.models.Measure;
-import project.assay.models.Person;
-import project.assay.models.Referent;
+import project.assay.models.*;
 import project.assay.repositories.MeasureRepository;
 
 @Service
@@ -19,32 +17,47 @@ public class MeasureService {
 
     private final MeasureRepository measureRepository;
     private final IndicatorService indicatorService;
+    private final ExcludedReasonService excludedReasonService;
 
-    public MeasureService(MeasureRepository measureRepository, IndicatorService indicatorService) {
+    public MeasureService(MeasureRepository measureRepository, IndicatorService indicatorService, ExcludedReasonService excludedReasonService) {
         this.measureRepository = measureRepository;
         this.indicatorService = indicatorService;
+        this.excludedReasonService = excludedReasonService;
     }
 
     public List<Measure> findAllByPersonId(int personId) {
         return measureRepository.findByPersonId(personId);
     }
 
-    public Map<String, List<String>> getDecryptedMeasures(int personId, LocalDate date) {
+    public Map<String, Double> getDecryptedMeasures(int personId, LocalDate date) {
         List<Measure> measures = measureRepository.findByPersonIdAndDate(personId, date);
-        Map<String, List<String>> decryptedMeasures = new HashMap<>();
+        List<String> excludedReasons = excludedReasonService.findByPersonId(personId)
+                .stream()
+                .map(ExcludedReason::getReason).toList();
+
+        Map<String, Double> decryptedMeasures = new HashMap<>();
+        int counter = 0;
         for (Measure measure : measures) {
             Referent referent = measure.getReferent();
             if (referent.getStatus().equals("ok")) {
                 continue;
             }
-
-            String name = measure.getIndicator().getName();
-            List<String> reasons = referent.getReasons();
-            if (decryptedMeasures.containsKey(name)) {
-                decryptedMeasures.get(name).addAll(reasons);
-            } else {
-                decryptedMeasures.put(name, reasons);
+            List<String> personReasons = referent.getReasons();
+            for (String reason : personReasons) {
+                if (excludedReasons.contains(reason)) {
+                    continue;
+                }
+                if (decryptedMeasures.containsKey(reason)) {
+                    decryptedMeasures.merge(reason, 1.0, Double::sum);
+                } else {
+                    decryptedMeasures.put(reason, 1.0);
+                }
+                counter++;
             }
+        }
+        for (Map.Entry<String, Double> entry : decryptedMeasures.entrySet()) {
+            Double newValue = Math.round(entry.getValue() / counter * 1000.0) / 1000.0;
+            entry.setValue(newValue);
         }
         return decryptedMeasures;
     }
@@ -86,8 +99,10 @@ public class MeasureService {
             return "Incorrect selection indicator id!";
         }
 
+        Indicator selectedIndicator = indicatorService.findById(selectedId);
         Set<LocalDate> referentsDates = person.getMeasureList()
                 .stream()
+                .filter(measure -> measure.getIndicator().getName().equals(selectedIndicator.getName()))
                 .map(Measure::getReferent)
                 .map(Referent::getRegDate)
                 .collect(Collectors.toSet());

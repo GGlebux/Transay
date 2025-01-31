@@ -75,7 +75,7 @@ public class MeasuresController {
     }
 
     @GetMapping("/decrypt")
-    public Map<String, List<String>> decrypt(@RequestParam("date") @Valid LocalDate date,
+    public Map<String, Double> decrypt(@RequestParam("date") @Valid LocalDate date,
                                              @PathVariable("personId") int personId) {
         return measureService.getDecryptedMeasures(personId, date);
     }
