@@ -14,7 +14,7 @@ import project.assay.utils.converters.JsonToListConverter;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MeasureUpdateDTO {
   // Поле для определения id выбранного индикатора (indicatorId)
-  private int celectedId;
+  private int selectedId;
 
   @NotNull(message = "currentValue shoud not be empty")
   private double currentValue;

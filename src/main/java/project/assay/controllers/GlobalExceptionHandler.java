@@ -55,7 +55,6 @@ public class GlobalExceptionHandler {
         e.getMessage(),
         LocalDateTime.now()
     );
-    System.out.println(e.getMessage());
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responce);
   }
 

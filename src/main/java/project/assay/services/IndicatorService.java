@@ -26,7 +26,7 @@ public class IndicatorService {
   }
 
   public Indicator findById(int id) {
-    return indicatorRepository.getIndicatorById(id).orElseThrow(() -> new IndicatorNotFoundException("Indicator with id=" + id + " not found"));
+      return indicatorRepository.getIndicatorById(id).orElseThrow(() -> new IndicatorNotFoundException("Indicator with id=" + id + " not found"));
   }
 
   public List<Indicator> findAllCorrect(Person person) {

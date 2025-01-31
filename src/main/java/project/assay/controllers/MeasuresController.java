@@ -4,19 +4,14 @@ package project.assay.controllers;
 import jakarta.validation.Valid;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.*;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import project.assay.dto.IndicatorDTO;
 import project.assay.dto.MeasureDTO;
 import project.assay.dto.MeasureUpdateDTO;
@@ -65,7 +60,7 @@ public class MeasuresController {
         if (indicators.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return ResponseEntity.ok(indicators.stream().map(this::convertToIndicatorDTO).toList());
+        return ResponseEntity.ok(indicators.stream().map(this::convertToIndicatorDTO).sorted().toList());
     }
 
     /**
@@ -75,8 +70,14 @@ public class MeasuresController {
      */
     @GetMapping
     public Map<String, List<MeasureDTO>> showMeasures(@PathVariable("personId") int personId) {
-        List<Measure> measures = measureService.findAllById(personId);
+        List<Measure> measures = measureService.findAllByPersonId(personId);
         return createSummaryTable(measures);
+    }
+
+    @GetMapping("/decrypt")
+    public Map<String, List<String>> decrypt(@RequestParam("date") @Valid LocalDate date,
+                                             @PathVariable("personId") int personId) {
+        return measureService.getDecryptedMeasures(personId, date);
     }
 
     /**
@@ -90,10 +91,15 @@ public class MeasuresController {
     public ResponseEntity<String> create(@RequestBody @Valid MeasureUpdateDTO measureUpdateDTO,
                                          @PathVariable("personId") int personId) {
 
+        int selectedId = measureUpdateDTO.getSelectedId();
         Person person = peopleService.findById(personId);
-        Indicator indicator = indicatorService.findById(measureUpdateDTO.getCelectedId());
 
-// ToDo: Добавить проверку того, что сохраняется верный индикатор для человека
+        String canCreate = measureService.canCreateMeasure(person, measureUpdateDTO);
+        if (!canCreate.equals("ok")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(canCreate);
+        }
+
+        Indicator indicator = indicatorService.findById(selectedId);
         Referent referent = convertToReferent(measureUpdateDTO);
         referentService.enrich(referent, indicator);
         referentService.save(referent);
@@ -132,7 +138,7 @@ public class MeasuresController {
     private MeasureDTO convertToMeasureDTO(Measure measure) {
         Indicator i = measure.getIndicator();
         Referent r = measure.getReferent();
-        MeasureDTO result = MeasureDTO.builder()
+        return MeasureDTO.builder()
                 .id(measure.getId())
                 .minValue(i.getMinValue())
                 .currentValue(r.getCurrentValue())
@@ -142,14 +148,13 @@ public class MeasuresController {
                 .status(r.getStatus())
                 .reasons(r.getReasons())
                 .build();
-        return result;
 
     }
+
     private Map<String, List<MeasureDTO>> createSummaryTable(List<Measure> measures) {
         Map<String, List<MeasureDTO>> summaryTable = new HashMap<>();
         for (Measure measure : measures) {
-            Indicator indicator = measure.getIndicator();
-            String name = indicator.getName();
+            String name = measure.getIndicator().getName();
             MeasureDTO measureDTO = convertToMeasureDTO(measure);
             if (summaryTable.containsKey(name)) {
                 summaryTable.get(name).add(measureDTO);
@@ -157,7 +162,6 @@ public class MeasuresController {
                 List<MeasureDTO> measuresList = new ArrayList<>(List.of(measureDTO));
                 summaryTable.put(name, measuresList);
             }
-
         }
         return summaryTable;
     }
