@@ -17,7 +17,7 @@ public class IndicatorService {
   private final IndicatorRepository indicatorRepository;
 
   @Autowired
-  public IndicatorService(IndicatorRepository indicatorRepository, PeopleService peopleService) {
+  public IndicatorService(IndicatorRepository indicatorRepository) {
     this.indicatorRepository = indicatorRepository;
   }
 
