@@ -1,6 +1,7 @@
 package project.assay.services;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,7 +44,8 @@ public class ReferentService {
         referent.setStatus("upper");
         referent.setReasons(transcript.getRaise()); break;
       case "ok":
-        referent.setStatus("ok"); break;
+        referent.setStatus("ok");
+        referent.setReasons(List.of("ok")); break;
     }
   }
 

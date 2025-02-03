@@ -93,13 +93,12 @@ public class MeasuresController {
 
         int selectedId = measureUpdateDTO.getSelectedId();
         Person person = peopleService.findById(personId);
-
-        String canCreate = measureService.canCreateMeasure(person, measureUpdateDTO);
+        Indicator indicator = indicatorService.findById(selectedId);
+        String canCreate = measureService.canCreateMeasure(person, measureUpdateDTO, indicator);
         if (!canCreate.equals("ok")) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(canCreate);
         }
 
-        Indicator indicator = indicatorService.findById(selectedId);
         Referent referent = convertToReferent(measureUpdateDTO);
         referentService.enrich(referent, indicator);
         referentService.save(referent);

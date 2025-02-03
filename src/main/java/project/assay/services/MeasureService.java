@@ -59,7 +59,17 @@ public class MeasureService {
             Double newValue = Math.round(entry.getValue() / counter * 1000.0) / 1000.0;
             entry.setValue(newValue);
         }
-        return decryptedMeasures;
+
+        return decryptedMeasures.entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (oldValue, newValue) -> oldValue,
+                        LinkedHashMap::new
+                        )
+                );
     }
 
 
@@ -87,7 +97,7 @@ public class MeasureService {
         measureRepository.deleteById(measureId);
     }
 
-    public String canCreateMeasure(Person person, MeasureUpdateDTO verifiableMeasure) {
+    public String canCreateMeasure(Person person, MeasureUpdateDTO verifiableMeasure, Indicator selectedIndicator) {
         int selectedId = verifiableMeasure.getSelectedId();
         List<Indicator> indicators = indicatorService.findAllCorrect(person);
 
@@ -99,7 +109,6 @@ public class MeasureService {
             return "Incorrect selection indicator id!";
         }
 
-        Indicator selectedIndicator = indicatorService.findById(selectedId);
         Set<LocalDate> referentsDates = person.getMeasureList()
                 .stream()
                 .filter(measure -> measure.getIndicator().getName().equals(selectedIndicator.getName()))
