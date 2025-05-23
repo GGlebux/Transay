@@ -61,17 +61,17 @@ VALUES ('erythrocyte',
         ]'::jsonb);
 
 insert into indicator(name, gender, max_age, min_age, max_value, min_value, is_gravid)
-VALUES ('hemoglobin', 'both', 7, 0, 220, 180, false);
+VALUES ('hemoglobin', 'both', 6, 0, 220, 180, false);
 insert into indicator(name, gender, max_age, min_age, max_value, min_value, is_gravid)
-VALUES ('hemoglobin', 'both', 29, 8, 180, 150, false);
+VALUES ('hemoglobin', 'both', 29, 7, 180, 150, false);
 insert into indicator(name, gender, max_age, min_age, max_value, min_value, is_gravid)
-VALUES ('hemoglobin.', 'both', 180, 30, 120, 90, false);
+VALUES ('hemoglobin.', 'both', 179, 30, 120, 90, false);
 insert into indicator(name, gender, max_age, min_age, max_value, min_value, is_gravid)
-VALUES ('hemoglobin', 'both', 1825, 181, 140, 120, false);
+VALUES ('hemoglobin', 'both', 1824, 180, 140, 120, false);
 insert into indicator(name, gender, max_age, min_age, max_value, min_value, is_gravid)
-VALUES ('hemoglobin', 'both', 4380, 1826, 150, 125, false);
+VALUES ('hemoglobin', 'both', 4379, 1825, 150, 125, false);
 insert into indicator(name, gender, max_age, min_age, max_value, min_value, is_gravid)
-VALUES ('hemoglobin', 'female', 54750, 4381, 160, 125, false);
+VALUES ('hemoglobin', 'female', 54750, 4380, 160, 125, false);
 insert into indicator(name, gender, max_age, min_age, max_value, min_value, is_gravid)
 VALUES ('hemoglobin', 'male', 54750, 4381, 170, 130, false);
 
