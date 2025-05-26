@@ -5,9 +5,7 @@ import org.modelmapper.TypeMap;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import project.assay.dto.MeasureDTO;
-import project.assay.dto.MeasureUpdateDTO;
-import project.assay.models.Indicator;
+import project.assay.dto.MeasureRequestDTO;
 import project.assay.models.Referent;
 
 @SpringBootApplication
@@ -23,7 +21,7 @@ public class AssayApplication {
 		ModelMapper modelMapper = new ModelMapper();
 
 		// Для конвертации из метода convertToReferent()
-		TypeMap<MeasureUpdateDTO, Referent> typeMap = modelMapper.createTypeMap(MeasureUpdateDTO.class, Referent.class);
+		TypeMap<MeasureRequestDTO, Referent> typeMap = modelMapper.createTypeMap(MeasureRequestDTO.class, Referent.class);
 		typeMap.addMappings(mapper -> mapper.skip(Referent::setId));
 
 		// Для конвертации из метода convertToMeasureDTO()

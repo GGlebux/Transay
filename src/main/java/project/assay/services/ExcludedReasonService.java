@@ -3,51 +3,43 @@ package project.assay.services;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import project.assay.dto.ExcludedReasonDTO;
 import project.assay.models.ExcludedReason;
 import project.assay.models.Transcript;
 import project.assay.repositories.ExcludedReasonRepository;
 
 @Service
 public class ExcludedReasonService {
-  private final ExcludedReasonRepository excludedReasonRepository;
-  private final TranscriptService transcriptService;
+    private final ExcludedReasonRepository excludedReasonRepository;
+    private final TranscriptService transcriptService;
 
-  @Autowired
-  public ExcludedReasonService(ExcludedReasonRepository excludedReasonRepository, TranscriptService transcriptService) {
-    this.excludedReasonRepository = excludedReasonRepository;
-    this.transcriptService = transcriptService;
-  }
-
-  public ExcludedReason findById(int id) {
-    return excludedReasonRepository.findById(id).orElse(null);
-  }
-
-  public List<String> findAll() {
-    List<Transcript> transcripts = transcriptService.findAll();
-    Set<String> stringReasons = new HashSet<>();
-    for (Transcript transcript : transcripts) {
-      stringReasons.addAll(transcript.getFall());
-      stringReasons.addAll(transcript.getRaise());
+    @Autowired
+    public ExcludedReasonService(ExcludedReasonRepository excludedReasonRepository, TranscriptService transcriptService) {
+        this.excludedReasonRepository = excludedReasonRepository;
+        this.transcriptService = transcriptService;
     }
-    return stringReasons.stream().sorted().toList();
-  }
 
-  public List<ExcludedReason> findByPersonId(int personId) {
-    return excludedReasonRepository.findByOwnerId(personId);
-  }
+    public List<String> findAll() {
+        List<Transcript> transcripts = transcriptService.findAll();
+        Set<String> stringReasons = new HashSet<>();
+        for (Transcript transcript : transcripts) {
+            stringReasons.addAll(transcript.getFall());
+            stringReasons.addAll(transcript.getRaise());
+        }
+        return stringReasons.stream().sorted().toList();
+    }
 
-  public ExcludedReason save(ExcludedReason excludedReason) {
-    return excludedReasonRepository.save(excludedReason);
-  }
+    public List<ExcludedReason> findByPersonId(int personId) {
+        return excludedReasonRepository.findByOwnerId(personId);
+    }
 
-  public void delete(int id) {
-    excludedReasonRepository.deleteById(id);
-  }
+    public ExcludedReason save(ExcludedReason excludedReason) {
+        return excludedReasonRepository.save(excludedReason);
+    }
 
-  private ExcludedReasonDTO convertToReasonDTO(String reason) {
-    return ExcludedReasonDTO.builder().reason(reason).build();
-  }
+    public void delete(int id) {
+        excludedReasonRepository.deleteById(id);
+    }
 }

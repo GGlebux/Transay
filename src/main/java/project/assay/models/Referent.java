@@ -1,13 +1,10 @@
 package project.assay.models;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.List;
@@ -16,8 +13,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 import project.assay.utils.converters.JsonToListConverter;
+
+import static jakarta.persistence.GenerationType.IDENTITY;
+import static org.hibernate.type.SqlTypes.JSON;
 
 @Entity
 @Table(name = "referent")
@@ -28,7 +27,7 @@ import project.assay.utils.converters.JsonToListConverter;
 public class Referent {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @GeneratedValue(strategy = IDENTITY)
   private int id;
 
   @Column(name = "current_value")
@@ -45,7 +44,7 @@ public class Referent {
 
   @Convert(converter = JsonToListConverter.class)
   @Column(name = "transcript", columnDefinition = "jsonb")
-  @JdbcTypeCode(SqlTypes.JSON)
+  @JdbcTypeCode(JSON)
   private List<String> reasons;
 
   @Override

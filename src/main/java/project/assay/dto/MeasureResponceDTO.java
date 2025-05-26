@@ -11,7 +11,7 @@ import project.assay.utils.converters.JsonToListConverter;
 
 @Data
 @Builder(toBuilder = true)
-public class MeasureDTO {
+public class MeasureResponceDTO {
   private int id;
 
   private double minValue;

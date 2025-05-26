@@ -18,6 +18,9 @@ import project.assay.models.Person;
 import project.assay.services.PeopleService;
 import project.assay.services.ExcludedReasonService;
 
+import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.ResponseEntity.ok;
+
 /**
  * REST Контроллер для работы с сущностью Reason (причины, которые исключил пользователь).
  * Предоставляет API endpoint`ы для клиента
@@ -42,46 +45,56 @@ public class ReasonsController {
   public ResponseEntity<List<String>> getAllReasons() {
     List<String> reasons = excludedReasonService.findAll();
     if (reasons.isEmpty()) {
-      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+      return new ResponseEntity<>(NO_CONTENT);
     }
-    return ResponseEntity.ok(reasons);
+    return ok(reasons);
   }
 
   @GetMapping("/people/{personId}/reason")
   public ResponseEntity<List<ExcludedReasonDTO>> getPersonReasons(@PathVariable("personId") int personId) {
-    List<ExcludedReasonDTO> reasons = excludedReasonService.findByPersonId(personId)
-            .stream().map(this::convertToReasonDTO).toList();
+    List<ExcludedReasonDTO> reasons = excludedReasonService
+            .findByPersonId(personId)
+            .stream()
+            .map(this::convertToReasonDTO)
+            .toList();
     if (reasons.isEmpty()) {
-      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+      return new ResponseEntity<>(NO_CONTENT);
     }
-    return ResponseEntity.ok(reasons);
+    return ok(reasons);
   }
 
   @PostMapping("/people/{personId}/reason")
   public ResponseEntity<String> createReason(@PathVariable("personId") int personId,
       @RequestBody ExcludedReasonDTO excludedReasonDTO) {
-    Person owner = peopleService.findById(personId);
-    List<String> reasons = excludedReasonService.findByPersonId(personId)
-            .stream().map(ExcludedReason::getReason).toList();
+    Person owner = peopleService.find(personId);
+    List<String> reasons = excludedReasonService
+            .findByPersonId(personId)
+            .stream()
+            .map(ExcludedReason::getReason)
+            .toList();
     if (reasons.contains(excludedReasonDTO.getReason())) {
-      return ResponseEntity.status(HttpStatus.CONFLICT).body("Reason already exists!");
+      return ResponseEntity.status(CONFLICT).body("Reason already exists!");
     }
-    ExcludedReason excludedReason = ExcludedReason.builder()
+    ExcludedReason excludedReason = ExcludedReason
+            .builder()
             .reason(excludedReasonDTO.getReason())
-            .owner(owner).build();
+            .owner(owner)
+            .build();
     excludedReasonService.save(excludedReason);
-    return ResponseEntity.ok("Create reason with id=" + excludedReason.getId());
+    return ok("Create reason with id=" + excludedReason.getId());
   }
 
   @DeleteMapping("/people/{personId}/reason/{reasonId}")
   public ResponseEntity<HttpStatus> deleteReason(@PathVariable("reasonId") int reasonId) {
     excludedReasonService.delete(reasonId);
-    return ResponseEntity.ok(HttpStatus.ACCEPTED);
+    return ok(ACCEPTED);
   }
 
   private ExcludedReasonDTO convertToReasonDTO(ExcludedReason excludedReason) {
-    return ExcludedReasonDTO.builder()
+    return ExcludedReasonDTO
+            .builder()
             .reason(excludedReason.getReason())
-            .id(excludedReason.getId()).build();
+            .id(excludedReason.getId())
+            .build();
   }
 }

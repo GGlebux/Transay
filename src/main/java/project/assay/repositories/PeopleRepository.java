@@ -6,5 +6,4 @@ import project.assay.models.Person;
 
 @Repository
 public interface PeopleRepository extends JpaRepository<Person, Integer> {
-
 }

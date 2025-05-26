@@ -3,13 +3,11 @@ package project.assay.controllers;
 
 import jakarta.validation.Valid;
 
-import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 
 import java.util.Map;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,10 +16,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import project.assay.dto.PersonDTO;
 import project.assay.dto.PersonUpdateDTO;
-import project.assay.dto.ExcludedReasonDTO;
 import project.assay.exceptions.PersonNotCreatedException;
-import project.assay.models.ExcludedReason;
-import project.assay.models.Person;
 import project.assay.services.PeopleService;
 
 /**
@@ -33,98 +28,71 @@ import project.assay.services.PeopleService;
 @RequestMapping("/people")
 public class PeopleController {
 
-  private final PeopleService peopleService;
-  private final ModelMapper modelMapper;
+    private final PeopleService peopleService;
 
 
-  @Autowired
-  public PeopleController(PeopleService peopleService, ModelMapper modelMapper) {
-    this.peopleService = peopleService;
-    this.modelMapper = modelMapper;
-  }
-
-  /**
-   * @return PersonDTO - информация о конкретном человеке
-   */
-  @GetMapping("/{personId}")
-  public ResponseEntity<PersonDTO> show(@PathVariable("personId") int personId) {
-    Person person = peopleService.findById(personId);
-    return ResponseEntity.ok(converToPersonDTO(person));
-  }
-
-  /**
-   * Создает человека
-   * @param personDTO
-   */
-  @PostMapping
-  public ResponseEntity<String> create(@RequestBody @Valid PersonDTO personDTO,
-      BindingResult bindingResult) {
-    throwValidException(bindingResult);
-    Person savedPerson = peopleService.save(convertToPerson(personDTO));
-    return ResponseEntity.created(URI.create("/people/" + savedPerson.getId()))
-        .body("Created person with id=" + savedPerson.getId());
-  }
-
-  /**
-   * Обновляет данные человека
-   * @param personUpdateDTO
-   */
-  @PatchMapping("/{personId}")
-  public ResponseEntity<HttpStatus> update(@RequestBody @Valid PersonUpdateDTO personUpdateDTO,
-      @PathVariable("personId") int personId, BindingResult bindingResult) {
-    throwValidException(bindingResult);
-    Person person = peopleService.findById(personId);
-    peopleService.update(personId, convertToPerson(personUpdateDTO, person));
-    return ResponseEntity.ok(HttpStatus.ACCEPTED);
-  }
-
-  /**
-   * Удаляет человека
-   * @param personId
-   */
-  @DeleteMapping("/{personId}")
-  public ResponseEntity<HttpStatus> delete(@PathVariable("personId") int personId) {
-    peopleService.delete(personId);
-    return ResponseEntity.ok(HttpStatus.OK);
-  }
-
-  /**
-   * Возвращает клиенту ошибки валидации
-   * @param bindingResult
-   */
-  private void throwValidException(BindingResult bindingResult) {
-    if (bindingResult.hasErrors()) {
-      Map<String, String> errMsg = new HashMap<>();
-      List<FieldError> errors = bindingResult.getFieldErrors();
-      for (FieldError error : errors) {
-        errMsg.put(error.getField(), error.getDefaultMessage());
-      }
-      throw new PersonNotCreatedException(errMsg.toString());
+    @Autowired
+    public PeopleController(PeopleService peopleService) {
+        this.peopleService = peopleService;
     }
-  }
 
-  private Person convertToPerson(PersonDTO personDTO) {
-    return modelMapper.map(personDTO, Person.class);
-  }
+    /**
+     * @return PersonDTO - информация о конкретном человеке
+     */
+    @GetMapping("/{personId}")
+    public ResponseEntity<PersonDTO> show(@PathVariable("personId") int personId) {
+        return peopleService.findById(personId);
+    }
 
-  private Person convertToPerson(PersonUpdateDTO personUpdateDTO, Person preparedPerson) {
-    modelMapper.getConfiguration().setSkipNullEnabled(true);
-    modelMapper.map(personUpdateDTO, preparedPerson);
-    return preparedPerson;
-  }
+    /**
+     * Создает человека
+     *
+     * @param personDTO
+     */
+    @PostMapping
+    public ResponseEntity<String> create(@RequestBody @Valid PersonDTO personDTO,
+                                         BindingResult bindingResult) {
+        throwValidException(bindingResult);
+        return peopleService.save(personDTO);
+    }
 
-  private PersonDTO converToPersonDTO(Person person) {
-    List<ExcludedReasonDTO> reasons = converToReasonDTO(person.getExcludedExcludedReasons());
-    PersonDTO personDTO = modelMapper.map(person, PersonDTO.class);
-    personDTO.setExcludedReasons(reasons);
-    return personDTO;
-  }
+    /**
+     * Обновляет данные человека
+     *
+     * @param personUpdateDTO
+     */
+    @PatchMapping("/{personId}")
+    public ResponseEntity<HttpStatus> update(@RequestBody @Valid PersonUpdateDTO personUpdateDTO,
+                                             @PathVariable("personId") int personId, BindingResult bindingResult) {
+        throwValidException(bindingResult);
+        return peopleService.update(personId, personUpdateDTO);
+    }
 
-  private List<ExcludedReasonDTO> converToReasonDTO(List<ExcludedReason> excludedReasons) {
-    return excludedReasons.stream().map((reason -> modelMapper.map(reason, ExcludedReasonDTO.class))).toList();
-  }
+    /**
+     * Удаляет человека
+     *
+     * @param personId
+     */
+    @DeleteMapping("/{personId}")
+    public ResponseEntity<HttpStatus> delete(@PathVariable("personId") int personId) {
+        return peopleService.delete(personId);
+    }
+    /**
+     * Возвращает клиенту ошибки валидации
+     *
+     * @param bindingResult
+     */
+    private void throwValidException(BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            Map<String, String> errMsg = new HashMap<>();
+            List<FieldError> errors = bindingResult.getFieldErrors();
+            for (FieldError error : errors) {
+                errMsg.put(error.getField(), error.getDefaultMessage());
+            }
+            throw new PersonNotCreatedException(errMsg.toString());
+        }
+    }
 
-  private ExcludedReasonDTO convertToReason(ExcludedReasonDTO excludedReasonDTO) {
-    return modelMapper.map(excludedReasonDTO, ExcludedReasonDTO.class);
-  }
+
+
 }

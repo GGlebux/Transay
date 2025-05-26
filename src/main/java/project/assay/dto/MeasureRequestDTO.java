@@ -7,9 +7,11 @@ import java.time.LocalDate;
 
 import lombok.Data;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
 @Data
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class MeasureUpdateDTO {
+@JsonInclude(NON_NULL)
+public class MeasureRequestDTO {
   // Поле для определения id выбранного индикатора (indicatorId)
   private int selectedId;
 
