@@ -1,14 +1,16 @@
 package project.assay.services;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Objects;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.assay.models.Indicator;
 import project.assay.models.Referent;
 import project.assay.models.Transcript;
 import project.assay.repositories.ReferentRepository;
+
+import java.time.LocalDate;
+
+import static java.util.List.of;
+import static java.util.Objects.isNull;
 
 @Service
 @Transactional(readOnly = true)
@@ -27,15 +29,14 @@ public class ReferentService {
   @Transactional
   public void enrich(Referent referent, Indicator indicator) {
     // Если клиент не указал дату анализа, то ставим по умолчанию текущую
-    if (Objects.isNull(referent.getRegDate())) {
+    if (isNull(referent.getRegDate())) {
       referent.setRegDate(LocalDate.now());
     }
     // ToDo: добавить единицы измерения
-    referent.setUnits("standart");
 
     // Проверяем референтое состояние на данных момент
     String verdict = indicatorService.checkValue(indicator, referent.getCurrentValue());
-    Transcript transcript = transcriptService.findByName(indicator.getName());
+    Transcript transcript = transcriptService.findByName(indicator.getEng_name());
     switch (verdict) {
       case "lower":
         referent.setStatus("lower");
@@ -45,17 +46,12 @@ public class ReferentService {
         referent.setReasons(transcript.getRaise()); break;
       case "ok":
         referent.setStatus("ok");
-        referent.setReasons(List.of("ok")); break;
+        referent.setReasons(of()); break;
     }
   }
 
   @Transactional
   public void save(Referent referent) {
     referentRepository.save(referent);
-  }
-
-  @Transactional
-  public void delete(Referent referent) {
-    referentRepository.delete(referent);
   }
 }

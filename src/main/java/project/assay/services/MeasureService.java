@@ -1,9 +1,5 @@
 package project.assay.services;
 
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,14 +7,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.assay.dto.IndicatorDTO;
-import project.assay.dto.MeasureResponceDTO;
 import project.assay.dto.MeasureRequestDTO;
+import project.assay.dto.MeasureResponceDTO;
 import project.assay.models.*;
 import project.assay.repositories.MeasureRepository;
 
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import static java.net.URI.create;
 import static java.util.List.of;
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.ResponseEntity.*;
 
 @Service
@@ -28,16 +29,16 @@ public class MeasureService {
     private final MeasureRepository measureRepository;
     private final PeopleService peopleService;
     private final IndicatorService indicatorService;
-    private final ExcludedReasonService excludedReasonService;
+    private final ReasonsService reasonsService;
     private final ReferentService referentService;
     private final ModelMapper modelMapper;
 
     @Autowired
-    public MeasureService(PeopleService peopleService, MeasureRepository measureRepository, IndicatorService indicatorService, ExcludedReasonService excludedReasonService, ReferentService referentService, ModelMapper modelMapper) {
+    public MeasureService(PeopleService peopleService, MeasureRepository measureRepository, IndicatorService indicatorService, ReasonsService reasonsService, ReferentService referentService, ModelMapper modelMapper) {
         this.peopleService = peopleService;
         this.measureRepository = measureRepository;
         this.indicatorService = indicatorService;
-        this.excludedReasonService = excludedReasonService;
+        this.reasonsService = reasonsService;
         this.referentService = referentService;
         this.modelMapper = modelMapper;
     }
@@ -112,7 +113,7 @@ public class MeasureService {
 
         Set<LocalDate> referentsDates = person.getMeasureList()
                 .stream()
-                .filter(measure -> measure.getIndicator().getName().equals(selectedIndicator.getName()))
+                .filter(measure -> measure.getIndicator().getEng_name().equals(selectedIndicator.getEng_name()))
                 .map(Measure::getReferent)
                 .map(Referent::getRegDate)
                 .collect(Collectors.toSet());
@@ -139,7 +140,6 @@ public class MeasureService {
                 .currentValue(r.getCurrentValue())
                 .maxValue(i.getMaxValue())
                 .regDate(r.getRegDate())
-                .units(r.getUnits())
                 .status(r.getStatus())
                 .reasons(r.getReasons())
                 .build();
@@ -150,7 +150,7 @@ public class MeasureService {
 
         Map<String, List<MeasureResponceDTO>> summaryTable = new HashMap<>();
         for (Measure measure : measures) {
-            String name = measure.getIndicator().getName();
+            String name = measure.getIndicator().getEng_name();
             MeasureResponceDTO measureResponceDTO = convertToMeasureDTO(measure);
             if (summaryTable.containsKey(name)) {
                 summaryTable.get(name).add(measureResponceDTO);
@@ -164,7 +164,7 @@ public class MeasureService {
 
     public ResponseEntity<Map<String, Double>> getDecryptedMeasures(int personId, LocalDate date) {
         List<Measure> measures = measureRepository.findByPersonIdAndDate(personId, date);
-        List<String> excludedReasons = excludedReasonService.findByPersonId(personId)
+        List<String> excludedReasons = reasonsService.findAll(personId)
                 .stream()
                 .map(ExcludedReason::getReason).toList();
 

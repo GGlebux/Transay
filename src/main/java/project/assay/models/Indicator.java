@@ -8,6 +8,10 @@ import lombok.Setter;
 
 import java.util.List;
 
+import static jakarta.persistence.CascadeType.ALL;
+import static jakarta.persistence.FetchType.LAZY;
+import static jakarta.persistence.GenerationType.IDENTITY;
+
 @Entity
 @Table(name = "indicator")
 @Setter
@@ -16,12 +20,15 @@ import java.util.List;
 @AllArgsConstructor
 public class Indicator {
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @GeneratedValue(strategy = IDENTITY)
   @Column(name = "id")
   private int id;
 
-  @Column(name = "name")
-  private String name;
+  @Column(name = "eng_name")
+  private String eng_name;
+
+  @Column(name = "rus_name")
+  private String rus_name;
 
   @Column(name = "gender")
   private String gender;
@@ -41,20 +48,25 @@ public class Indicator {
   @Column(name = "max_value")
   private double maxValue;
 
-  @OneToMany(mappedBy = "indicator")
+  @Column(name = "units")
+  private String units;
+
+  @OneToMany(mappedBy = "indicator", fetch = LAZY, cascade = ALL)
   private List<Measure> measure;
 
   @Override
   public String toString() {
     return "Indicator{" +
-        "maxValue=" + maxValue +
-        ", minValue=" + minValue +
-        ", maxAge=" + maxAge +
-        ", minAge=" + minAge +
-        ", isGravid=" + isGravid +
-        ", gender='" + gender + '\'' +
-        ", name='" + name + '\'' +
-        ", id=" + id +
-        '}';
+            "id=" + id +
+            ", eng_name='" + eng_name + '\'' +
+            ", rus_name='" + rus_name + '\'' +
+            ", gender='" + gender + '\'' +
+            ", isGravid=" + isGravid +
+            ", minAge=" + minAge +
+            ", maxAge=" + maxAge +
+            ", minValue=" + minValue +
+            ", maxValue=" + maxValue +
+            ", units='" + units + '\'' +
+            '}';
   }
 }

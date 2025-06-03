@@ -1,9 +1,6 @@
 package project.assay.services;
 
 
-import java.util.List;
-import java.util.Optional;
-
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,11 +9,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.assay.dto.ExcludedReasonDTO;
 import project.assay.dto.PersonDTO;
-import project.assay.dto.PersonUpdateDTO;
-import project.assay.exceptions.PersonNotFoundException;
+import project.assay.dto.PersonToUpdateDTO;
+import project.assay.exceptions.EntityNotFoundException;
 import project.assay.models.ExcludedReason;
 import project.assay.models.Person;
 import project.assay.repositories.PeopleRepository;
+
+import java.util.List;
+import java.util.Optional;
 
 import static java.net.URI.create;
 import static org.springframework.http.HttpStatus.ACCEPTED;
@@ -39,7 +39,7 @@ public class PeopleService {
     public Person find(int id){
         return peopleRepository
                 .findById(id)
-                .orElseThrow(() -> new PersonNotFoundException("Person with id=" + id + " not found!"));
+                .orElseThrow(() -> new EntityNotFoundException("Person with id=" + id + " not found!"));
     }
 
     public ResponseEntity<PersonDTO> findById(int id) {
@@ -47,7 +47,7 @@ public class PeopleService {
         if (person.isPresent()) {
             return ok(converToPersonDTO(person.get()));
         }
-        throw new PersonNotFoundException("Person with id=" + id + " not found!");
+        throw new EntityNotFoundException("Person with id=" + id + " not found!");
     }
 
     @Transactional
@@ -59,7 +59,7 @@ public class PeopleService {
     }
 
     @Transactional
-    public ResponseEntity<HttpStatus> update(int id, PersonUpdateDTO personDTOtoUpdate) {
+    public ResponseEntity<HttpStatus> update(int id, PersonToUpdateDTO personDTOtoUpdate) {
         Optional<Person> personFromDB = peopleRepository.findById(id);
         if (personFromDB.isPresent()) {
             Person personToUpdate = convertToPerson(personDTOtoUpdate, personFromDB.get());
@@ -67,13 +67,13 @@ public class PeopleService {
             peopleRepository.save(personToUpdate);
             return ok(ACCEPTED);
         }
-        throw new PersonNotFoundException("Person with id=" + id + " not found!");
+        throw new EntityNotFoundException("Person with id=" + id + " not found!");
     }
 
     @Transactional
     public ResponseEntity<HttpStatus> delete(int id) {
         peopleRepository.findById(id)
-                .orElseThrow(() -> new PersonNotFoundException("Person with id=" + id + " not found!"));
+                .orElseThrow(() -> new EntityNotFoundException("Person with id=" + id + " not found!"));
         peopleRepository.deleteById(id);
         return noContent().build();
     }
@@ -82,9 +82,9 @@ public class PeopleService {
         return modelMapper.map(personDTO, Person.class);
     }
 
-    private Person convertToPerson(PersonUpdateDTO personUpdateDTO, Person preparedPerson) {
+    private Person convertToPerson(PersonToUpdateDTO personToUpdateDTO, Person preparedPerson) {
         modelMapper.getConfiguration().setSkipNullEnabled(true);
-        modelMapper.map(personUpdateDTO, preparedPerson);
+        modelMapper.map(personToUpdateDTO, preparedPerson);
         return preparedPerson;
     }
 

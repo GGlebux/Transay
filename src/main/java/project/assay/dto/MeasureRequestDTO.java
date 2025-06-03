@@ -3,9 +3,9 @@ package project.assay.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotNull;
-import java.time.LocalDate;
-
 import lombok.Data;
+
+import java.time.LocalDate;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
@@ -20,5 +20,4 @@ public class MeasureRequestDTO {
 
   @JsonFormat(pattern = "yyyy-MM-dd")
   private LocalDate regDate;
-
 }

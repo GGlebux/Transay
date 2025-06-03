@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 import project.assay.models.ExcludedReason;
 
 @Repository
-public interface ExcludedReasonRepository extends JpaRepository<ExcludedReason, Integer> {
+public interface ReasonRepository extends JpaRepository<ExcludedReason, Integer> {
 
   List<ExcludedReason> findByOwnerId(int personId);
 }

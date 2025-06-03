@@ -1,19 +1,15 @@
 package project.assay.models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import java.time.LocalDate;
-import java.util.List;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import project.assay.utils.converters.JsonToListConverter;
+
+import java.time.LocalDate;
+import java.util.List;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static org.hibernate.type.SqlTypes.JSON;
@@ -36,15 +32,12 @@ public class Referent {
   @Column(name = "reg_date")
   private LocalDate regDate;
 
-  @Column(name = "units")
-  private String units;
-
   @Column(name = "status")
   private String status;
 
+  @JdbcTypeCode(JSON)
   @Convert(converter = JsonToListConverter.class)
   @Column(name = "transcript", columnDefinition = "jsonb")
-  @JdbcTypeCode(JSON)
   private List<String> reasons;
 
   @Override
@@ -53,7 +46,6 @@ public class Referent {
         "id=" + id +
         ", currentValue=" + currentValue +
         ", regDate=" + regDate +
-        ", units='" + units + '\'' +
         ", status='" + status + '\'' +
         ", description=" + reasons +
         '}';

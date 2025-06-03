@@ -15,8 +15,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import project.assay.dto.PersonDTO;
-import project.assay.dto.PersonUpdateDTO;
-import project.assay.exceptions.PersonNotCreatedException;
+import project.assay.dto.PersonToUpdateDTO;
+import project.assay.exceptions.EntityNotCreatedException;
 import project.assay.services.PeopleService;
 
 /**
@@ -59,13 +59,13 @@ public class PeopleController {
     /**
      * Обновляет данные человека
      *
-     * @param personUpdateDTO
+     * @param personToUpdateDTO
      */
     @PatchMapping("/{personId}")
-    public ResponseEntity<HttpStatus> update(@RequestBody @Valid PersonUpdateDTO personUpdateDTO,
+    public ResponseEntity<HttpStatus> update(@RequestBody @Valid PersonToUpdateDTO personToUpdateDTO,
                                              @PathVariable("personId") int personId, BindingResult bindingResult) {
         throwValidException(bindingResult);
-        return peopleService.update(personId, personUpdateDTO);
+        return peopleService.update(personId, personToUpdateDTO);
     }
 
     /**
@@ -89,7 +89,7 @@ public class PeopleController {
             for (FieldError error : errors) {
                 errMsg.put(error.getField(), error.getDefaultMessage());
             }
-            throw new PersonNotCreatedException(errMsg.toString());
+            throw new EntityNotCreatedException(errMsg.toString());
         }
     }
 
