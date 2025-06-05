@@ -67,9 +67,13 @@ public class PeopleService {
         return status(NO_CONTENT).build();
     }
 
-    public ResponseEntity<List<Reason>> findAllEx(int personId) {
+    public List<Reason> findAllExReasons(int personId) {
         Person person = this.findById(personId);
-        return ok(person.getExcludedReasons());
+        return person.getExcludedReasons();
+    }
+
+    public ResponseEntity<List<Reason>> findAllEx(int personId) {
+        return ok(this.findAllExReasons(personId));
     }
 
     @Transactional
@@ -102,10 +106,5 @@ public class PeopleService {
         modelMapper.getConfiguration().setSkipNullEnabled(true);
         modelMapper.map(personToUpdateDTO, preparedPerson);
         return preparedPerson;
-    }
-
-    private PersonRequestDTO converToPersonDTO(Person person) {
-        PersonRequestDTO personRequestDTO = modelMapper.map(person, PersonRequestDTO.class);
-        return personRequestDTO;
     }
 }

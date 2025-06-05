@@ -100,9 +100,9 @@ public class IndicatorService {
         double minValue = indicator.getMinValue();
         double maxValue = indicator.getMaxValue();
         if (value < minValue) {
-            return "lower";
+            return "fall";
         } else if (value > maxValue) {
-            return "upper";
+            return "raise";
         } else {
             return "ok";
         }

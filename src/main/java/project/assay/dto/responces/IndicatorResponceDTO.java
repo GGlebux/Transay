@@ -6,8 +6,8 @@ import project.assay.models.AgeRange;
 @Data
 public class IndicatorResponceDTO {
     private int id;
-    private String eng_name;
-    private String rus_name;
+    private String engName;
+    private String rusName;
     private String gender;
     private boolean isGravid;
     private AgeRange minAge;

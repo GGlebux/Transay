@@ -2,18 +2,18 @@ package project.assay.controllers;
 
 
 import jakarta.validation.Valid;
-
-import java.time.LocalDate;
-import java.util.*;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import project.assay.dto.responces.IndicatorDTO;
-import project.assay.dto.responces.MeasureResponceDTO;
 import project.assay.dto.requests.MeasureRequestDTO;
+import project.assay.dto.responces.MeasureResponceDTO;
+import project.assay.dto.responces.SimpleIndicatorResponceDTO;
 import project.assay.services.MeasureService;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -36,7 +36,7 @@ public class MeasuresController {
      * @param personId id человека
      */
     @GetMapping("/correct")
-    public ResponseEntity<List<IndicatorDTO>> showCorrectList(@PathVariable("personId") int personId) {
+    public ResponseEntity<List<SimpleIndicatorResponceDTO>> showCorrectList(@PathVariable("personId") int personId) {
         return measureService.findAllCorrect(personId);
     }
 
@@ -64,8 +64,8 @@ public class MeasuresController {
      * @return URI + String
      */
     @PostMapping
-    public ResponseEntity<String> create(@RequestBody @Valid MeasureRequestDTO measureRequestDTO,
-                                         @PathVariable("personId") int personId) {
+    public ResponseEntity<MeasureResponceDTO> create(@RequestBody @Valid MeasureRequestDTO measureRequestDTO,
+                                          @PathVariable("personId") int personId) {
         return measureService.save(measureRequestDTO, personId);
     }
 

@@ -33,5 +33,4 @@ public class AssayApplication {
 	ModelMapper modelMapper(){
 		return new ModelMapper();
 	}
-
 }

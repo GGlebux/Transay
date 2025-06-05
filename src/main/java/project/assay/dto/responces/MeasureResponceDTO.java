@@ -1,6 +1,6 @@
 package project.assay.dto.responces;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import project.assay.models.Reason;
 
@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Data
-@Builder(toBuilder = true)
+@AllArgsConstructor
 public class MeasureResponceDTO {
   private int id;
   private double minValue;

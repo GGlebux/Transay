@@ -1,20 +1,19 @@
 package project.assay.services;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.assay.exceptions.EntityNotFoundException;
-
 import project.assay.models.Reason;
 import project.assay.repositories.ReasonRepository;
 
 import java.util.List;
 
 import static java.lang.String.format;
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.ResponseEntity.ok;
 import static org.springframework.http.ResponseEntity.status;
 
@@ -22,14 +21,10 @@ import static org.springframework.http.ResponseEntity.status;
 @Transactional(readOnly = true)
 public class ReasonsService {
     private final ReasonRepository reasonRepository;
-    private final ModelMapper modelMapper;
-    private static final String REASONS_PATH = "static/reasons.xlsx";
-
 
     @Autowired
-    public ReasonsService(ReasonRepository reasonRepository, ModelMapper modelMapper) {
+    public ReasonsService(ReasonRepository reasonRepository) {
         this.reasonRepository = reasonRepository;
-        this.modelMapper = modelMapper;
     }
 
     public Reason findById(int id) {
@@ -43,11 +38,6 @@ public class ReasonsService {
 
     @Transactional
     public ResponseEntity<List<Reason>> findAll() {
-//        List<Reason> stringSet = parseExcelColumn(REASONS_PATH, 0)
-//                .stream()
-//                .map(Reason::new)
-//                .toList();
-//        reasonRepository.saveAll(stringSet);
         return ok(reasonRepository.findAll());
     }
 

@@ -2,7 +2,6 @@ package project.assay.utils;
 
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.core.io.ClassPathResource;
-import project.assay.models.AgeRange;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,8 +20,6 @@ public class StaticMethods {
         LocalDate today = now();
         return (int) DAYS.between(birthDate, today);
     }
-
-
 
     public static Set<String> parseExcelColumn(String filePath, int columnIndex) {
         Set<String> result = new HashSet<>();

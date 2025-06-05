@@ -3,16 +3,12 @@ package project.assay.models;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.annotations.JdbcTypeCode;
-import project.assay.utils.converters.JsonToListConverter;
 
 import java.util.List;
-import java.util.Set;
 
 import static jakarta.persistence.FetchType.EAGER;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static java.util.List.of;
-import static org.hibernate.type.SqlTypes.JSON;
 
 @Entity
 @Table(name = "transcript")

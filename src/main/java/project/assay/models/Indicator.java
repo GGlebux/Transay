@@ -26,10 +26,10 @@ public class Indicator {
   private int id;
 
   @Column(name = "eng_name")
-  private String eng_name;
+  private String engName;
 
   @Column(name = "rus_name")
-  private String rus_name;
+  private String rusName;
 
   @Column(name = "gender")
   private String gender;
@@ -59,8 +59,8 @@ public class Indicator {
   public String toString() {
     return "Indicator{" +
             "id=" + id +
-            ", eng_name='" + eng_name + '\'' +
-            ", rus_name='" + rus_name + '\'' +
+            ", eng_name='" + engName + '\'' +
+            ", rus_name='" + rusName + '\'' +
             ", gender='" + gender + '\'' +
             ", isGravid=" + isGravid +
             ", minAge=" + minAge +

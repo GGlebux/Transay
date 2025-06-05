@@ -7,10 +7,7 @@ import project.assay.models.Referent;
 import project.assay.models.Transcript;
 import project.assay.repositories.ReferentRepository;
 
-import java.time.LocalDate;
-
 import static java.time.LocalDate.now;
-import static java.util.List.of;
 import static java.util.Objects.isNull;
 
 @Service
@@ -37,12 +34,12 @@ public class ReferentService {
 
     // Проверяем референтое состояние на данных момент
     String verdict = indicatorService.checkValue(indicator, referent.getCurrentValue());
-    Transcript transcript = transcriptService.findCorrect(indicator.getEng_name(), indicator.getGender());
+    Transcript transcript = transcriptService.findCorrect(indicator.getEngName(), indicator.getGender());
     switch (verdict) {
-      case "lower":
-        referent.setStatus("lower"); break;
-      case "upper":
-        referent.setStatus("upper"); break;
+      case "fall":
+        referent.setStatus("fall"); break;
+      case "raise":
+        referent.setStatus("raise"); break;
       case "ok":
         referent.setStatus("ok"); break;
     }

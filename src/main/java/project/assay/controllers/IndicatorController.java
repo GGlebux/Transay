@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import project.assay.dto.requests.IndicatorRequestDTO;
 import project.assay.dto.responces.IndicatorResponceDTO;
-import project.assay.models.Indicator;
 import project.assay.services.IndicatorService;
 
 import java.util.List;
@@ -41,7 +40,6 @@ public class IndicatorController {
     public ResponseEntity<HttpStatus> deleteIndicator(@PathVariable int id) {
         return indicatorService.delete(id);
     }
-
 
 
     @GetMapping("/units")

@@ -8,10 +8,10 @@ import project.assay.models.AgeRange;
 @Data
 public class IndicatorRequestDTO {
     @NotNull(message = "eng_name should not be empty")
-    private String eng_name;
+    private String engName;
 
     @NotNull(message = "rus_name should not be empty")
-    private String rus_name;
+    private String rusName;
 
     @Pattern(regexp = "^(male|female|both)$", message = "Gender should be 'male' or 'female' or 'both'")
     private String gender;
