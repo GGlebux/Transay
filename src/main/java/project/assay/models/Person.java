@@ -1,12 +1,6 @@
 package project.assay.models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -24,6 +18,7 @@ import lombok.ToString;
 import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.FetchType.EAGER;
 import static jakarta.persistence.FetchType.LAZY;
+import static java.util.List.of;
 
 
 @Entity
@@ -56,9 +51,14 @@ public class Person {
     @Column(name = "is_gravid")
     private Boolean isGravid;
 
-    @OneToMany(mappedBy = "owner", cascade = ALL, orphanRemoval = true, fetch = EAGER)
-    private List<ExcludedReason> excludedExcludedReasons;
+    @OneToMany(fetch = EAGER, cascade = ALL)
+    @JoinTable(
+            name = "excluded_reason",
+            joinColumns = @JoinColumn(name = "person_id"),
+            inverseJoinColumns = @JoinColumn(name = "reason_id")
+    )
+    private List<Reason> excludedReasons = of();
 
     @OneToMany(mappedBy = "person", cascade = ALL, orphanRemoval = true, fetch = LAZY)
-    private List<Measure> measureList;
+    private List<Measure> measureList = of();
 }

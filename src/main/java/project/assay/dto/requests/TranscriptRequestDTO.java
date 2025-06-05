@@ -1,4 +1,4 @@
-package project.assay.dto;
+package project.assay.dto.requests;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -11,6 +11,6 @@ public class TranscriptRequestDTO {
     private String name;
     @NotNull(message = "Gender should not be empty")
     private String gender;
-    private List<String> fall;
-    private List<String> raise;
+    private List<Integer> fallsIds;
+    private List<Integer> raisesIds;
 }

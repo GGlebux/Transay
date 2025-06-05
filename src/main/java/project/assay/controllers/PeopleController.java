@@ -3,9 +3,7 @@ package project.assay.controllers;
 
 import jakarta.validation.Valid;
 
-import java.util.HashMap;
 import java.util.List;
-
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +12,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
-import project.assay.dto.PersonDTO;
-import project.assay.dto.PersonToUpdateDTO;
+import project.assay.dto.requests.PersonRequestDTO;
+import project.assay.dto.requests.PersonToUpdateDTO;
 import project.assay.exceptions.EntityNotCreatedException;
+import project.assay.models.Person;
+import project.assay.models.Reason;
 import project.assay.services.PeopleService;
+
+import static java.util.stream.Collectors.toMap;
 
 /**
  * REST Контроллер для работы с сущностью Person. Предоставляет API endpoint`ы для клиента
@@ -37,23 +39,23 @@ public class PeopleController {
     }
 
     /**
-     * @return PersonDTO - информация о конкретном человеке
+     * @return PersonRequestDTO - информация о конкретном человеке
      */
     @GetMapping("/{personId}")
-    public ResponseEntity<PersonDTO> show(@PathVariable("personId") int personId) {
-        return peopleService.findById(personId);
+    public ResponseEntity<Person> show(@PathVariable("personId") int personId) {
+        return peopleService.find(personId);
     }
 
     /**
      * Создает человека
      *
-     * @param personDTO
+     * @param personRequestDTO
      */
     @PostMapping
-    public ResponseEntity<String> create(@RequestBody @Valid PersonDTO personDTO,
+    public ResponseEntity<Person> create(@RequestBody @Valid PersonRequestDTO personRequestDTO,
                                          BindingResult bindingResult) {
         throwValidException(bindingResult);
-        return peopleService.save(personDTO);
+        return peopleService.save(personRequestDTO);
     }
 
     /**
@@ -62,8 +64,8 @@ public class PeopleController {
      * @param personToUpdateDTO
      */
     @PatchMapping("/{personId}")
-    public ResponseEntity<HttpStatus> update(@RequestBody @Valid PersonToUpdateDTO personToUpdateDTO,
-                                             @PathVariable("personId") int personId, BindingResult bindingResult) {
+    public ResponseEntity<Person> update(@RequestBody @Valid PersonToUpdateDTO personToUpdateDTO,
+                                         @PathVariable("personId") int personId, BindingResult bindingResult) {
         throwValidException(bindingResult);
         return peopleService.update(personId, personToUpdateDTO);
     }
@@ -77,6 +79,26 @@ public class PeopleController {
     public ResponseEntity<HttpStatus> delete(@PathVariable("personId") int personId) {
         return peopleService.delete(personId);
     }
+
+
+    @GetMapping("/{personId}/ex_reasons")
+    public ResponseEntity<List<Reason>> getAllExReasons(@PathVariable("personId") int personId) {
+        return peopleService.findAllEx(personId);
+    }
+
+    @PostMapping("/{personId}/ex_reasons")
+    public ResponseEntity<Reason> addExReason(@PathVariable("personId") int personId,
+                                              @RequestBody Integer reasonId) {
+        return peopleService.createEx(personId, reasonId);
+    }
+
+    @DeleteMapping("/{personId}/ex_reasons/{reasonId}")
+    public ResponseEntity<HttpStatus> deleteExReason(@PathVariable("personId") int personId,
+                                                     @PathVariable("reasonId") int reasonId) {
+        return peopleService.deleteEx(personId, reasonId);
+    }
+
+
     /**
      * Возвращает клиенту ошибки валидации
      *
@@ -84,15 +106,13 @@ public class PeopleController {
      */
     private void throwValidException(BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            Map<String, String> errMsg = new HashMap<>();
-            List<FieldError> errors = bindingResult.getFieldErrors();
-            for (FieldError error : errors) {
-                errMsg.put(error.getField(), error.getDefaultMessage());
-            }
+            Map<String, String> errMsg = bindingResult
+                    .getFieldErrors()
+                    .stream()
+                    .collect(toMap(FieldError::getField, FieldError::getDefaultMessage));
             throw new EntityNotCreatedException(errMsg.toString());
         }
     }
-
 
 
 }

@@ -1,9 +1,11 @@
 package project.assay.utils;
 
 import org.apache.poi.ss.usermodel.*;
+import org.springframework.core.io.ClassPathResource;
 import project.assay.models.AgeRange;
 
-import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -11,38 +13,34 @@ import java.util.Set;
 import static java.time.LocalDate.now;
 import static java.time.temporal.ChronoUnit.DAYS;
 import static org.apache.poi.ss.usermodel.Row.MissingCellPolicy.CREATE_NULL_AS_BLANK;
+import static org.apache.poi.ss.usermodel.WorkbookFactory.create;
 
 public class StaticMethods {
-  public static int getDaysOfAge(LocalDate birthDate) {
-    LocalDate today = now();
-    return (int) DAYS.between(birthDate, today);
-  }
 
-  public static int getTotalDays(AgeRange range) {
-    int years = range.getYears();
-    int months = range.getMonths();
-    int days = range.getDays();
-    return years * 365 + months * 30 + days;
-  }
-
-  public static Set<String> parseExcelColumn(String filePath, int columnIndex) {
-    Set<String> result = new HashSet<>();
-
-    try (FileInputStream fis = new FileInputStream(filePath);
-         Workbook workbook = WorkbookFactory.create(fis)) {
-
-      Sheet sheet = workbook.getSheetAt(0); // Берём первый лист
-      for (Row row : sheet) {
-        Cell cell = row.getCell(columnIndex, CREATE_NULL_AS_BLANK);
-        String value = cell.toString().trim();
-        if (!value.isEmpty()) {
-          result.add(value);
-        }
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
+    public static int getDaysOfAge(LocalDate birthDate) {
+        LocalDate today = now();
+        return (int) DAYS.between(birthDate, today);
     }
 
-    return result;
-  }
+
+
+    public static Set<String> parseExcelColumn(String filePath, int columnIndex) {
+        Set<String> result = new HashSet<>();
+
+        try (InputStream inputStream = new ClassPathResource(filePath).getInputStream()) {
+            Workbook workbook = create(inputStream);
+
+            Sheet sheet = workbook.getSheetAt(0); // Берём первый лист
+            for (Row row : sheet) {
+                Cell cell = row.getCell(columnIndex, CREATE_NULL_AS_BLANK);
+                String value = cell.toString().trim();
+                if (!value.isEmpty()) {
+                    result.add(value);
+                }
+            }
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+        return result;
+    }
 }

@@ -7,19 +7,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import project.assay.dto.ExcludedReasonDTO;
-import project.assay.dto.PersonDTO;
-import project.assay.dto.PersonToUpdateDTO;
+import project.assay.dto.requests.PersonRequestDTO;
+import project.assay.dto.requests.PersonToUpdateDTO;
 import project.assay.exceptions.EntityNotFoundException;
-import project.assay.models.ExcludedReason;
 import project.assay.models.Person;
+import project.assay.models.Reason;
 import project.assay.repositories.PeopleRepository;
 
 import java.util.List;
-import java.util.Optional;
 
-import static java.net.URI.create;
-import static org.springframework.http.HttpStatus.ACCEPTED;
+import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.ResponseEntity.*;
 
 @Service
@@ -28,58 +25,77 @@ public class PeopleService {
 
     private final PeopleRepository peopleRepository;
     private final ModelMapper modelMapper;
+    private final ReasonsService reasonsService;
 
 
     @Autowired
-    public PeopleService(PeopleRepository peopleRepository, ModelMapper modelMapper) {
+    public PeopleService(PeopleRepository peopleRepository, ModelMapper modelMapper, ReasonsService reasonsService) {
         this.peopleRepository = peopleRepository;
         this.modelMapper = modelMapper;
+        this.reasonsService = reasonsService;
     }
 
-    public Person find(int id){
+    public Person findById(int id){
         return peopleRepository
                 .findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Person with id=" + id + " not found!"));
     }
 
-    public ResponseEntity<PersonDTO> findById(int id) {
-        Optional<Person> person = peopleRepository.findById(id);
-        if (person.isPresent()) {
-            return ok(converToPersonDTO(person.get()));
-        }
-        throw new EntityNotFoundException("Person with id=" + id + " not found!");
+    public ResponseEntity<Person> find(int id) {
+        return ok(findById(id));
     }
 
     @Transactional
-    public ResponseEntity<String> save(PersonDTO personDTO) {
-        Person saved = peopleRepository.save(convertToPerson(personDTO));
-        return created(create("/people/" + saved.getId()))
-                .body("Created person with id=" + saved.getId());
+    public ResponseEntity<Person> save(PersonRequestDTO personRequestDTO) {
+        Person saved = peopleRepository.save(convertToPerson(personRequestDTO));
+        return status(CREATED).body(saved);
 
     }
 
     @Transactional
-    public ResponseEntity<HttpStatus> update(int id, PersonToUpdateDTO personDTOtoUpdate) {
-        Optional<Person> personFromDB = peopleRepository.findById(id);
-        if (personFromDB.isPresent()) {
-            Person personToUpdate = convertToPerson(personDTOtoUpdate, personFromDB.get());
-            personToUpdate.setId(id);
-            peopleRepository.save(personToUpdate);
-            return ok(ACCEPTED);
-        }
-        throw new EntityNotFoundException("Person with id=" + id + " not found!");
+    public ResponseEntity<Person> update(int id, PersonToUpdateDTO personDTOtoUpdate) {
+        Person personFromDB = this.findById(id);
+
+        Person personToUpdate = convertToPerson(personDTOtoUpdate, personFromDB);
+        personToUpdate.setId(id);
+        return ok(peopleRepository.save(personToUpdate));
     }
 
     @Transactional
     public ResponseEntity<HttpStatus> delete(int id) {
-        peopleRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Person with id=" + id + " not found!"));
         peopleRepository.deleteById(id);
-        return noContent().build();
+        return status(NO_CONTENT).build();
     }
 
-    private Person convertToPerson(PersonDTO personDTO) {
-        return modelMapper.map(personDTO, Person.class);
+    public ResponseEntity<List<Reason>> findAllEx(int personId) {
+        Person person = this.findById(personId);
+        return ok(person.getExcludedReasons());
+    }
+
+    @Transactional
+    public ResponseEntity<Reason> createEx(int personId, int reasonId) {
+        Person person = this.findById(personId);
+        Reason reason = reasonsService.findById(reasonId);
+        person.getExcludedReasons().add(reason);
+        return ok(peopleRepository
+                .save(person)
+                .getExcludedReasons()
+                .stream()
+                .filter(elem -> elem.getId() == reasonId)
+                .findFirst().get());
+    }
+
+    @Transactional
+    public ResponseEntity<HttpStatus> deleteEx(int personId, int reasonId) {
+        Person person = this.findById(personId);
+        Reason reason = reasonsService.findById(reasonId);
+        person.getExcludedReasons().remove(reason);
+        peopleRepository.save(person);
+        return status(NO_CONTENT).build();
+    }
+
+    private Person convertToPerson(PersonRequestDTO personRequestDTO) {
+        return modelMapper.map(personRequestDTO, Person.class);
     }
 
     private Person convertToPerson(PersonToUpdateDTO personToUpdateDTO, Person preparedPerson) {
@@ -88,17 +104,8 @@ public class PeopleService {
         return preparedPerson;
     }
 
-    private PersonDTO converToPersonDTO(Person person) {
-        List<ExcludedReasonDTO> reasons = converToReasonDTO(person.getExcludedExcludedReasons());
-        PersonDTO personDTO = modelMapper.map(person, PersonDTO.class);
-        personDTO.setExcludedReasons(reasons);
-        return personDTO;
-    }
-
-    private List<ExcludedReasonDTO> converToReasonDTO(List<ExcludedReason> excludedReasons) {
-        return excludedReasons
-                .stream()
-                .map((reason -> modelMapper.map(reason, ExcludedReasonDTO.class)))
-                .toList();
+    private PersonRequestDTO converToPersonDTO(Person person) {
+        PersonRequestDTO personRequestDTO = modelMapper.map(person, PersonRequestDTO.class);
+        return personRequestDTO;
     }
 }

@@ -1,4 +1,4 @@
-package project.assay.dto;
+package project.assay.dto.requests;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -13,7 +13,7 @@ public class IndicatorRequestDTO {
     @NotNull(message = "rus_name should not be empty")
     private String rus_name;
 
-    @Pattern(regexp = "^(male|female)$", message = "Gender should be 'male' or 'female'")
+    @Pattern(regexp = "^(male|female|both)$", message = "Gender should be 'male' or 'female' or 'both'")
     private String gender;
 
     @NotNull(message = "isGravid should not be empty")

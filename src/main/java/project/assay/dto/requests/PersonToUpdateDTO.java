@@ -1,4 +1,4 @@
-package project.assay.dto;
+package project.assay.dto.requests;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Pattern;
@@ -20,6 +20,4 @@ public class PersonToUpdateDTO {
   private LocalDate dateOfBirth;
 
   private Boolean isGravid;
-
-  private List<ExcludedReasonDTO> excludedReasons;
 }

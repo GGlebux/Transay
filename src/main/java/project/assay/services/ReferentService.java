@@ -9,6 +9,7 @@ import project.assay.repositories.ReferentRepository;
 
 import java.time.LocalDate;
 
+import static java.time.LocalDate.now;
 import static java.util.List.of;
 import static java.util.Objects.isNull;
 
@@ -30,24 +31,22 @@ public class ReferentService {
   public void enrich(Referent referent, Indicator indicator) {
     // Если клиент не указал дату анализа, то ставим по умолчанию текущую
     if (isNull(referent.getRegDate())) {
-      referent.setRegDate(LocalDate.now());
+      referent.setRegDate(now());
     }
     // ToDo: добавить единицы измерения
 
     // Проверяем референтое состояние на данных момент
     String verdict = indicatorService.checkValue(indicator, referent.getCurrentValue());
-    Transcript transcript = transcriptService.findByName(indicator.getEng_name());
+    Transcript transcript = transcriptService.findCorrect(indicator.getEng_name(), indicator.getGender());
     switch (verdict) {
       case "lower":
-        referent.setStatus("lower");
-        referent.setReasons(transcript.getFall()); break;
+        referent.setStatus("lower"); break;
       case "upper":
-        referent.setStatus("upper");
-        referent.setReasons(transcript.getRaise()); break;
+        referent.setStatus("upper"); break;
       case "ok":
-        referent.setStatus("ok");
-        referent.setReasons(of()); break;
+        referent.setStatus("ok"); break;
     }
+    referent.setTranscript(transcript);
   }
 
   @Transactional

@@ -11,6 +11,7 @@ import java.util.List;
 import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
+import static java.util.List.of;
 
 @Entity
 @Table(name = "indicator")
@@ -52,7 +53,7 @@ public class Indicator {
   private String units;
 
   @OneToMany(mappedBy = "indicator", fetch = LAZY, cascade = ALL)
-  private List<Measure> measure;
+  private List<Measure> measure = of();
 
   @Override
   public String toString() {

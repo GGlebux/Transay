@@ -7,7 +7,11 @@ import org.hibernate.annotations.JdbcTypeCode;
 import project.assay.utils.converters.JsonToListConverter;
 
 import java.util.List;
+import java.util.Set;
 
+import static jakarta.persistence.FetchType.EAGER;
+import static jakarta.persistence.GenerationType.IDENTITY;
+import static java.util.List.of;
 import static org.hibernate.type.SqlTypes.JSON;
 
 @Entity
@@ -15,7 +19,7 @@ import static org.hibernate.type.SqlTypes.JSON;
 @Data
 public class Transcript {
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @GeneratedValue(strategy = IDENTITY)
   @Column(name = "id")
   private int id;
 
@@ -25,13 +29,19 @@ public class Transcript {
   @Column(name = "gender")
   private String gender;
 
-  @JdbcTypeCode(JSON)
-  @Convert(converter = JsonToListConverter.class)
-  @Column(name = "fall", columnDefinition = "jsonb")
-  private List<String> fall;
+  @ManyToMany(fetch = EAGER)
+  @JoinTable(
+          name = "fall_reason",
+          joinColumns = @JoinColumn(name = "transcript_id"),
+          inverseJoinColumns = @JoinColumn(name = "reason_id")
+  )
+  private List<Reason> falls = of();
 
-  @JdbcTypeCode(JSON)
-  @Convert(converter = JsonToListConverter.class)
-  @Column(name = "raise", columnDefinition = "jsonb")
-  private List<String> raise;
+  @ManyToMany(fetch = EAGER)
+  @JoinTable(
+          name = "raise_reason",
+          joinColumns = @JoinColumn(name = "transcript_id"),
+          inverseJoinColumns = @JoinColumn(name = "reason_id")
+  )
+  private List<Reason> raises= of();
 }

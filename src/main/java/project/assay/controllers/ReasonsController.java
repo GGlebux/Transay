@@ -4,49 +4,53 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import project.assay.dto.ExcludedReasonDTO;
-import project.assay.services.PeopleService;
+import project.assay.models.Reason;
 import project.assay.services.ReasonsService;
 
 import java.util.List;
 import java.util.Set;
 
 /**
- * REST Контроллер для работы с сущностью Reason (причины, которые исключил пользователь).
- * Предоставляет API endpoint`ы для клиента
+ * REST Контроллер для работы с сущностью Reason (причины повышения/понижения индикаторов).
+ * Предоставляет API endpoint`ы для админа
  *
  * @author GGlebux
  */
 
 @RestController
-@RequestMapping
+@RequestMapping("/reasons")
 public class ReasonsController {
 
     private final ReasonsService reasonsService;
 
     @Autowired
-    public ReasonsController(ReasonsService reasonsService, PeopleService peopleService) {
+    public ReasonsController(ReasonsService reasonsService) {
         this.reasonsService = reasonsService;
     }
 
-    @GetMapping("/reasons")
-    public ResponseEntity<Set<String>> getAllReasons() {
+    @GetMapping
+    public ResponseEntity<List<Reason>> getAllReasons() {
         return reasonsService.findAll();
     }
 
-    @GetMapping("/people/{personId}/reason")
-    public ResponseEntity<List<ExcludedReasonDTO>> getPersonReasons(@PathVariable("personId") int personId) {
-        return reasonsService.findByPersonId(personId);
+    @PostMapping
+    public ResponseEntity<Reason> createReason(@RequestBody String name) {
+        return reasonsService.create(name);
     }
 
-    @PostMapping("/people/{personId}/reason")
-    public ResponseEntity<String> createReason(@PathVariable("personId") int personId,
-                                               @RequestBody ExcludedReasonDTO excludedReasonDTO) {
-        return reasonsService.save(excludedReasonDTO, personId);
+    @GetMapping("/{reasonId}")
+    public ResponseEntity<Reason> getReason(@PathVariable int reasonId) {
+        return reasonsService.find(reasonId);
     }
 
-    @DeleteMapping("/people/{personId}/reason/{reasonId}")
-    public ResponseEntity<HttpStatus> deleteReason(@PathVariable("reasonId") int reasonId) {
+    @PutMapping("/{reasonId}")
+    public ResponseEntity<Reason> updateReason(@RequestBody String name,
+                                               @PathVariable int reasonId) {
+        return reasonsService.update(name, reasonId);
+    }
+
+    @DeleteMapping("/{reasonId}")
+    public ResponseEntity<HttpStatus> deleteReason(@PathVariable int reasonId) {
         return reasonsService.delete(reasonId);
     }
 }

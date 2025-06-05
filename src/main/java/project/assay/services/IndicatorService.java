@@ -2,11 +2,12 @@ package project.assay.services;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import project.assay.dto.IndicatorRequestDTO;
+import project.assay.dto.requests.IndicatorRequestDTO;
+import project.assay.dto.responces.IndicatorResponceDTO;
 import project.assay.exceptions.EntityNotFoundException;
 import project.assay.models.Indicator;
 import project.assay.models.Person;
@@ -15,9 +16,11 @@ import project.assay.repositories.IndicatorRepository;
 import java.util.List;
 import java.util.Set;
 
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.ResponseEntity.ok;
 import static org.springframework.http.ResponseEntity.status;
+import static project.assay.models.AgeRange.convertToRange;
 import static project.assay.utils.StaticMethods.*;
 
 @Service
@@ -26,8 +29,7 @@ public class IndicatorService {
 
     private final IndicatorRepository indicatorRepository;
     private final ModelMapper modelMapper;
-    private static final String UNITS_PATH = "src/main/resources/static/units.xlsx";
-
+    private static final String UNITS_PATH = "static/units.xlsx";
 
     @Autowired
     public IndicatorService(IndicatorRepository indicatorRepository, ModelMapper modelMapper) {
@@ -37,12 +39,27 @@ public class IndicatorService {
             mapper.skip(Indicator::setMaxAge);
             mapper.skip(Indicator::setMinAge);
         });
+        modelMapper
+                .createTypeMap(Indicator.class, IndicatorResponceDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(IndicatorResponceDTO::setMinAge);
+                    mapper.skip(IndicatorResponceDTO::setMaxAge);
+                });
+        modelMapper
+                .createTypeMap(IndicatorResponceDTO.class, Indicator.class)
+                .addMappings(mapper -> {
+                    mapper.skip(Indicator::setMinAge);
+                    mapper.skip(Indicator::setMaxAge);
+                });
         this.indicatorRepository = indicatorRepository;
         this.modelMapper = modelMapper;
     }
 
-    public ResponseEntity<List<Indicator>> findAll() {
-        return status(OK).body(indicatorRepository.findAll());
+    public ResponseEntity<List<IndicatorResponceDTO>> findAll() {
+        return status(OK).body(indicatorRepository.findAll()
+                .stream()
+                .map(this::convertToDTO)
+                .toList());
     }
 
     public Indicator findById(int id) {
@@ -60,14 +77,24 @@ public class IndicatorService {
     }
 
     @Transactional
-    public ResponseEntity<Indicator> create(IndicatorRequestDTO dto) {
-        return ok(indicatorRepository.save(convertToEntity(dto)));
+    public ResponseEntity<IndicatorResponceDTO> create(IndicatorRequestDTO dto) {
+        Indicator saved = indicatorRepository.save(convertToEntity(dto));
+        return ok(convertToDTO(saved));
     }
 
     @Transactional
-    public Indicator save(Indicator indicator) {
-        return indicatorRepository.save(indicator);
+    public ResponseEntity<IndicatorResponceDTO> update(int indicatorId, IndicatorRequestDTO dto) {
+        Indicator prepared = findById(indicatorId);
+        Indicator updated = indicatorRepository.save(convertToEntity(dto, prepared));
+        return ok(convertToDTO(updated));
     }
+
+    @Transactional
+    public ResponseEntity<HttpStatus> delete(int id) {
+        indicatorRepository.deleteById(id);
+        return status(NO_CONTENT).build();
+    }
+
 
     public String checkValue(Indicator indicator, double value) {
         double minValue = indicator.getMinValue();
@@ -84,8 +111,21 @@ public class IndicatorService {
     private Indicator convertToEntity(IndicatorRequestDTO dto) {
         Indicator indicator = new Indicator();
         modelMapper.map(dto, indicator);
-        indicator.setMinAge(getTotalDays(dto.getMinAge()));
-        indicator.setMaxAge(getTotalDays(dto.getMaxAge()));
+        indicator.setMinAge(dto.getMinAge().calculateTotalDays());
+        indicator.setMaxAge(dto.getMaxAge().calculateTotalDays());
         return indicator;
+    }
+
+    private Indicator convertToEntity(IndicatorRequestDTO dto, Indicator prepared) {
+        modelMapper.map(dto, prepared);
+        return prepared;
+    }
+
+    private IndicatorResponceDTO convertToDTO(Indicator indicator) {
+        IndicatorResponceDTO dto = new IndicatorResponceDTO();
+        modelMapper.map(indicator, dto);
+        dto.setMinAge(convertToRange(indicator.getMinAge()));
+        dto.setMaxAge(convertToRange(indicator.getMaxAge()));
+        return dto;
     }
 }

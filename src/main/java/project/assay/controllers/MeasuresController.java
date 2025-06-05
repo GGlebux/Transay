@@ -10,9 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import project.assay.dto.IndicatorDTO;
-import project.assay.dto.MeasureResponceDTO;
-import project.assay.dto.MeasureRequestDTO;
+import project.assay.dto.responces.IndicatorDTO;
+import project.assay.dto.responces.MeasureResponceDTO;
+import project.assay.dto.requests.MeasureRequestDTO;
 import project.assay.services.MeasureService;
 
 /**

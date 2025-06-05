@@ -11,6 +11,8 @@ import project.assay.utils.converters.JsonToListConverter;
 import java.time.LocalDate;
 import java.util.List;
 
+import static jakarta.persistence.CascadeType.ALL;
+import static jakarta.persistence.FetchType.EAGER;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static org.hibernate.type.SqlTypes.JSON;
 
@@ -35,10 +37,9 @@ public class Referent {
   @Column(name = "status")
   private String status;
 
-  @JdbcTypeCode(JSON)
-  @Convert(converter = JsonToListConverter.class)
-  @Column(name = "transcript", columnDefinition = "jsonb")
-  private List<String> reasons;
+  @OneToOne(cascade = ALL, fetch = EAGER)
+  @JoinColumn(name = "transcript_id", referencedColumnName = "id")
+  private Transcript transcript;
 
   @Override
   public String toString() {
@@ -47,7 +48,7 @@ public class Referent {
         ", currentValue=" + currentValue +
         ", regDate=" + regDate +
         ", status='" + status + '\'' +
-        ", description=" + reasons +
+        ", versict=" + transcript +
         '}';
   }
 }

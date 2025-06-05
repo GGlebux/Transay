@@ -1,88 +1,77 @@
 package project.assay.services;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import project.assay.dto.ExcludedReasonDTO;
-import project.assay.models.ExcludedReason;
-import project.assay.models.Person;
+import project.assay.exceptions.EntityNotFoundException;
+
+import project.assay.models.Reason;
 import project.assay.repositories.ReasonRepository;
 
 import java.util.List;
-import java.util.Set;
 
-import static org.springframework.http.HttpStatus.CONFLICT;
-import static org.springframework.http.HttpStatus.NO_CONTENT;
+import static java.lang.String.format;
+import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.ResponseEntity.ok;
 import static org.springframework.http.ResponseEntity.status;
-import static project.assay.utils.StaticMethods.parseExcelColumn;
 
 @Service
 @Transactional(readOnly = true)
 public class ReasonsService {
     private final ReasonRepository reasonRepository;
-    private final PeopleService peopleService;
-    private static final String REASONS_PATH = "src/main/resources/static/reasons.xlsx";
+    private final ModelMapper modelMapper;
+    private static final String REASONS_PATH = "static/reasons.xlsx";
+
 
     @Autowired
-    public ReasonsService(ReasonRepository reasonRepository, PeopleService peopleService, TranscriptService transcriptService) {
+    public ReasonsService(ReasonRepository reasonRepository, ModelMapper modelMapper) {
         this.reasonRepository = reasonRepository;
-        this.peopleService = peopleService;
+        this.modelMapper = modelMapper;
     }
 
-    public ResponseEntity<Set<String>> findAll() {
-        return ok(parseExcelColumn(REASONS_PATH, 0));
+    public Reason findById(int id) {
+        return reasonRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(format("Reason with id=%d not found", id)));
     }
 
-    protected List<ExcludedReason> findAll(int person) {
-        return reasonRepository.findByOwnerId(person);
-    }
-
-    public ResponseEntity<List<ExcludedReasonDTO>> findByPersonId(int personId) {
-        List<ExcludedReasonDTO> reasons = reasonRepository
-                .findByOwnerId(personId)
-                .stream()
-                .map(this::convertToReasonDTO)
-                .toList();
-        if (reasons.isEmpty()) {
-            return status(NO_CONTENT).body(reasons);
-        }
-        return ok(reasons);
+    public List<Reason> findAll(List<Integer> ids){
+        return reasonRepository.findAllById(ids);
     }
 
     @Transactional
-    public ResponseEntity<String> save(ExcludedReasonDTO excludedReasonDTO, int personId) {
-        Person owner = peopleService.find(personId);
-        List<String> reasons = this
-                .findAll(personId)
-                .stream()
-                .map(ExcludedReason::getReason)
-                .toList();
-        if (reasons.contains(excludedReasonDTO.getReason())) {
-            return status(CONFLICT).body("Reason already exists!");
-        }
-        ExcludedReason excludedReason = ExcludedReason
-                .builder()
-                .reason(excludedReasonDTO.getReason())
-                .owner(owner)
-                .build();
-        reasonRepository.save(excludedReason);
-        return ok("Create reason with id=" + excludedReason.getId());
+    public ResponseEntity<List<Reason>> findAll() {
+//        List<Reason> stringSet = parseExcelColumn(REASONS_PATH, 0)
+//                .stream()
+//                .map(Reason::new)
+//                .toList();
+//        reasonRepository.saveAll(stringSet);
+        return ok(reasonRepository.findAll());
+    }
+
+    public ResponseEntity<Reason> find(int id){
+        return ok(this.findById(id));
+    }
+
+    @Transactional
+    public ResponseEntity<Reason> create(String name) {
+        return status(CREATED)
+                .body(reasonRepository.save(new Reason(name)));
+    }
+
+    @Transactional
+    public ResponseEntity<Reason> update(String name, int id) {
+        Reason reason = this.findById(id);
+        reason.setName(name);
+        return ok(reasonRepository.save(reason));
     }
 
     @Transactional
     public ResponseEntity<HttpStatus> delete(int id) {
-        reasonRepository.deleteById(id);
+        Reason reason = this.findById(id);
+        reasonRepository.delete(reason);
         return status(NO_CONTENT).build();
-    }
-
-    private ExcludedReasonDTO convertToReasonDTO(ExcludedReason excludedReason) {
-        return ExcludedReasonDTO
-                .builder()
-                .reason(excludedReason.getReason())
-                .id(excludedReason.getId())
-                .build();
     }
 }

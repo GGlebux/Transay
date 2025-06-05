@@ -1,7 +1,8 @@
-package project.assay.dto;
+package project.assay.dto.responces;
 
 import lombok.Builder;
 import lombok.Data;
+import project.assay.models.Reason;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,5 +17,5 @@ public class MeasureResponceDTO {
   private LocalDate regDate;
   private String units;
   private String status;
-  private List<String> reasons;
+  private List<Reason> reasons;
 }

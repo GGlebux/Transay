@@ -1,4 +1,4 @@
-package project.assay.dto;
+package project.assay.dto.requests;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotEmpty;
@@ -8,10 +8,9 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Data
-public class PersonDTO {
+public class PersonRequestDTO {
   @NotEmpty(message = "Name should not be empty")
   @Size(min = 2, max = 50, message = "Name should be between 2 and 50 characters")
   private String name;
@@ -26,6 +25,4 @@ public class PersonDTO {
 
   @NotNull(message = "isGravid should not be empty")
   private Boolean isGravid;
-
-  private List<ExcludedReasonDTO> excludedReasons;
 }

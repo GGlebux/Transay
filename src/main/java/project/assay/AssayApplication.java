@@ -1,12 +1,12 @@
 package project.assay;
 
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeMap;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import project.assay.dto.MeasureRequestDTO;
-import project.assay.models.Referent;
+import org.springframework.context.annotation.Scope;
+
+import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE;
 
 @SpringBootApplication
 public class AssayApplication {
@@ -15,20 +15,23 @@ public class AssayApplication {
 		SpringApplication.run(AssayApplication.class, args);
 	}
 
+//	@Bean
+//	JedisConnectionFactory jedisConnectionFactory() {
+//		return new JedisConnectionFactory();
+//	}
+//
+//	@Bean
+//	public RedisTemplate<String, Object> redisTemplate() {
+//		RedisTemplate<String, Object> template = new RedisTemplate<>();
+//		template.setConnectionFactory(jedisConnectionFactory());
+//		template.setValueSerializer(new GenericToStringSerializer<Object>(Object.class));
+//		return template;
+//	}
 
 	@Bean
+	@Scope(SCOPE_PROTOTYPE)
 	ModelMapper modelMapper(){
-		ModelMapper modelMapper = new ModelMapper();
-
-		// Для конвертации из метода convertToReferent()
-		TypeMap<MeasureRequestDTO, Referent> typeMap = modelMapper.createTypeMap(MeasureRequestDTO.class, Referent.class);
-		typeMap.addMappings(mapper -> mapper.skip(Referent::setId));
-
-		// Для конвертации из метода convertToMeasureDTO()
-//		TypeMap<Indicator, MeasureDTO> indicatorTypeMap = modelMapper.createTypeMap(Indicator.class, MeasureDTO.class);
-//		TypeMap<Referent, MeasureDTO> referentTypeMap = modelMapper.createTypeMap(Referent.class, MeasureDTO.class);
-
-		return modelMapper;
+		return new ModelMapper();
 	}
 
 }
