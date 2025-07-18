@@ -1,11 +1,11 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/transay
-    username: postgres
-    password: postgres
-#    url: ${SPRING_DATASOURCE_URL}
-#    username: ${SPRING_DATASOURCE_USERNAME}
-#    password: ${SPRING_DATASOURCE_PASSWORD}
+    #    url: jdbc:postgresql://localhost:5432/transay
+    #    username: postgres
+    #    password: postgres
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
   jpa:
     properties:
       hibernate:
@@ -16,5 +16,9 @@ spring:
     hiddenmethod:
       filter:
         enabled: true
-  liquibase:
-    change-log: db/changelog/db.changelog-master.yaml
+
+  sql:
+    init:
+      schema-locations: classpath:db/schema.sql
+      data-locations: classpath:db/data.sql
+      mode: always

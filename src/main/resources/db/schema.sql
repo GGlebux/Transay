@@ -77,4 +77,3 @@ CREATE TABLE "measure"
     "referent_id"  INTEGER REFERENCES Referent (id) ON DELETE CASCADE NOT NULL
 );
 
-
