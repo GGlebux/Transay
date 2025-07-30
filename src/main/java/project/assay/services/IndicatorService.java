@@ -29,16 +29,49 @@ public class IndicatorService {
 
     private final IndicatorRepository indicatorRepository;
     private final ModelMapper modelMapper;
-    private static final String UNITS_PATH = "static/units.xlsx";
+    private static final Set<String> UNITS;
+
+    static {
+        UNITS = Set.of("г/л",
+                "тера/л",
+                "фл",
+                "пг",
+                "%",
+                "*10^(9)/л",
+                "мм/час",
+                "мкг/л",
+                "мкмоль/л",
+                "мкмоль/литр",
+                "нг/мл",
+                "мг/л",
+                "ммоль/л",
+                "МкЕд/мл",
+                "ме/л",
+                "ед/л",
+                "мМЕ/л",
+                "нг/дл",
+                "пмоль/л",
+                "пг/мл",
+                "МЕ/мл",
+                "нмоль/л",
+                "мкг/сутки",
+                "мкг/дл",
+                "мкмоль/сут",
+                "мкг/сут",
+                "мкг/литр",
+                "мм/ч",
+                "клеток/мкл",
+                "мкЕд/л");
+    }
 
     @Autowired
     public IndicatorService(IndicatorRepository indicatorRepository, ModelMapper modelMapper) {
         modelMapper
                 .createTypeMap(IndicatorRequestDTO.class, Indicator.class)
                 .addMappings(mapper -> {
-            mapper.skip(Indicator::setMaxAge);
-            mapper.skip(Indicator::setMinAge);
-        });
+                    mapper.skip(Indicator::setMaxAge);
+                    mapper.skip(Indicator::setMinAge);
+                });
         modelMapper
                 .createTypeMap(Indicator.class, IndicatorResponceDTO.class)
                 .addMappings(mapper -> {
@@ -67,8 +100,8 @@ public class IndicatorService {
                 .orElseThrow(() -> new EntityNotFoundException("Indicator with id=" + id + " not found"));
     }
 
-    public ResponseEntity<Set<String>> findAllUnits(){
-        return ok(parseExcelColumn(UNITS_PATH, 0));
+    public ResponseEntity<Set<String>> findAllUnits() {
+        return ok(UNITS);
     }
 
     public List<Indicator> findAllCorrect(Person person) {

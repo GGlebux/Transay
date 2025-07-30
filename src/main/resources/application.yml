@@ -1,8 +1,11 @@
 spring:
   datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
+#    url: ${SPRING_DATASOURCE_URL}
+#    username: ${SPRING_DATASOURCE_USERNAME}
+#    password: ${SPRING_DATASOURCE_PASSWORD}
+    url: jdbc:postgresql://localhost:5432/transay
+    username: postgres
+    password: postgres
   jpa:
     properties:
       hibernate:
@@ -18,4 +21,4 @@ spring:
     init:
       schema-locations: classpath:db/schema.sql
       data-locations: classpath:db/data.sql
-      mode: always
+      mode: never
