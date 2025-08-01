@@ -55,7 +55,7 @@ RESTful API для работы с медицинскими показателя
 
 ## 🚀 Запуск
 ```bash
-git clone https://github.com/GGlebux/Assay.git
-cd ./Assay
-docker-compose up
+git clone https://github.com/GGlebux/Transay.git
+cd ./Transay/backend
+docker-compose up --build
 ```
