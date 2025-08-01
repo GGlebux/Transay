@@ -8,9 +8,10 @@
         <version>3.4.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>project</groupId>
+    <groupId>backend</groupId>
     <artifactId>TranSay</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
     <name>assay</name>
     <description>Demo project for Spring Boot</description>
     <properties>

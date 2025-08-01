@@ -1,7 +1,7 @@
 services:
   postgres:
-    image: 'postgres:16'
-    container_name: 'java-postgres'
+    image: 'postgres:latest'
+    container_name: 'transay_db'
     ports:
       - 5000:5432
     environment:
@@ -10,18 +10,19 @@ services:
       - 'POSTGRES_PASSWORD=postgres'
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./src/main/resources/db/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   app:
     build: .
-    ports:
-      - 8080:8080
-    depends_on:
-      - postgres
+    container_name: 'transay_application'
     environment:
       - 'SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/transay'
       - 'SPRING_DATASOURCE_USERNAME=postgres'
       - 'SPRING_DATASOURCE_PASSWORD=postgres'
-    restart: on-failure
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgres
 
 volumes:
   postgres_data:
