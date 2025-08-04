@@ -1,0 +1,68 @@
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+
+type Reason = {
+  id: number;
+  name: string;
+};
+
+const genders = ['male', 'female', 'both'];
+
+function TranscriptForm() {
+  const [raiseReasons, setRaiseReasons] = useState<string[]>([]);
+  const [lowerReasons, setLowerReasons] = useState<string[]>([]);
+  const [allReasons, setAllReasons] = useState<Reason[]>([]);
+
+  useEffect(() => {
+    axios
+      .get<Reason[]>('http://localhost:8080/reasons')
+      .then((res) => setAllReasons(res.data))
+      .catch((err) => console.error('Ошибка при получении reasons:', err));
+  }, []);
+
+  const handleSelect = (type: 'raise' | 'lower', value: string) => {
+    if (!value) return;
+    const set = type === 'raise' ? setRaiseReasons : setLowerReasons;
+    const current = type === 'raise' ? raiseReasons : lowerReasons;
+    if (!current.includes(value)) set([...current, value]);
+  };
+
+  const handleRemove = (type: 'raise' | 'lower', value: string) => {
+    const set = type === 'raise' ? setRaiseReasons : setLowerReasons;
+    const current = type === 'raise' ? raiseReasons : lowerReasons;
+    set(current.filter((r) => r !== value));
+  };
+
+  return (
+    <form className="form-card">
+      <h2>Транскрипция</h2>
+
+      <label className="form-label">
+        Англ название
+        <input type="text" />
+      </label>
+
+      <label className="form-label">
+        Гендер
+        <select>
+          {genders.map((g) => (
+            <option key={g} value={g}>
+              {g}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label className="form-label">
+        Причины повышения
+        <select onChange={(e) => handleSelect('raise', e.target.value)}>
+          <option value="">Выберите причину</option>
+          {allReasons.map((r) => (
+            <option key={r.id} value={r.name}>
+              {r.name}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <d
