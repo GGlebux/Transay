@@ -1,12 +1,10 @@
 import './styles/forms.css';
-import IndicatorForm from './components/IndicatorForm';
-import TranscriptForm from './components/TranscriptForm';
+import FormsWrapper from './components/FormsWrapper';
 
 function App() {
   return (
     <div className="container">
-      <IndicatorForm />
-      <TranscriptForm />
+      <FormsWrapper />
     </div>
   );
 }

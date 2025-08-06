@@ -1,137 +1,207 @@
-import { useEffect, useState} from 'react';
-import type { FormEvent } from 'react';
-import axios from 'axios';
+import { useEffect, useState } from "react";
+import type { FormEvent } from "react";
+import axios from "axios";
+import { FloatingTextInput, FloatingSelect } from "./FloatingTextField";
 
+const genders = ["male", "female", "both"];
+
+type Props = { engName: string; setEngName: (v: string) => void };
 type Units = string[];
 
-const genders = ['male', 'female', 'both'];
-
-function IndicatorForm() {
+export default function IndicatorForm({ engName, setEngName }: Props) {
+  const [rusName, setRusName] = useState("");
+  const [unit, setUnit] = useState("");
+  const [gender, setGender] = useState("");
+  const [gravid, setGravid] = useState(false);
+  const [minValue, setMinValue] = useState("");
+  const [maxValue, setMaxValue] = useState("");
   const [units, setUnits] = useState<Units>([]);
-  const [engName, setEngName] = useState<string>('');
-  const [rusName, setRusName] = useState<string>('');
-  const [gender, setGender] = useState<string>('male');
-  const [gravid, setGravid] = useState<boolean>(false);
-  const [minAge, setMinAge] = useState({ years: 0, months: 0, days: 0 });
-  const [maxAge, setMaxAge] = useState({ years: 0, months: 0, days: 0 });
-  const [minValue, setMinValue] = useState<number | ''>('');
-  const [maxValue, setMaxValue] = useState<number | ''>('');
-  const [unit, setUnit] = useState<string>('');
+  const [minAge, setMinAge] = useState({ years: "", month: "", days: "" });
+  const [maxAge, setMaxAge] = useState({ years: "", month: "", days: "" });
 
   useEffect(() => {
     axios
-      .get<Units>('http://localhost:8080/indicators/units')
+      .get<Units>("http://localhost:8080/indicators/units")
       .then((res) => setUnits(res.data.sort()))
-      .catch((err) => console.error('Ошибка при получении units:', err));
+      .catch(console.error);
   }, []);
 
-  const onSubmit = (e: FormEvent) => {
+  const resetForm = () => {
+    setEngName("");
+    setRusName("");
+    setUnit("");
+    setGender("");
+    setGravid(false);
+    setMinValue("");
+    setMaxValue("");
+    setMinAge({ years: "", month: "", days: "" });
+    setMaxAge({ years: "", month: "", days: "" });
+  };
+
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
+
     axios
-      .post('http://localhost:8080/indicators', {
-        id: Date.now(),
+      .post("http://localhost:8080/indicators", {
         engName,
         rusName,
         gender,
-        minAge,
-        maxAge,
+        gravid,
+        minAge: {
+          years: Number(minAge.years || 0),
+          month: Number(minAge.month || 0),
+          days: Number(minAge.days || 0),
+        },
+        maxAge: {
+          years: Number(maxAge.years || 0),
+          month: Number(maxAge.month || 0),
+          days: Number(maxAge.days || 0),
+        },
         minValue: Number(minValue),
         maxValue: Number(maxValue),
         units: unit,
-        gravid,
       })
-      .then(() => alert('Indicator sent'))
-      .catch((err) => console.error('Ошибка отправки indicator:', err));
+      .then(() => alert("Данные успешно отправлены!"))
+      .catch((err) => {
+        console.error(err);
+        alert("Ошибка при отправке данных");
+      });
   };
 
   return (
-    <form className="form-card" onSubmit={onSubmit}>
+    <form className="form-card" onSubmit={handleSubmit}>
       <h2>Индикатор</h2>
 
-      <label className="form-label">
-        Англ название
-        <input type="text" value={engName} onChange={(e) => setEngName(e.target.value)} required />
-      </label>
+      <FloatingTextInput
+        id="ind-eng"
+        label="Англ название"
+        value={engName}
+        onChange={(e) => {
+          const filteredValue = e.target.value.replace(/[а-яёА-ЯЁ]/g, "");
+          setEngName(filteredValue);
+        }}
+      />
 
-      <label className="form-label">
-        Рус название
-        <input type="text" value={rusName} onChange={(e) => setRusName(e.target.value)} required />
-      </label>
+      <FloatingTextInput
+        id="ind-rus"
+        label="Рус название"
+        value={rusName}
+        onChange={(e) => {
+          const filtered = e.target.value.replace(/[^а-яёА-ЯЁ\s]/g, "");
+          setRusName(filtered);
+        }}
+      />
 
-      <label className="form-label">
-        Единицы измерения
-        <select value={unit} onChange={(e) => setUnit(e.target.value)} required>
-          <option value="">Выберите единицу</option>
-          {units.map((u) => (
-            <option key={u} value={u}>
-              {u}
-            </option>
-          ))}
-        </select>
-      </label>
+      <FloatingSelect
+        id="ind-unit"
+        label="Единицы измерения"
+        value={unit}
+        onChange={(e) => setUnit(e.target.value)}
+        options={units.map((u) => ({ value: u, label: u }))}
+      />
 
-      <label className="form-label">
-        Гендер
-        <select value={gender} onChange={(e) => setGender(e.target.value)}>
-          {genders.map((g) => (
-            <option key={g} value={g}>
-              {g}
-            </option>
-          ))}
-        </select>
-      </label>
+      <FloatingSelect
+        id="ind-gender"
+        label="Гендер"
+        value={gender}
+        onChange={(e) => setGender(e.target.value)}
+        options={genders.map((g) => ({ value: g, label: g }))}
+      />
 
-      <label className="form-label checkbox">
-        <input type="checkbox" checked={gravid} onChange={(e) => setGravid(e.target.checked)} />
-        Беременна
-      </label>
+      <div className="checkbox">
+        <label htmlFor="ind-gravid">Беременна</label>
+        <input
+          id="ind-gravid"
+          type="checkbox"
+          checked={gravid}
+          onChange={(e) => setGravid(e.target.checked)}
+        />
+      </div>
 
       <label className="form-label">Минимальный возраст</label>
-      <div className="age-row">
-        <label className="form-label">Годы<input type="number" value={minAge.years} onChange={(e) => setMinAge({ ...minAge, years: +e.target.value })} /></label>
-        <label className="form-label">Месяцы<input type="number" value={minAge.months} onChange={(e) => setMinAge({ ...minAge, months: +e.target.value })} /></label>
-        <label className="form-label">Дни<input type="number" value={minAge.days} onChange={(e) => setMinAge({ ...minAge, days: +e.target.value })} /></label>
+      <div className="age-input-group">
+        <FloatingTextInput
+          id="min-age-years"
+          label="Годы"
+          type="number"
+          value={minAge.years}
+          onChange={(e) =>
+            setMinAge({ ...minAge, years: e.target.value })
+          }
+        />
+        <FloatingTextInput
+          id="min-age-months"
+          label="Месяцы"
+          type="number"
+          value={minAge.month}
+          onChange={(e) =>
+            setMinAge({ ...minAge, month: e.target.value })
+          }
+        />
+        <FloatingTextInput
+          id="min-age-days"
+          label="Дни"
+          type="number"
+          value={minAge.days}
+          onChange={(e) =>
+            setMinAge({ ...minAge, days: e.target.value })
+          }
+        />
       </div>
 
       <label className="form-label">Максимальный возраст</label>
-      <div className="age-row">
-        <label className="form-label">Годы<input type="number" value={maxAge.years} onChange={(e) => setMaxAge({ ...maxAge, years: +e.target.value })} /></label>
-        <label className="form-label">Месяцы<input type="number" value={maxAge.months} onChange={(e) => setMaxAge({ ...maxAge, months: +e.target.value })} /></label>
-        <label className="form-label">Дни<input type="number" value={maxAge.days} onChange={(e) => setMaxAge({ ...maxAge, days: +e.target.value })} /></label>
+      <div className="age-input-group">
+        <FloatingTextInput
+          id="max-age-years"
+          label="Годы"
+          type="number"
+          value={maxAge.years}
+          onChange={(e) =>
+            setMaxAge({ ...maxAge, years: e.target.value })
+          }
+        />
+        <FloatingTextInput
+          id="max-age-months"
+          label="Месяцы"
+          type="number"
+          value={maxAge.month}
+          onChange={(e) =>
+            setMaxAge({ ...maxAge, month: e.target.value })
+          }
+        />
+        <FloatingTextInput
+          id="max-age-days"
+          label="Дни"
+          type="number"
+          value={maxAge.days}
+          onChange={(e) =>
+            setMaxAge({ ...maxAge, days: e.target.value })
+          }
+        />
       </div>
 
-<label className="form-label">
-  Минимальное значение
-  <input
-    type="number"
-    step="0.0001"
-    value={minValue}
-    onChange={(e) => {
-      const value = e.target.value;
-      setMinValue(value === "" ? "" : parseFloat(value));
-    }}
-    required
-  />
-</label>
+      <FloatingTextInput
+        id="min-value"
+        label="Минимальное значение"
+        type="number"
+        value={minValue}
+        onChange={(e) => setMinValue(e.target.value)}
+      />
 
-<label className="form-label">
-  Максимальное значение
-  <input
-    type="number"
-    step="0.0001"
-    value={maxValue}
-    onChange={(e) => {
-      const value = e.target.value;
-      setMaxValue(value === "" ? "" : parseFloat(value));
-    }}
-    required
-  />
-</label>
+      <FloatingTextInput
+        id="max-value"
+        label="Максимальное значение"
+        type="number"
+        value={maxValue}
+        onChange={(e) => setMaxValue(e.target.value)}
+      />
 
-
-      <button type="submit">Отправить</button>
+      <div className="btn-container">
+        <button type="button" className="btn-clear" onClick={resetForm}>
+          Очистить
+        </button>
+        <button type="submit">Отправить</button>
+      </div>
     </form>
   );
 }
-
-export default IndicatorForm;

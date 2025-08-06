@@ -1,146 +1,140 @@
-import { useEffect, useState } from 'react';
-import type { FormEvent } from 'react';
-import axios from 'axios';
+import { useEffect, useState } from "react";
+import type { FormEvent } from "react";
+import axios from "axios";
+import { FloatingTextInput, FloatingSelect } from "./FloatingTextField";
 
-type Reason = { id: number; name: string };
-
-const genders = ['male', 'female', 'both'];
-
-function TranscriptForm() {
-  const [allReasons, setAllReasons] = useState<Reason[]>([]);
-  const [raiseReasons, setRaiseReasons] = useState<Reason[]>([]);
-  const [lowerReasons, setLowerReasons] = useState<Reason[]>([]);
-  const [name, setName] = useState('');
-  const [gender, setGender] = useState('male');
+export default function TranscriptForm({
+  engName,
+  setEngName,
+}: {
+  engName: string;
+  setEngName: (v: string) => void;
+}) {
+  const [allReasons, setAllReasons] = useState<{ id: number; name: string }[]>(
+    []
+  );
+  const [raiseReasons, setRaiseReasons] = useState<
+    { id: number; name: string }[]
+  >([]);
+  const [lowerReasons, setLowerReasons] = useState<
+    { id: number; name: string }[]
+  >([]);
+  const [gender, setGender] = useState("");
 
   useEffect(() => {
     axios
-      .get<Reason[]>('http://localhost:8080/reasons')
-      .then((res) => {
-        const sorted = res.data.sort((a, b) => a.name.localeCompare(b.name));
-        setAllReasons(sorted);
-      })
-      .catch((err) => console.error('Ошибка при получении reasons:', err));
+      .get<{ id: number; name: string }[]>("http://localhost:8080/reasons")
+      .then((res) =>
+        setAllReasons(res.data.sort((a, b) => a.name.localeCompare(b.name)))
+      )
+      .catch(console.error);
   }, []);
 
-  const handleSelect = (type: 'raise' | 'lower', id: number) => {
-    const reason = allReasons.find((r) => r.id === id);
-    if (!reason) return;
-
-    const list = type === 'raise' ? raiseReasons : lowerReasons;
-    const set = type === 'raise' ? setRaiseReasons : setLowerReasons;
-
-    if (!list.some((r) => r.id === id)) {
-      set([...list, reason]);
-    }
+  const handleSelect = (type: "raise" | "lower", id: number) => {
+    const r = allReasons.find((r) => r.id === id);
+    if (!r) return;
+    const list = type === "raise" ? raiseReasons : lowerReasons;
+    const setter = type === "raise" ? setRaiseReasons : setLowerReasons;
+    if (!list.some((x) => x.id === id)) setter([...list, r]);
+  };
+  const handleRemove = (type: "raise" | "lower", id: number) => {
+    const list = type === "raise" ? raiseReasons : lowerReasons;
+    const setter = type === "raise" ? setRaiseReasons : setLowerReasons;
+    setter(list.filter((r) => r.id !== id));
   };
 
-  const handleRemove = (type: 'raise' | 'lower', id: number) => {
-    const set = type === 'raise' ? setRaiseReasons : setLowerReasons;
-    const list = type === 'raise' ? raiseReasons : lowerReasons;
-
-    set(list.filter((r) => r.id !== id));
+  const resetForm = () => {
+    setEngName("");
+    setGender("");
+    setRaiseReasons([]);
+    setLowerReasons([]);
   };
 
-const onSubmit = (e: FormEvent) => {
-  e.preventDefault();
-
-  const fallsIds = lowerReasons.map(r => r.id);
-  const raisesIds = raiseReasons.map(r => r.id);
-
-  const payload = {
-    name,
-    gender,
-    fallsIds,
-    raisesIds,
+  const onSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    axios
+      .post("http://localhost:8080/transcripts", {
+        name: engName,
+        gender,
+        fallsIds: lowerReasons.map((r) => r.id),
+        raisesIds: raiseReasons.map((r) => r.id),
+      })
+      .then(() => alert("Данные успешно отправлены!"))
+      .catch(console.error);
   };
-
-  axios
-    .post('http://localhost:8080/transcripts', payload)
-    .then(() => {
-      alert('Transcript sent');
-      // Очистка формы:
-      setName('');
-      setGender('male');
-      setRaiseReasons([]);
-      setLowerReasons([]);
-    })
-    .catch((err) => console.error('Ошибка отправки transcript:', err));
-};
-
-
-
 
   return (
     <form className="form-card" onSubmit={onSubmit}>
       <h2>Транскрипция</h2>
+      <FloatingTextInput
+        id="trans-name"
+        label="Англ название"
+        value={engName}
+        onChange={(e) => {
+          // Убираем все русские буквы из ввода
+          const filteredValue = e.target.value.replace(/[а-яёА-ЯЁ]/g, "");
+          setEngName(filteredValue);
+        }}
+      />
 
-      <label className="form-label">
-        Англ название
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-      </label>
-
-      <label className="form-label">
-        Гендер
-        <select value={gender} onChange={(e) => setGender(e.target.value)}>
-          {genders.map((g) => (
-            <option key={g} value={g}>
-              {g}
-            </option>
-          ))}
-        </select>
-      </label>
-
-      <label className="form-label">
-        Причины повышения
-        <select onChange={(e) => handleSelect('raise', Number(e.target.value))} defaultValue="">
-          <option value="">Выберите причину</option>
-          {allReasons.map((r) => (
-            <option key={r.id} value={r.id}>
-              {r.name}
-            </option>
-          ))}
-        </select>
-      </label>
-
+      <FloatingSelect
+        id="gender"
+        label="Гендер"
+        value={gender}
+        onChange={(e) => setGender(e.target.value)}
+        options={[
+          { value: "male", label: "male" },
+          { value: "female", label: "female" },
+          { value: "both", label: "both" },
+        ]}
+        
+      />
+      <FloatingSelect
+        id="raise-select"
+        label="Причины повышения"
+        value=""
+        onChange={(e) => handleSelect("raise", Number(e.target.value))}
+        options={allReasons.map((r) => ({
+          value: String(r.id),
+          label: r.name,
+        }))}
+      />
       <div className="tag-container">
         {raiseReasons.map((r) => (
           <span key={r.id} className="tag">
             {r.name}
-            <button type="button" onClick={() => handleRemove('raise', r.id)}>×</button>
+            <button type="button" onClick={() => handleRemove("raise", r.id)}>
+              ×
+            </button>
           </span>
         ))}
       </div>
-
-      <label className="form-label">
-        Причины понижения
-        <select onChange={(e) => handleSelect('lower', Number(e.target.value))} defaultValue="">
-          <option value="">Выберите причину</option>
-          {allReasons.map((r) => (
-            <option key={r.id} value={r.id}>
-              {r.name}
-            </option>
-          ))}
-        </select>
-      </label>
-
+      <FloatingSelect
+        id="lower-select"
+        label="Причины понижения"
+        value=""
+        onChange={(e) => handleSelect("lower", Number(e.target.value))}
+        options={allReasons.map((r) => ({
+          value: String(r.id),
+          label: r.name,
+        }))}
+      />
       <div className="tag-container">
         {lowerReasons.map((r) => (
           <span key={r.id} className="tag">
             {r.name}
-            <button type="button" onClick={() => handleRemove('lower', r.id)}>×</button>
+            <button type="button" onClick={() => handleRemove("lower", r.id)}>
+              ×
+            </button>
           </span>
         ))}
       </div>
-
-      <button type="submit">Отправить</button>
+      <div className="btn-container">
+        <button type="button" className="btn-clear" onClick={resetForm}>
+          Очистить
+        </button>
+        <button type="submit">Отправить</button>
+      </div>
     </form>
   );
 }
-
-export default TranscriptForm;
