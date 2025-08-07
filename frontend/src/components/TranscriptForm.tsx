@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import axios from "axios";
 import { FloatingTextInput, FloatingSelect } from "./FloatingTextField";
+import { API } from "../apiConfig"; // импорт API
 
 export default function TranscriptForm({
   engName,
@@ -23,7 +24,7 @@ export default function TranscriptForm({
 
   useEffect(() => {
     axios
-      .get<{ id: number; name: string }[]>("http://localhost:8080/reasons")
+      .get<{ id: number; name: string }[]>(API.REASONS)
       .then((res) =>
         setAllReasons(res.data.sort((a, b) => a.name.localeCompare(b.name)))
       )
@@ -37,6 +38,7 @@ export default function TranscriptForm({
     const setter = type === "raise" ? setRaiseReasons : setLowerReasons;
     if (!list.some((x) => x.id === id)) setter([...list, r]);
   };
+
   const handleRemove = (type: "raise" | "lower", id: number) => {
     const list = type === "raise" ? raiseReasons : lowerReasons;
     const setter = type === "raise" ? setRaiseReasons : setLowerReasons;
@@ -53,7 +55,7 @@ export default function TranscriptForm({
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
     axios
-      .post("http://localhost:8080/transcripts", {
+      .post(API.TRANSCRIPTS, {
         name: engName,
         gender,
         fallsIds: lowerReasons.map((r) => r.id),
@@ -71,7 +73,6 @@ export default function TranscriptForm({
         label="Англ название"
         value={engName}
         onChange={(e) => {
-          // Убираем все русские буквы из ввода
           const filteredValue = e.target.value.replace(/[а-яёА-ЯЁ]/g, "");
           setEngName(filteredValue);
         }}
@@ -87,8 +88,8 @@ export default function TranscriptForm({
           { value: "female", label: "female" },
           { value: "both", label: "both" },
         ]}
-        
       />
+
       <FloatingSelect
         id="raise-select"
         label="Причины повышения"
@@ -109,6 +110,7 @@ export default function TranscriptForm({
           </span>
         ))}
       </div>
+
       <FloatingSelect
         id="lower-select"
         label="Причины понижения"
@@ -129,6 +131,7 @@ export default function TranscriptForm({
           </span>
         ))}
       </div>
+
       <div className="btn-container">
         <button type="button" className="btn-clear" onClick={resetForm}>
           Очистить

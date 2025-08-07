@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import axios from "axios";
 import { FloatingTextInput, FloatingSelect } from "./FloatingTextField";
+import { API } from "../apiConfig"; // импорт API
 
 const genders = ["male", "female", "both"];
 
@@ -21,7 +22,7 @@ export default function IndicatorForm({ engName, setEngName }: Props) {
 
   useEffect(() => {
     axios
-      .get<Units>("http://localhost:8080/indicators/units")
+      .get<Units>(API.INDICATOR_UNITS)
       .then((res) => setUnits(res.data.sort()))
       .catch(console.error);
   }, []);
@@ -42,7 +43,7 @@ export default function IndicatorForm({ engName, setEngName }: Props) {
     e.preventDefault();
 
     axios
-      .post("http://localhost:8080/indicators", {
+      .post(API.INDICATORS, {
         engName,
         rusName,
         gender,
@@ -125,27 +126,21 @@ export default function IndicatorForm({ engName, setEngName }: Props) {
           label="Годы"
           type="number"
           value={minAge.years}
-          onChange={(e) =>
-            setMinAge({ ...minAge, years: e.target.value })
-          }
+          onChange={(e) => setMinAge({ ...minAge, years: e.target.value })}
         />
         <FloatingTextInput
           id="min-age-months"
           label="Месяцы"
           type="number"
           value={minAge.month}
-          onChange={(e) =>
-            setMinAge({ ...minAge, month: e.target.value })
-          }
+          onChange={(e) => setMinAge({ ...minAge, month: e.target.value })}
         />
         <FloatingTextInput
           id="min-age-days"
           label="Дни"
           type="number"
           value={minAge.days}
-          onChange={(e) =>
-            setMinAge({ ...minAge, days: e.target.value })
-          }
+          onChange={(e) => setMinAge({ ...minAge, days: e.target.value })}
         />
       </div>
 
@@ -156,27 +151,21 @@ export default function IndicatorForm({ engName, setEngName }: Props) {
           label="Годы"
           type="number"
           value={maxAge.years}
-          onChange={(e) =>
-            setMaxAge({ ...maxAge, years: e.target.value })
-          }
+          onChange={(e) => setMaxAge({ ...maxAge, years: e.target.value })}
         />
         <FloatingTextInput
           id="max-age-months"
           label="Месяцы"
           type="number"
           value={maxAge.month}
-          onChange={(e) =>
-            setMaxAge({ ...maxAge, month: e.target.value })
-          }
+          onChange={(e) => setMaxAge({ ...maxAge, month: e.target.value })}
         />
         <FloatingTextInput
           id="max-age-days"
           label="Дни"
           type="number"
           value={maxAge.days}
-          onChange={(e) =>
-            setMaxAge({ ...maxAge, days: e.target.value })
-          }
+          onChange={(e) => setMaxAge({ ...maxAge, days: e.target.value })}
         />
       </div>
 
