@@ -17,7 +17,7 @@ public class IndicatorRequestDTO {
     private String gender;
 
     @NotNull(message = "isGravid should not be empty")
-    private boolean isGravid;
+    private Boolean isGravid;
 
     @NotNull(message = "minAge should not be empty")
     private AgeRange minAge;

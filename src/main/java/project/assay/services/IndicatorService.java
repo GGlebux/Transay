@@ -111,12 +111,14 @@ public class IndicatorService {
 
     @Transactional
     public ResponseEntity<?> create(IndicatorRequestDTO dto) {
-        Indicator valid = convertToEntity(dto);
-        if (valid.getMaxAge() <= valid.getMinAge()) {
-            return status(BAD_REQUEST).body(format("maxAge '%d' should be greater than '%d'", valid.getMaxAge(), valid.getMinAge()));
+        Indicator toValidate = convertToEntity(dto);
+        String isValid = validateIndicator(toValidate);
+
+        if (isValid.equals("ok")) {
+            Indicator saved = indicatorRepository.save(toValidate);
+            return ok(convertToDTO(saved));
         }
-        Indicator saved = indicatorRepository.save(valid);
-        return ok(convertToDTO(saved));
+        return status(BAD_REQUEST).body(isValid);
     }
 
     @Transactional
@@ -164,5 +166,18 @@ public class IndicatorService {
         dto.setMinAge(convertToRange(indicator.getMinAge()));
         dto.setMaxAge(convertToRange(indicator.getMaxAge()));
         return dto;
+    }
+
+    private String validateIndicator(Indicator toValidate) {
+        if (toValidate.getMaxAge() <= toValidate.getMinAge()) {
+            return format("maxAge '%d' should be greater than minAge '%d'", toValidate.getMaxAge(), toValidate.getMinAge());
+        }
+        if (toValidate.getMaxValue() <= toValidate.getMinValue()) {
+            return format("maxValue '%.2f' should be greater than minValue '%.2f'", toValidate.getMaxValue(), toValidate.getMinValue());
+        }
+        if (toValidate.getGender().equals("male") && toValidate.isGravid()) {
+            return "male gender should be gravid";
+        }
+        return "ok";
     }
 }
