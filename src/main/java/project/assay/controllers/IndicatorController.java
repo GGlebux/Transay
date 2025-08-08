@@ -27,7 +27,7 @@ public class IndicatorController {
     }
 
     @PostMapping
-    public ResponseEntity<IndicatorResponceDTO> createIndicator(@RequestBody IndicatorRequestDTO dto) {
+    public ResponseEntity<?> createIndicator(@RequestBody IndicatorRequestDTO dto) {
         return indicatorService.create(dto);
     }
 

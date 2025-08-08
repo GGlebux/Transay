@@ -110,10 +110,10 @@ public class IndicatorService {
     }
 
     @Transactional
-    public ResponseEntity<IndicatorResponceDTO> create(IndicatorRequestDTO dto) {
+    public ResponseEntity<?> create(IndicatorRequestDTO dto) {
         Indicator valid = convertToEntity(dto);
         if (valid.getMaxAge() <= valid.getMinAge()) {
-            status(BAD_REQUEST).body(format("maxAge '%d' should be greater than '%d'", valid.getMaxAge(), valid.getMinAge()));
+            return status(BAD_REQUEST).body(format("maxAge '%d' should be greater than '%d'", valid.getMaxAge(), valid.getMinAge()));
         }
         Indicator saved = indicatorRepository.save(valid);
         return ok(convertToDTO(saved));
