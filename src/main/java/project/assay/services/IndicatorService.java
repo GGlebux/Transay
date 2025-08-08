@@ -16,8 +16,8 @@ import project.assay.repositories.IndicatorRepository;
 import java.util.List;
 import java.util.Set;
 
-import static org.springframework.http.HttpStatus.NO_CONTENT;
-import static org.springframework.http.HttpStatus.OK;
+import static java.lang.String.format;
+import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.ResponseEntity.ok;
 import static org.springframework.http.ResponseEntity.status;
 import static project.assay.models.AgeRange.convertToRange;
@@ -111,7 +111,11 @@ public class IndicatorService {
 
     @Transactional
     public ResponseEntity<IndicatorResponceDTO> create(IndicatorRequestDTO dto) {
-        Indicator saved = indicatorRepository.save(convertToEntity(dto));
+        Indicator valid = convertToEntity(dto);
+        if (valid.getMaxAge() <= valid.getMinAge()) {
+            status(BAD_REQUEST).body(format("maxAge '%d' should be greater than '%d'", valid.getMaxAge(), valid.getMinAge()));
+        }
+        Indicator saved = indicatorRepository.save(valid);
         return ok(convertToDTO(saved));
     }
 
@@ -144,8 +148,8 @@ public class IndicatorService {
     private Indicator convertToEntity(IndicatorRequestDTO dto) {
         Indicator indicator = new Indicator();
         modelMapper.map(dto, indicator);
-        indicator.setMinAge(dto.getMinAge().calculateTotalDays());
-        indicator.setMaxAge(dto.getMaxAge().calculateTotalDays());
+        indicator.setMinAge(dto.getMinAge().calculateTotalDays(false));
+        indicator.setMaxAge(dto.getMaxAge().calculateTotalDays(true));
         return indicator;
     }
 

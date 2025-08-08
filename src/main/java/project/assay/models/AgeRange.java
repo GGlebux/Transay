@@ -12,8 +12,9 @@ public class AgeRange {
     private int months;
     private int days;
 
-    public int calculateTotalDays() {
-        return years * 365 + months * 30 + days;
+    public int calculateTotalDays(boolean isExcluded) {
+        int resultDays = years * 365 + months * 30 + days;
+        return isExcluded ? resultDays -1 : resultDays;
     }
 
     public static AgeRange convertToRange(int totalDays) {
