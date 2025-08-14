@@ -9,7 +9,6 @@ import project.assay.dto.responces.IndicatorResponceDTO;
 import project.assay.services.IndicatorService;
 
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/indicators")
@@ -43,7 +42,7 @@ public class IndicatorController {
 
 
     @GetMapping("/units")
-    public ResponseEntity<Set<String>> getAllUnits() {
+    public ResponseEntity<List<String>> getAllUnits() {
         return indicatorService.findAllUnits();
     }
 }

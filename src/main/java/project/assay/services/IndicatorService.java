@@ -14,7 +14,6 @@ import project.assay.models.Person;
 import project.assay.repositories.IndicatorRepository;
 
 import java.util.List;
-import java.util.Set;
 
 import static java.lang.String.format;
 import static org.springframework.http.HttpStatus.*;
@@ -29,43 +28,11 @@ public class IndicatorService {
 
     private final IndicatorRepository indicatorRepository;
     private final ModelMapper modelMapper;
-    private static final Set<String> UNITS;
-
-    static {
-        UNITS = Set.of("г/л",
-                "тера/л",
-                "фл",
-                "пг",
-                "%",
-                "*10^(9)/л",
-                "мм/час",
-                "мкг/л",
-                "мкмоль/л",
-                "мкмоль/литр",
-                "нг/мл",
-                "мг/л",
-                "ммоль/л",
-                "МкЕд/мл",
-                "ме/л",
-                "ед/л",
-                "мМЕ/л",
-                "нг/дл",
-                "пмоль/л",
-                "пг/мл",
-                "МЕ/мл",
-                "нмоль/л",
-                "мкг/сутки",
-                "мкг/дл",
-                "мкмоль/сут",
-                "мкг/сут",
-                "мкг/литр",
-                "мм/ч",
-                "клеток/мкл",
-                "мкЕд/л");
-    }
+    private final UnitsService unitsService;
 
     @Autowired
-    public IndicatorService(IndicatorRepository indicatorRepository, ModelMapper modelMapper) {
+    public IndicatorService(IndicatorRepository indicatorRepository, ModelMapper modelMapper, UnitsService unitsService) {
+        this.unitsService = unitsService;
         modelMapper
                 .createTypeMap(IndicatorRequestDTO.class, Indicator.class)
                 .addMappings(mapper -> {
@@ -100,8 +67,8 @@ public class IndicatorService {
                 .orElseThrow(() -> new EntityNotFoundException("Indicator with id=" + id + " not found"));
     }
 
-    public ResponseEntity<Set<String>> findAllUnits() {
-        return ok(UNITS);
+    public ResponseEntity<List<String>> findAllUnits() {
+        return ok(unitsService.findAll());
     }
 
     public List<Indicator> findAllCorrect(Person person) {

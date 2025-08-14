@@ -17,6 +17,7 @@ public class AgeRange {
         return isExcluded ? resultDays -1 : resultDays;
     }
 
+    // ToDo: Сделать как в методе выше, прибавление к максимальному значению 1
     public static AgeRange convertToRange(int totalDays) {
         AgeRange ageRange = new AgeRange();
         ageRange.years = totalDays / 365;
