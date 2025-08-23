@@ -39,10 +39,4 @@ public class IndicatorController {
     public ResponseEntity<HttpStatus> deleteIndicator(@PathVariable int id) {
         return indicatorService.delete(id);
     }
-
-
-    @GetMapping("/units")
-    public ResponseEntity<List<String>> getAllUnits() {
-        return indicatorService.findAllUnits();
-    }
 }

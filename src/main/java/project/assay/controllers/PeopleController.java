@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,12 +31,20 @@ import static java.util.stream.Collectors.toMap;
 @RequestMapping("/people")
 public class PeopleController {
 
-    private final PeopleService peopleService;
+    private final PeopleService service;
 
 
     @Autowired
-    public PeopleController(PeopleService peopleService) {
-        this.peopleService = peopleService;
+    public PeopleController(PeopleService service) {
+        this.service = service;
+    }
+
+    /**
+     * @return @code{List<Person>} - список всех людей
+     */
+    @GetMapping
+    public ResponseEntity<List<Person>> getAllPeople() {
+        return service.findAll();
     }
 
     /**
@@ -43,7 +52,7 @@ public class PeopleController {
      */
     @GetMapping("/{personId}")
     public ResponseEntity<Person> show(@PathVariable("personId") int personId) {
-        return peopleService.find(personId);
+        return service.find(personId);
     }
 
     /**
@@ -55,7 +64,7 @@ public class PeopleController {
     public ResponseEntity<Person> create(@RequestBody @Valid PersonRequestDTO personRequestDTO,
                                          BindingResult bindingResult) {
         throwValidException(bindingResult);
-        return peopleService.save(personRequestDTO);
+        return service.save(personRequestDTO);
     }
 
     /**
@@ -67,7 +76,7 @@ public class PeopleController {
     public ResponseEntity<Person> update(@RequestBody @Valid PersonToUpdateDTO personToUpdateDTO,
                                          @PathVariable("personId") int personId, BindingResult bindingResult) {
         throwValidException(bindingResult);
-        return peopleService.update(personId, personToUpdateDTO);
+        return service.update(personId, personToUpdateDTO);
     }
 
     /**
@@ -77,25 +86,25 @@ public class PeopleController {
      */
     @DeleteMapping("/{personId}")
     public ResponseEntity<HttpStatus> delete(@PathVariable("personId") int personId) {
-        return peopleService.delete(personId);
+        return service.delete(personId);
     }
 
 
     @GetMapping("/{personId}/ex_reasons")
-    public ResponseEntity<List<Reason>> getAllExReasons(@PathVariable("personId") int personId) {
-        return peopleService.findAllEx(personId);
+    public ResponseEntity<Set<Reason>> getAllExReasons(@PathVariable("personId") int personId) {
+        return service.findAllEx(personId);
     }
 
     @PostMapping("/{personId}/ex_reasons")
     public ResponseEntity<Reason> addExReason(@PathVariable("personId") int personId,
                                               @RequestBody Integer reasonId) {
-        return peopleService.createEx(personId, reasonId);
+        return service.createEx(personId, reasonId);
     }
 
     @DeleteMapping("/{personId}/ex_reasons/{reasonId}")
     public ResponseEntity<HttpStatus> deleteExReason(@PathVariable("personId") int personId,
                                                      @PathVariable("reasonId") int reasonId) {
-        return peopleService.deleteEx(personId, reasonId);
+        return service.deleteEx(personId, reasonId);
     }
 
 

@@ -8,14 +8,22 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.assay.dto.requests.IndicatorRequestDTO;
 import project.assay.dto.responces.IndicatorResponceDTO;
+import project.assay.dto.responces.SimpleIndicatorResponceDTO;
 import project.assay.exceptions.EntityNotFoundException;
 import project.assay.models.Indicator;
+import project.assay.models.IndicatorGroup;
 import project.assay.models.Person;
 import project.assay.repositories.IndicatorRepository;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static java.lang.String.format;
+import static java.util.Comparator.comparingInt;
+import static java.util.Map.Entry.comparingByValue;
+import static java.util.stream.Collectors.toMap;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.ResponseEntity.ok;
 import static org.springframework.http.ResponseEntity.status;
@@ -27,12 +35,14 @@ import static project.assay.utils.StaticMethods.*;
 public class IndicatorService {
 
     private final IndicatorRepository indicatorRepository;
+    private final PeopleService peopleService;
+    private final IndicatorGroupService groupService;
     private final ModelMapper modelMapper;
-    private final UnitsService unitsService;
 
     @Autowired
-    public IndicatorService(IndicatorRepository indicatorRepository, ModelMapper modelMapper, UnitsService unitsService) {
-        this.unitsService = unitsService;
+    public IndicatorService(IndicatorRepository indicatorRepository, PeopleService peopleService, IndicatorGroupService groupService, ModelMapper modelMapper) {
+        this.peopleService = peopleService;
+        this.groupService = groupService;
         modelMapper
                 .createTypeMap(IndicatorRequestDTO.class, Indicator.class)
                 .addMappings(mapper -> {
@@ -67,15 +77,38 @@ public class IndicatorService {
                 .orElseThrow(() -> new EntityNotFoundException("Indicator with id=" + id + " not found"));
     }
 
-    public ResponseEntity<List<String>> findAllUnits() {
-        return ok(unitsService.findAll());
-    }
+    // ToDo: Сделать правильное разбиение по группам индикаторов
 
-    public List<Indicator> findAllCorrect(Person person) {
-        int age = getDaysOfAge(person.getDateOfBirth());
-        return indicatorRepository.findAllCorrect(person.getGender(), person.getIsGravid(), age);
-    }
+    public ResponseEntity<Map<String, SimpleIndicatorResponceDTO>> getSimpleDTOByGroups(int personId) {
+        Person person = peopleService.findById(personId);
+        List<IndicatorGroup> groups = groupService.find();
+        List<Indicator> indicators = this.findAllCorrectIndicators(person);
+        indicators.stream().map(Indicator::getRusName).forEach(System.out::println);
 
+        Map<String, SimpleIndicatorResponceDTO> indicatorsByGroups = new HashMap<>();
+
+        for (IndicatorGroup group : groups) {
+            for (String indicatorName : group.getIndicators()) {
+                for (Indicator indicator : indicators) {
+
+                    if (indicator.getEngName().equals(indicatorName)){
+                        indicatorsByGroups.put(group.getGroupName(), convertToSimpleDTO(indicator));
+                    }
+
+                }
+            }
+        }
+
+        return ok(indicatorsByGroups
+                .entrySet()
+                .stream()
+                .sorted(comparingByValue(comparingInt(SimpleIndicatorResponceDTO::getId)))
+                .collect(toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (oldValue, _) -> oldValue,
+                        LinkedHashMap::new)));
+    }
     @Transactional
     public ResponseEntity<?> create(IndicatorRequestDTO dto) {
         Indicator toValidate = convertToEntity(dto);
@@ -101,8 +134,13 @@ public class IndicatorService {
         return status(NO_CONTENT).build();
     }
 
+    protected List<Indicator> findAllCorrectIndicators(Person person) {
+        int age = getDaysOfAge(person.getDateOfBirth());
+        return indicatorRepository.findAllCorrect(person.getGender(), person.getIsGravid(), age);
+    }
 
-    public String checkValue(Indicator indicator, double value) {
+
+    protected String checkValue(Indicator indicator, double value) {
         double minValue = indicator.getMinValue();
         double maxValue = indicator.getMaxValue();
         if (value < minValue) {
@@ -146,5 +184,9 @@ public class IndicatorService {
             return "male gender should be gravid";
         }
         return "ok";
+    }
+
+    private SimpleIndicatorResponceDTO convertToSimpleDTO(Indicator indicator) {
+        return modelMapper.map(indicator, SimpleIndicatorResponceDTO.class);
     }
 }

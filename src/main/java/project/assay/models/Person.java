@@ -7,7 +7,8 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
-import java.util.List;
+
+import java.util.Set;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,7 +19,7 @@ import lombok.ToString;
 import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.FetchType.EAGER;
 import static jakarta.persistence.FetchType.LAZY;
-import static java.util.List.of;
+import static java.util.Set.of;
 
 
 @Entity
@@ -57,8 +58,8 @@ public class Person {
             joinColumns = @JoinColumn(name = "person_id"),
             inverseJoinColumns = @JoinColumn(name = "reason_id")
     )
-    private List<Reason> excludedReasons = of();
+    private Set<Reason> excludedReasons = of();
 
     @OneToMany(mappedBy = "person", cascade = ALL, orphanRemoval = true, fetch = LAZY)
-    private List<Measure> measureList = of();
+    private Set<Measure> measures = of();
 }

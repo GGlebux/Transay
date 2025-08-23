@@ -15,7 +15,9 @@ import project.assay.models.Reason;
 import project.assay.repositories.PeopleRepository;
 
 import java.util.List;
+import java.util.Set;
 
+import static java.util.Comparator.comparingInt;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.ResponseEntity.*;
 
@@ -33,6 +35,14 @@ public class PeopleService {
         this.peopleRepository = peopleRepository;
         this.modelMapper = modelMapper;
         this.reasonsService = reasonsService;
+    }
+
+    public ResponseEntity<List<Person>> findAll() {
+        return ok(peopleRepository
+                .findAll()
+                .stream()
+                .sorted(comparingInt(Person::getId))
+                .toList());
     }
 
     public Person findById(int id){
@@ -67,12 +77,12 @@ public class PeopleService {
         return status(NO_CONTENT).build();
     }
 
-    public List<Reason> findAllExReasons(int personId) {
+    public Set<Reason> findAllExReasons(int personId) {
         Person person = this.findById(personId);
         return person.getExcludedReasons();
     }
 
-    public ResponseEntity<List<Reason>> findAllEx(int personId) {
+    public ResponseEntity<Set<Reason>> findAllEx(int personId) {
         return ok(this.findAllExReasons(personId));
     }
 
@@ -85,8 +95,8 @@ public class PeopleService {
                 .save(person)
                 .getExcludedReasons()
                 .stream()
-                .filter(elem -> elem.getId() == reasonId)
-                .findFirst().get());
+                .filter(elem -> elem.getId() == reasonId) // ищем сохраненный reason, привязанный к человеку
+                .findFirst().orElseThrow(()-> new EntityNotFoundException("Reason with id=" +reasonId + " not found!")));
     }
 
     @Transactional

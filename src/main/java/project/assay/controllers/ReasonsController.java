@@ -42,7 +42,7 @@ public class ReasonsController {
         return reasonsService.find(reasonId);
     }
 
-    @PutMapping("/{reasonId}")
+    @PatchMapping("/{reasonId}")
     public ResponseEntity<Reason> updateReason(@RequestBody String name,
                                                @PathVariable int reasonId) {
         return reasonsService.update(name, reasonId);

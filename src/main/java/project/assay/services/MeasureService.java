@@ -7,8 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.assay.dto.requests.MeasureRequestDTO;
+import project.assay.dto.responces.DecryptValueDTO;
 import project.assay.dto.responces.MeasureResponceDTO;
-import project.assay.dto.responces.SimpleIndicatorResponceDTO;
 import project.assay.exceptions.EntityNotCreatedException;
 import project.assay.models.*;
 import project.assay.repositories.MeasureRepository;
@@ -16,8 +16,7 @@ import project.assay.repositories.MeasureRepository;
 import java.time.LocalDate;
 import java.util.*;
 
-import static java.lang.Math.round;
-import static java.util.Comparator.reverseOrder;
+import static java.util.Comparator.*;
 import static java.util.List.of;
 import static java.util.Map.Entry.comparingByValue;
 import static java.util.stream.Collectors.toMap;
@@ -51,16 +50,7 @@ public class MeasureService {
         return measureRepository.findByPersonId(personId);
     }
 
-    @Transactional
-    public ResponseEntity<List<SimpleIndicatorResponceDTO>> findAllCorrect(int personId) {
-        Person person = peopleService.findById(personId);
-        return ok(indicatorService
-                .findAllCorrect(person)
-                .stream()
-                .map(this::convertToSimpleDTO)
-                .sorted()
-                .toList());
-    }
+
 
     @Transactional
     public ResponseEntity<MeasureResponceDTO> save(MeasureRequestDTO measureRequestDTO, int personId) {
@@ -98,7 +88,7 @@ public class MeasureService {
 
     public String canCreateMeasure(Person person, MeasureRequestDTO verifiableMeasure, Indicator selectedIndicator) {
         int selectedId = verifiableMeasure.getSelectedId();
-        List<Indicator> indicators = indicatorService.findAllCorrect(person);
+        List<Indicator> indicators = indicatorService.findAllCorrectIndicators(person);
 
         // Проверка выбран ли корректный индикатор для конкретного человека
         Set<Integer> idCorrectIndicators = indicators
@@ -110,7 +100,7 @@ public class MeasureService {
         }
 
         // Проверка дубликатов такого индикатора на одну дату
-        Set<LocalDate> referentsDates = person.getMeasureList()
+        Set<LocalDate> referentsDates = person.getMeasures()
                 .stream()
                 .filter(measure -> measure.getIndicator().getEngName().equals(selectedIndicator.getEngName()))
                 .map(Measure::getReferent)
@@ -144,52 +134,65 @@ public class MeasureService {
         return ok(summaryTable);
     }
 
-    public ResponseEntity<Map<String, Double>> getDecryptedMeasures(int personId, LocalDate date) {
-        List<Measure> measures = measureRepository.findByPersonIdAndDate(personId, date);
-        List<Reason> excludedReasons = peopleService.findAllExReasons(personId);
+    public ResponseEntity<Map<String, DecryptValueDTO>> getDecryptedMeasures(int personId, LocalDate date) {
+        List<Measure> measures = measureRepository.findByPersonIdAndDate(personId, date); // Измерение человека по дате
+        Set<Reason> excludedReasons = peopleService.findAllExReasons(personId); // Исключенные причины человека
 
-        Map<String, Double> decryptedMeasures = new HashMap<>();
-        int counter = 0;
+        Map<String, DecryptValueDTO> decryptedMeasures = createDecryptMap(measures, excludedReasons);
+
+        // Сортируем по значению
+        return ok(sortDecryptMap(decryptedMeasures));
+    }
+
+    private static Map<String, DecryptValueDTO> createDecryptMap(List<Measure> measures, Set<Reason> excludedReasons) {
+        Map<String, DecryptValueDTO> decryptedMeasures = new HashMap<>();
+//      Проходим по всем измерениям
         for (Measure measure : measures) {
+
+//          Проверяем каждый референт
             Referent referent = measure.getReferent();
             if (referent.getStatus().equals("ok")) {
                 continue;
             }
-            List<Reason> personReasons = referent.getVerdict();
-            for (Reason reason : personReasons) {
+
+//          Если не в норме, то добавляем
+            List<Reason> referentVerdict = referent.getVerdict();
+            for (Reason reason : referentVerdict) {
                 String name = reason.getName();
+                // Если причина попадает в исключенные - не учитываем
                 if (excludedReasons.contains(reason)) {
                     continue;
                 }
+
+                String rusIndicatorName = measure.getIndicator().getRusName();
+
                 if (decryptedMeasures.containsKey(name)) {
-                    decryptedMeasures.merge(name, 1.0, Double::sum);
+                    DecryptValueDTO valueToUpdate = decryptedMeasures.get(name);
+                    valueToUpdate.getIndicators().add(rusIndicatorName);
+                    valueToUpdate.increment();
+                    decryptedMeasures.put(name, valueToUpdate);
                 } else {
-                    decryptedMeasures.put(name, 1.0);
+                    DecryptValueDTO newValue = new DecryptValueDTO(1, new HashSet<>(Set.of(rusIndicatorName)));
+                    decryptedMeasures.put(name, newValue);
                 }
-                counter++;
             }
         }
-        for (Map.Entry<String, Double> entry : decryptedMeasures.entrySet()) {
-            Double newValue = round(entry.getValue() / counter * 1000.0) / 1000.0;
-            entry.setValue(newValue);
-        }
-        Map<String, Double> result = decryptedMeasures
+        return decryptedMeasures;
+    }
+
+    private static Map<String, DecryptValueDTO> sortDecryptMap(Map<String, DecryptValueDTO> decryptedMeasures) {
+        return decryptedMeasures
                 .entrySet()
                 .stream()
-                .sorted(comparingByValue(reverseOrder()))
+                .sorted(comparingByValue(comparingInt(DecryptValueDTO::getMatchesCount).reversed()))
                 .collect(toMap(
                         Map.Entry::getKey,
                         Map.Entry::getValue,
                         (oldValue, _) -> oldValue,
                         LinkedHashMap::new));
-        return ok(result);
     }
 
-    private SimpleIndicatorResponceDTO convertToSimpleDTO(Indicator indicator) {
-        SimpleIndicatorResponceDTO dto = modelMapper.map(indicator, SimpleIndicatorResponceDTO.class);
-        dto.setName(indicator.getRusName());
-        return dto;
-    }
+
 
     private MeasureResponceDTO convertToMeasureDTO(Measure m) {
         Indicator i = m.getIndicator();

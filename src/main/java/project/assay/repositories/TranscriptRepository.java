@@ -1,6 +1,8 @@
 package project.assay.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import project.assay.models.Transcript;
 
@@ -8,5 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface TranscriptRepository extends JpaRepository<Transcript, Integer> {
-  Optional<Transcript> findByNameAndGender(String name, String gender);
+  @Query("SELECT t FROM Transcript t WHERE t.name = :name AND (t.gender = :gender or t.gender = 'both')")
+  Optional<Transcript> findByNameAndGender(@Param("name") String name,
+                                           @Param("gender") String gender);
 }
