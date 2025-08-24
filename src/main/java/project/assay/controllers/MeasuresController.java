@@ -7,16 +7,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import project.assay.dto.requests.MeasureRequestDTO;
-import project.assay.dto.responces.DecryptValueDTO;
-import project.assay.dto.responces.MeasureResponceDTO;
-import project.assay.dto.responces.SimpleIndicatorResponceDTO;
-import project.assay.services.IndicatorService;
+import project.assay.dto.responses.DecryptValueDTO;
+import project.assay.dto.responses.MeasureResponceDTO;
+import project.assay.dto.responses.SummaryTableGroupDTO;
 import project.assay.services.MeasureService;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+
+import static java.util.Optional.empty;
 
 /**
  *
@@ -27,23 +28,10 @@ public class MeasuresController {
 
 
     private final MeasureService measureService;
-    private final IndicatorService indicatorService;
 
     @Autowired
-    public MeasuresController(MeasureService measureService, IndicatorService indicatorService) {
+    public MeasuresController(MeasureService measureService) {
         this.measureService = measureService;
-        this.indicatorService = indicatorService;
-    }
-
-    /**
-     * Отображение списка корректных индикаторов для конкретного человека
-     *
-     * @param personId id человека
-     */
-    @GetMapping("/correct")
-    public ResponseEntity<Map<String, SimpleIndicatorResponceDTO>> showCorrectList(@PathVariable("personId") int personId,
-                                                                            @RequestParam("group") Optional<String> group) {
-        return indicatorService.getSimpleDTOByGroups(personId);
     }
 
     /**
@@ -52,7 +40,7 @@ public class MeasuresController {
      * @param personId id человека
      */
     @GetMapping
-    public ResponseEntity<Map<String, List<MeasureResponceDTO>>>  showMeasures(@PathVariable("personId") int personId) {
+    public ResponseEntity<Set<SummaryTableGroupDTO>> summaryTable(@PathVariable("personId") int personId) {
         return measureService.createSummaryTable(personId);
     }
 
@@ -72,7 +60,21 @@ public class MeasuresController {
     @PostMapping
     public ResponseEntity<MeasureResponceDTO> create(@RequestBody @Valid MeasureRequestDTO measureRequestDTO,
                                           @PathVariable("personId") int personId) {
-        return measureService.save(measureRequestDTO, personId);
+        return measureService.save(measureRequestDTO, personId, empty());
+    }
+
+    /**
+     * Создает корректное референтное значение для определенного человека
+     *
+     * @param measureRequestDTO конкретное референтое значение
+     * @param personId         id человека
+     * @return URI + String
+     */
+    @PatchMapping("/{measureId}")
+    public ResponseEntity<MeasureResponceDTO> update(@RequestBody @Valid MeasureRequestDTO measureRequestDTO,
+                                                     @PathVariable("personId") int personId,
+                                                     @PathVariable(value = "measureId") Optional<Integer> measureId) {
+        return measureService.save(measureRequestDTO, personId, measureId);
     }
 
     /**

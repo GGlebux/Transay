@@ -4,11 +4,11 @@ package project.assay.models;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.util.List;
+import java.util.Set;
 
 import static jakarta.persistence.FetchType.EAGER;
 import static jakarta.persistence.GenerationType.IDENTITY;
-import static java.util.List.of;
+import static java.util.Set.of;
 
 @Entity
 @Table(name = "transcript")
@@ -31,7 +31,7 @@ public class Transcript {
           joinColumns = @JoinColumn(name = "transcript_id"),
           inverseJoinColumns = @JoinColumn(name = "reason_id")
   )
-  private List<Reason> falls = of();
+  private Set<Reason> falls = of();
 
   @ManyToMany(fetch = EAGER)
   @JoinTable(
@@ -39,5 +39,5 @@ public class Transcript {
           joinColumns = @JoinColumn(name = "transcript_id"),
           inverseJoinColumns = @JoinColumn(name = "reason_id")
   )
-  private List<Reason> raises= of();
+  private Set<Reason> raises= of();
 }

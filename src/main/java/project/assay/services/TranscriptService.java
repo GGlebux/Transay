@@ -12,6 +12,7 @@ import project.assay.models.Transcript;
 import project.assay.repositories.TranscriptRepository;
 
 import java.util.List;
+import java.util.Set;
 
 import static java.lang.String.format;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
@@ -76,7 +77,6 @@ public class TranscriptService {
     private Transcript convertToEntity(TranscriptRequestDTO dto) {
         Transcript entity = modelMapper.map(dto, Transcript.class);
         enrichEntity(dto, entity);
-        System.out.println(entity);
         return entity;
     }
 
@@ -87,8 +87,8 @@ public class TranscriptService {
     }
 
     private void enrichEntity(TranscriptRequestDTO dto, Transcript entity) {
-        List<Reason> falls = reasonsService.findAll(dto.getFallsIds());
-        List<Reason> raises = reasonsService.findAll(dto.getRaisesIds());
+        Set<Reason> falls = reasonsService.findByIdIn(dto.getFallsIds());
+        Set<Reason> raises = reasonsService.findByIdIn(dto.getRaisesIds());
         entity.setFalls(falls);
         entity.setRaises(raises);
     }

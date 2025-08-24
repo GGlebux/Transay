@@ -10,19 +10,19 @@ import lombok.Data;
 import java.time.LocalDate;
 
 @Data
-public class PersonRequestDTO {
-  @NotEmpty(message = "Name should not be empty")
-  @Size(min = 2, max = 50, message = "Name should be between 2 and 50 characters")
-  private String name;
+public class PersonRequestDTO  {
+    @Size(min = 2, max = 50, message = "Name should be between 2 and 50 characters")
+    @NotEmpty(message = "Name should not be empty")
+    private String name;
 
-  @NotEmpty(message = "Gender should not be empty")
-  @Pattern(regexp = "^(male|female)$", message = "Gender should be 'male' or 'female'")
-  private String gender;
+    @Pattern(regexp = "^(male|female)$", message = "Gender should be 'male' or 'female'")
+    @NotEmpty(message = "Gender should not be empty")
+    private String gender;
 
-  @NotNull(message = "Date_of_birthday should not be empty")
-  @JsonFormat(pattern = "yyyy-MM-dd")
-  private LocalDate dateOfBirth;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    @NotNull(message = "Date_of_birthday should not be empty")
+    private LocalDate dateOfBirth;
 
-  @NotNull(message = "isGravid should not be empty")
-  private Boolean isGravid;
+    @NotNull(message = "isGravid should not be empty")
+    private Boolean isGravid;
 }

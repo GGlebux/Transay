@@ -10,8 +10,11 @@ import project.assay.models.Reason;
 import project.assay.repositories.ReasonRepository;
 
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toSet;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.ResponseEntity.ok;
@@ -20,48 +23,62 @@ import static org.springframework.http.ResponseEntity.status;
 @Service
 @Transactional(readOnly = true)
 public class ReasonsService {
-    private final ReasonRepository reasonRepository;
+    private final ReasonRepository repo;
 
     @Autowired
-    public ReasonsService(ReasonRepository reasonRepository) {
-        this.reasonRepository = reasonRepository;
+    public ReasonsService(ReasonRepository repo) {
+        this.repo = repo;
     }
 
     public Reason findById(int id) {
-        return reasonRepository.findById(id)
+        return repo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(format("Reason with id=%d not found", id)));
     }
 
-    public List<Reason> findAll(List<Integer> ids){
-        return reasonRepository.findAllById(ids);
+    public Set<Reason> findByIdIn(Set<Integer> ids){
+        return new TreeSet<>(repo.findAllById(ids));
     }
 
     @Transactional
-    public ResponseEntity<List<Reason>> findAll() {
-        return ok(reasonRepository.findAll());
+    public ResponseEntity<List<Reason>> findAllWithResponse() {
+        return ok(repo.findAll());
     }
 
-    public ResponseEntity<Reason> find(int id){
+    public ResponseEntity<Reason> findByIdWithResponse(int id){
         return ok(this.findById(id));
+    }
+
+    public Reason findByName(String name){
+        return repo
+                .findByName(name)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        format("Reason with name='%s' not found", name)));
+    }
+    public Set<Reason> findByNameIn(Set<String> names){
+        return repo
+                .findByNameIn(names)
+                .stream()
+                .limit(names.size())
+                .collect(toSet());
     }
 
     @Transactional
     public ResponseEntity<Reason> create(String name) {
         return status(CREATED)
-                .body(reasonRepository.save(new Reason(name)));
+                .body(repo.save(new Reason(name)));
     }
 
     @Transactional
     public ResponseEntity<Reason> update(String name, int id) {
         Reason reason = this.findById(id);
         reason.setName(name);
-        return ok(reasonRepository.save(reason));
+        return ok(repo.save(reason));
     }
 
     @Transactional
     public ResponseEntity<HttpStatus> delete(int id) {
         Reason reason = this.findById(id);
-        reasonRepository.delete(reason);
+        repo.delete(reason);
         return status(NO_CONTENT).build();
     }
 }

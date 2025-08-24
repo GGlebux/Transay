@@ -16,9 +16,17 @@ import static org.apache.poi.ss.usermodel.WorkbookFactory.create;
 
 public class StaticMethods {
 
-    public static int getDaysOfAge(LocalDate birthDate) {
+    public static int getDaysOfAge(LocalDate startDate) {
         LocalDate today = now();
-        return (int) DAYS.between(birthDate, today);
+        return (int) DAYS.between(startDate, today);
+    }
+
+    public static int getDaysBetween(LocalDate startDate, LocalDate endDate) {
+        return (int) DAYS.between(startDate, endDate);
+    }
+
+    public static boolean isFuture(LocalDate date) {
+        return date.isAfter(now());
     }
 
     public static Set<String> parseExcelColumn(String filePath, int columnIndex) {

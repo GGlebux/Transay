@@ -1,20 +1,11 @@
 package project.assay.models;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import lombok.*;
 
 import java.time.LocalDate;
-
 import java.util.Set;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import java.util.TreeSet;
 
 import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.FetchType.EAGER;
@@ -36,17 +27,12 @@ public class Person {
     private int id;
 
     @Column(name = "name")
-    @NotEmpty(message = "Name should not be empty")
-    @Size(min = 2, max = 50, message = "Name should be between 2 and 50 characters")
     private String name;
 
     @Column(name = "gender")
-    @Pattern(regexp = "^(male|female)$", message = "Gender should be 'male' or 'female'")
-    @NotEmpty(message = "Gender should not be empty")
     private String gender;
 
     @Column(name = "date_of_birth")
-    @NotNull(message = "Date_of_birthday should not be empty")
     private LocalDate dateOfBirth;
 
     @Column(name = "is_gravid")
@@ -58,8 +44,8 @@ public class Person {
             joinColumns = @JoinColumn(name = "person_id"),
             inverseJoinColumns = @JoinColumn(name = "reason_id")
     )
-    private Set<Reason> excludedReasons = of();
+    private Set<Reason> excludedReasons = new TreeSet<>();
 
-    @OneToMany(mappedBy = "person", cascade = ALL, orphanRemoval = true, fetch = LAZY)
+    @OneToMany(mappedBy = "person", orphanRemoval = true, fetch = LAZY)
     private Set<Measure> measures = of();
 }

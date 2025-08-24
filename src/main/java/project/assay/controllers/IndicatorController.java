@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import project.assay.dto.requests.IndicatorRequestDTO;
-import project.assay.dto.responces.IndicatorResponceDTO;
+import project.assay.dto.responses.IndicatorResponceDTO;
 import project.assay.services.IndicatorService;
 
 import java.util.List;

@@ -7,42 +7,33 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.assay.dto.requests.IndicatorRequestDTO;
-import project.assay.dto.responces.IndicatorResponceDTO;
-import project.assay.dto.responces.SimpleIndicatorResponceDTO;
+import project.assay.dto.requests.MeasureRequestDTO;
+import project.assay.dto.responses.IndicatorResponceDTO;
 import project.assay.exceptions.EntityNotFoundException;
 import project.assay.models.Indicator;
-import project.assay.models.IndicatorGroup;
 import project.assay.models.Person;
 import project.assay.repositories.IndicatorRepository;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 import static java.lang.String.format;
-import static java.util.Comparator.comparingInt;
-import static java.util.Map.Entry.comparingByValue;
-import static java.util.stream.Collectors.toMap;
+import static java.time.LocalDate.now;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.ResponseEntity.ok;
 import static org.springframework.http.ResponseEntity.status;
 import static project.assay.models.AgeRange.convertToRange;
-import static project.assay.utils.StaticMethods.*;
+import static project.assay.utils.StaticMethods.getDaysBetween;
 
 @Service
 @Transactional(readOnly = true)
 public class IndicatorService {
 
     private final IndicatorRepository indicatorRepository;
-    private final PeopleService peopleService;
-    private final IndicatorGroupService groupService;
     private final ModelMapper modelMapper;
 
     @Autowired
-    public IndicatorService(IndicatorRepository indicatorRepository, PeopleService peopleService, IndicatorGroupService groupService, ModelMapper modelMapper) {
-        this.peopleService = peopleService;
-        this.groupService = groupService;
+    public IndicatorService(IndicatorRepository indicatorRepository, ModelMapper modelMapper) {
         modelMapper
                 .createTypeMap(IndicatorRequestDTO.class, Indicator.class)
                 .addMappings(mapper -> {
@@ -77,38 +68,6 @@ public class IndicatorService {
                 .orElseThrow(() -> new EntityNotFoundException("Indicator with id=" + id + " not found"));
     }
 
-    // ToDo: Сделать правильное разбиение по группам индикаторов
-
-    public ResponseEntity<Map<String, SimpleIndicatorResponceDTO>> getSimpleDTOByGroups(int personId) {
-        Person person = peopleService.findById(personId);
-        List<IndicatorGroup> groups = groupService.find();
-        List<Indicator> indicators = this.findAllCorrectIndicators(person);
-        indicators.stream().map(Indicator::getRusName).forEach(System.out::println);
-
-        Map<String, SimpleIndicatorResponceDTO> indicatorsByGroups = new HashMap<>();
-
-        for (IndicatorGroup group : groups) {
-            for (String indicatorName : group.getIndicators()) {
-                for (Indicator indicator : indicators) {
-
-                    if (indicator.getEngName().equals(indicatorName)){
-                        indicatorsByGroups.put(group.getGroupName(), convertToSimpleDTO(indicator));
-                    }
-
-                }
-            }
-        }
-
-        return ok(indicatorsByGroups
-                .entrySet()
-                .stream()
-                .sorted(comparingByValue(comparingInt(SimpleIndicatorResponceDTO::getId)))
-                .collect(toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue,
-                        (oldValue, _) -> oldValue,
-                        LinkedHashMap::new)));
-    }
     @Transactional
     public ResponseEntity<?> create(IndicatorRequestDTO dto) {
         Indicator toValidate = convertToEntity(dto);
@@ -134,9 +93,17 @@ public class IndicatorService {
         return status(NO_CONTENT).build();
     }
 
-    protected List<Indicator> findAllCorrectIndicators(Person person) {
-        int age = getDaysOfAge(person.getDateOfBirth());
-        return indicatorRepository.findAllCorrect(person.getGender(), person.getIsGravid(), age);
+    protected List<Indicator> findAllCorrectIndicators(Person person, MeasureRequestDTO dto) {
+        LocalDate dateOfBirth = person.getDateOfBirth();
+        LocalDate regDate = dto.getRegDate();
+        if (regDate.isBefore(dateOfBirth) || regDate.isAfter(now())) {
+            throw new EntityNotFoundException("'regDate' must be between 'dateOfBirth' and 'now'");
+        }
+        int age = getDaysBetween(dateOfBirth, regDate);
+        return indicatorRepository.findAllCorrect(dto.getName(),
+                person.getGender(),
+                person.getIsGravid(),
+                age);
     }
 
 
@@ -184,9 +151,5 @@ public class IndicatorService {
             return "male gender should be gravid";
         }
         return "ok";
-    }
-
-    private SimpleIndicatorResponceDTO convertToSimpleDTO(Indicator indicator) {
-        return modelMapper.map(indicator, SimpleIndicatorResponceDTO.class);
     }
 }

@@ -8,7 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.assay.dto.requests.PersonRequestDTO;
-import project.assay.dto.requests.PersonToUpdateDTO;
+import project.assay.dto.responses.PersonResponseDTO;
+import project.assay.exceptions.EntityNotCreatedException;
 import project.assay.exceptions.EntityNotFoundException;
 import project.assay.models.Person;
 import project.assay.models.Reason;
@@ -18,8 +19,11 @@ import java.util.List;
 import java.util.Set;
 
 import static java.util.Comparator.comparingInt;
-import static org.springframework.http.HttpStatus.*;
-import static org.springframework.http.ResponseEntity.*;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
+import static org.springframework.http.ResponseEntity.ok;
+import static org.springframework.http.ResponseEntity.status;
+import static project.assay.utils.StaticMethods.isFuture;
 
 @Service
 @Transactional(readOnly = true)
@@ -29,7 +33,6 @@ public class PeopleService {
     private final ModelMapper modelMapper;
     private final ReasonsService reasonsService;
 
-
     @Autowired
     public PeopleService(PeopleRepository peopleRepository, ModelMapper modelMapper, ReasonsService reasonsService) {
         this.peopleRepository = peopleRepository;
@@ -37,11 +40,12 @@ public class PeopleService {
         this.reasonsService = reasonsService;
     }
 
-    public ResponseEntity<List<Person>> findAll() {
+    public ResponseEntity<List<PersonResponseDTO>> findAll() {
         return ok(peopleRepository
                 .findAll()
                 .stream()
                 .sorted(comparingInt(Person::getId))
+                .map(this::convertToResponseDTO)
                 .toList());
     }
 
@@ -51,24 +55,36 @@ public class PeopleService {
                 .orElseThrow(() -> new EntityNotFoundException("Person with id=" + id + " not found!"));
     }
 
-    public ResponseEntity<Person> find(int id) {
-        return ok(findById(id));
+    public ResponseEntity<PersonResponseDTO> find(int id) {
+        return ok(convertToResponseDTO(findById(id)));
     }
 
     @Transactional
-    public ResponseEntity<Person> save(PersonRequestDTO personRequestDTO) {
-        Person saved = peopleRepository.save(convertToPerson(personRequestDTO));
-        return status(CREATED).body(saved);
+    public ResponseEntity<PersonResponseDTO> save(PersonRequestDTO dto) {
+        boolean isMale = dto.getGender().equals("male");
+
+        validatePerson(dto);
+
+        Person saved = peopleRepository.save(convertToEntity(dto));
+        if (isMale) {
+            PersonResponseDTO realMan = beRealMan(saved);
+            return ok(realMan);
+        }
+
+        return status(CREATED).body(convertToResponseDTO(saved));
 
     }
 
     @Transactional
-    public ResponseEntity<Person> update(int id, PersonToUpdateDTO personDTOtoUpdate) {
+    public ResponseEntity<PersonResponseDTO> update(int id, PersonRequestDTO personRequestDTO) {
         Person personFromDB = this.findById(id);
 
-        Person personToUpdate = convertToPerson(personDTOtoUpdate, personFromDB);
+        Person personToUpdate = convertToEntity(personRequestDTO, personFromDB);
         personToUpdate.setId(id);
-        return ok(peopleRepository.save(personToUpdate));
+
+        validatePerson(convertToRequestDTO(personToUpdate));
+
+        return ok(convertToResponseDTO(peopleRepository.save(personToUpdate)));
     }
 
     @Transactional
@@ -77,26 +93,39 @@ public class PeopleService {
         return status(NO_CONTENT).build();
     }
 
-    public Set<Reason> findAllExReasons(int personId) {
+    @Transactional
+    public PersonResponseDTO beRealMan(Person man) {
+        Set<Reason> maleExReasons = reasonsService
+                .findByNameIn(Set
+                        .of("беременность", "менструация"));
+        man
+                .getExcludedReasons()
+                .addAll(maleExReasons);
+        return convertToResponseDTO(peopleRepository.save(man));
+    }
+
+    public Set<Reason> findAllEx(int personId) {
         Person person = this.findById(personId);
         return person.getExcludedReasons();
     }
 
-    public ResponseEntity<Set<Reason>> findAllEx(int personId) {
-        return ok(this.findAllExReasons(personId));
+    public ResponseEntity<Set<Reason>> findAllExWithResponse(int personId) {
+        return ok(this.findAllEx(personId));
     }
 
     @Transactional
-    public ResponseEntity<Reason> createEx(int personId, int reasonId) {
+    public ResponseEntity<Set<Reason>> createEx(int personId, int reasonId) {
+        return this.createManyEx(personId, Set.of(reasonId));
+    }
+
+    @Transactional
+    public ResponseEntity<Set<Reason>> createManyEx(int personId, Set<Integer> reasonIds) {
         Person person = this.findById(personId);
-        Reason reason = reasonsService.findById(reasonId);
-        person.getExcludedReasons().add(reason);
+        Set<Reason> reasons = reasonsService.findByIdIn(reasonIds);
+        person.getExcludedReasons().addAll(reasons);
         return ok(peopleRepository
                 .save(person)
-                .getExcludedReasons()
-                .stream()
-                .filter(elem -> elem.getId() == reasonId) // ищем сохраненный reason, привязанный к человеку
-                .findFirst().orElseThrow(()-> new EntityNotFoundException("Reason with id=" +reasonId + " not found!")));
+                .getExcludedReasons());
     }
 
     @Transactional
@@ -108,13 +137,34 @@ public class PeopleService {
         return status(NO_CONTENT).build();
     }
 
-    private Person convertToPerson(PersonRequestDTO personRequestDTO) {
+    private Person convertToEntity(PersonRequestDTO personRequestDTO) {
         return modelMapper.map(personRequestDTO, Person.class);
     }
 
-    private Person convertToPerson(PersonToUpdateDTO personToUpdateDTO, Person preparedPerson) {
+    private Person convertToEntity(PersonRequestDTO personToUpdateDTO, Person preparedPerson) {
         modelMapper.getConfiguration().setSkipNullEnabled(true);
         modelMapper.map(personToUpdateDTO, preparedPerson);
         return preparedPerson;
+    }
+
+    private PersonRequestDTO convertToRequestDTO(Person person) {
+        return modelMapper.map(person, PersonRequestDTO.class);
+    }
+
+    private void validatePerson(PersonRequestDTO man){
+        boolean isMale = man.getGender().equals("male");
+
+        if (man.getIsGravid() && isMale) {
+            throw new EntityNotCreatedException("Gender Male should be isGravid");
+        }
+
+        if (isFuture(man.getDateOfBirth())) {
+            throw new EntityNotCreatedException("Date of Birth should be past");
+        }
+
+    }
+
+    private PersonResponseDTO convertToResponseDTO(Person person) {
+        return modelMapper.map(person, PersonResponseDTO.class);
     }
 }

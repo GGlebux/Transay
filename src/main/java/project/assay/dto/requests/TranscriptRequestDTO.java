@@ -3,7 +3,7 @@ package project.assay.dto.requests;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-import java.util.List;
+import java.util.Set;
 
 @Data
 public class TranscriptRequestDTO {
@@ -11,6 +11,6 @@ public class TranscriptRequestDTO {
     private String name;
     @NotNull(message = "Gender should not be empty")
     private String gender;
-    private List<Integer> fallsIds;
-    private List<Integer> raisesIds;
+    private Set<Integer> fallsIds;
+    private Set<Integer> raisesIds;
 }

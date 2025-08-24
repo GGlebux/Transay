@@ -29,7 +29,7 @@ public class ReasonsController {
 
     @GetMapping
     public ResponseEntity<List<Reason>> getAllReasons() {
-        return reasonsService.findAll();
+        return reasonsService.findAllWithResponse();
     }
 
     @PostMapping
@@ -39,7 +39,7 @@ public class ReasonsController {
 
     @GetMapping("/{reasonId}")
     public ResponseEntity<Reason> getReason(@PathVariable int reasonId) {
-        return reasonsService.find(reasonId);
+        return reasonsService.findByIdWithResponse(reasonId);
     }
 
     @PatchMapping("/{reasonId}")

@@ -26,10 +26,10 @@ public class IndicatorGroup {
     private String groupName;
 
     @Column(name = "indicators")
-    private List<String> indicators;
+    private List<String> indicatorsWithUnit;
 
-    public IndicatorGroup(String groupName, List<String> indicators) {
+    public IndicatorGroup(String groupName, List<String> indicatorsWithUnit) {
         this.groupName = groupName;
-        this.indicators = indicators;
+        this.indicatorsWithUnit = indicatorsWithUnit;
     }
 }

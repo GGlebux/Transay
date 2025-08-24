@@ -12,12 +12,13 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @Data
 @JsonInclude(NON_NULL)
 public class MeasureRequestDTO {
-  // Поле для определения id выбранного индикатора (indicatorId)
-  private int selectedId;
+  @NotNull(message = "name should not be empty")
+  private String name;
 
-  @NotNull(message = "currentValue shoud not be empty")
+  @NotNull(message = "currentValue should not be empty")
   private double currentValue;
 
   @JsonFormat(pattern = "yyyy-MM-dd")
+  @NotNull(message = "regDate should not be empty")
   private LocalDate regDate;
 }

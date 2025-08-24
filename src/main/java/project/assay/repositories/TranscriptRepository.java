@@ -10,7 +10,9 @@ import java.util.Optional;
 
 @Repository
 public interface TranscriptRepository extends JpaRepository<Transcript, Integer> {
-  @Query("SELECT t FROM Transcript t WHERE t.name = :name AND (t.gender = :gender or t.gender = 'both')")
+  @Query("SELECT t FROM Transcript t " +
+          "WHERE t.name = :name " +
+          "AND (t.gender = :gender or t.gender = 'both')")
   Optional<Transcript> findByNameAndGender(@Param("name") String name,
                                            @Param("gender") String gender);
 }

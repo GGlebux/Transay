@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import project.assay.dto.requests.IndicatorGroupDTO;
-import project.assay.models.IndicatorGroup;
+import project.assay.dto.requests.IndicatorGroupRequestDTO;
+import project.assay.dto.responses.IndicatorGroupResponseDTO;
 import project.assay.services.IndicatorGroupService;
 
 import java.util.List;
@@ -21,18 +21,18 @@ public class IndicatorGroupController {
     }
 
     @GetMapping
-    public ResponseEntity<List<IndicatorGroup>> findAll() {
-        return service.findAll();
+    public ResponseEntity<List<IndicatorGroupResponseDTO>> findAll() {
+        return service.findAllWithResponse();
     }
 
     @PostMapping
-    public ResponseEntity<IndicatorGroup> create(@RequestBody IndicatorGroupDTO dto) {
+    public ResponseEntity<IndicatorGroupResponseDTO> create(@RequestBody IndicatorGroupRequestDTO dto) {
         return service.save(dto);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<IndicatorGroup> update(@PathVariable int id,
-                                                       @RequestBody IndicatorGroupDTO dto){
+    public ResponseEntity<IndicatorGroupResponseDTO> update(@PathVariable int id,
+                                                       @RequestBody IndicatorGroupRequestDTO dto){
         return service.update(id, dto);
     }
 

@@ -7,9 +7,6 @@ import project.assay.models.Referent;
 import project.assay.models.Transcript;
 import project.assay.repositories.ReferentRepository;
 
-import static java.time.LocalDate.now;
-import static java.util.Objects.isNull;
-
 @Service
 @Transactional(readOnly = true)
 public class ReferentService {
@@ -24,15 +21,8 @@ public class ReferentService {
     this.transcriptService = transcriptService;
   }
 
-  @Transactional
   public void enrich(Referent referent, Indicator indicator) {
-    // Если клиент не указал дату анализа, то ставим по умолчанию текущую
-    if (isNull(referent.getRegDate())) {
-      referent.setRegDate(now());
-    }
-    // ToDo: добавить единицы измерения
-
-    // Проверяем референтое состояние на данных момент
+    // Проверяем референтное состояние на данных момент
     String verdict = indicatorService.checkValue(indicator, referent.getCurrentValue());
     Transcript transcript = transcriptService.findCorrect(indicator.getEngName(), indicator.getGender());
     switch (verdict) {

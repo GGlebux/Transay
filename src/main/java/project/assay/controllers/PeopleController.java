@@ -2,11 +2,6 @@ package project.assay.controllers;
 
 
 import jakarta.validation.Valid;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,11 +9,14 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import project.assay.dto.requests.PersonRequestDTO;
-import project.assay.dto.requests.PersonToUpdateDTO;
+import project.assay.dto.responses.PersonResponseDTO;
 import project.assay.exceptions.EntityNotCreatedException;
-import project.assay.models.Person;
 import project.assay.models.Reason;
 import project.assay.services.PeopleService;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -43,7 +41,7 @@ public class PeopleController {
      * @return @code{List<Person>} - список всех людей
      */
     @GetMapping
-    public ResponseEntity<List<Person>> getAllPeople() {
+    public ResponseEntity<List<PersonResponseDTO>> getAllPeople() {
         return service.findAll();
     }
 
@@ -51,7 +49,7 @@ public class PeopleController {
      * @return PersonRequestDTO - информация о конкретном человеке
      */
     @GetMapping("/{personId}")
-    public ResponseEntity<Person> show(@PathVariable("personId") int personId) {
+    public ResponseEntity<PersonResponseDTO> show(@PathVariable("personId") int personId) {
         return service.find(personId);
     }
 
@@ -61,7 +59,7 @@ public class PeopleController {
      * @param personRequestDTO
      */
     @PostMapping
-    public ResponseEntity<Person> create(@RequestBody @Valid PersonRequestDTO personRequestDTO,
+    public ResponseEntity<PersonResponseDTO> create(@RequestBody @Valid PersonRequestDTO personRequestDTO,
                                          BindingResult bindingResult) {
         throwValidException(bindingResult);
         return service.save(personRequestDTO);
@@ -70,13 +68,13 @@ public class PeopleController {
     /**
      * Обновляет данные человека
      *
-     * @param personToUpdateDTO
+     * @param personRequestDTO
      */
     @PatchMapping("/{personId}")
-    public ResponseEntity<Person> update(@RequestBody @Valid PersonToUpdateDTO personToUpdateDTO,
+    public ResponseEntity<PersonResponseDTO> update(@RequestBody @Valid PersonRequestDTO personRequestDTO,
                                          @PathVariable("personId") int personId, BindingResult bindingResult) {
         throwValidException(bindingResult);
-        return service.update(personId, personToUpdateDTO);
+        return service.update(personId, personRequestDTO);
     }
 
     /**
@@ -92,13 +90,19 @@ public class PeopleController {
 
     @GetMapping("/{personId}/ex_reasons")
     public ResponseEntity<Set<Reason>> getAllExReasons(@PathVariable("personId") int personId) {
-        return service.findAllEx(personId);
+        return service.findAllExWithResponse(personId);
     }
 
     @PostMapping("/{personId}/ex_reasons")
-    public ResponseEntity<Reason> addExReason(@PathVariable("personId") int personId,
+    public ResponseEntity<Set<Reason>> addExReason(@PathVariable("personId") int personId,
                                               @RequestBody Integer reasonId) {
         return service.createEx(personId, reasonId);
+    }
+
+    @PostMapping("/{personId}/ex_reasons/many")
+    public ResponseEntity<Set<Reason>> addExManyReason(@PathVariable("personId") int personId,
+                                              @RequestBody Set<Integer> reasonId) {
+        return service.createManyEx(personId, reasonId);
     }
 
     @DeleteMapping("/{personId}/ex_reasons/{reasonId}")

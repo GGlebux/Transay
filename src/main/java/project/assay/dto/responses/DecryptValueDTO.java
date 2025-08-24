@@ -1,4 +1,4 @@
-package project.assay.dto.responces;
+package project.assay.dto.responses;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

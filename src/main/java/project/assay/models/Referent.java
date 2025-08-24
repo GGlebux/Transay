@@ -7,11 +7,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import static jakarta.persistence.FetchType.EAGER;
 import static jakarta.persistence.GenerationType.IDENTITY;
-import static java.util.List.of;
 
 @Entity
 @Table(name = "referent")
@@ -49,11 +49,13 @@ public class Referent {
                 '}';
     }
 
-    public List<Reason> getVerdict(){
+
+    // ToDo: узкое горлышко - оптимизировать
+    public Set<Reason> getVerdict(){
         return switch (status) {
             case "fall" -> transcript.getFalls();
             case "raise" -> transcript.getRaises();
-            default -> of();
+            default -> new HashSet<>();
         };
     }
 
