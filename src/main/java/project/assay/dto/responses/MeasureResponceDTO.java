@@ -24,7 +24,7 @@ public class MeasureResponceDTO implements Comparable<MeasureResponceDTO>{
 
   @Override
   public int compareTo(@NotNull MeasureResponceDTO o) {
-    return compare(id, o.id);
+    return this.regDate.compareTo(o.regDate);
   }
 
   public void clearExReasons(Set<Reason> exReasons) {

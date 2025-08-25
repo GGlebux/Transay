@@ -1,5 +1,6 @@
 package project.assay.services;
 
+import org.apache.poi.ss.formula.functions.T;
 import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,8 @@ import project.assay.repositories.MeasureRepository;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static java.lang.String.format;
 import static java.util.Comparator.comparingInt;
@@ -36,11 +39,12 @@ public class MeasureService {
     private final ReferentService referentService;
     private final IndicatorGroupService groupService;
     private final ModelMapper modelMapper;
+    private final TranscriptService transcriptService;
     private List<IndicatorGroupResponseDTO> indicatorGroups;
 
 
     @Autowired
-    public MeasureService(PeopleService peopleService, MeasureRepository measureRepository, IndicatorService indicatorService, ReferentService referentService, IndicatorGroupService groupService, ModelMapper modelMapper) {
+    public MeasureService(PeopleService peopleService, MeasureRepository measureRepository, IndicatorService indicatorService, ReferentService referentService, IndicatorGroupService groupService, ModelMapper modelMapper, TranscriptService transcriptService) {
         this.peopleService = peopleService;
         this.measureRepository = measureRepository;
         this.indicatorService = indicatorService;
@@ -52,12 +56,12 @@ public class MeasureService {
                 .addMappings(mapper -> mapper.skip(Referent::setId));
         this.groupService = groupService;
         this.indicatorGroups = new ArrayList<>();
+        this.transcriptService = transcriptService;
     }
 
     private List<Measure> findAllByPersonId(int personId) {
         return measureRepository.findByPersonId(personId);
     }
-
 
 
     @Transactional
@@ -74,10 +78,10 @@ public class MeasureService {
         // Изменяем без проверки или создаем с проверкой
         measureId
                 .ifPresentOrElse((id) -> {
-                    validateMeasureByOwner(personId, id);
-                    measure.setId(id);
-                    },
-                () -> this.canCreateMeasure(person, dto, indicator));
+                            validateMeasureByOwner(personId, id);
+                            measure.setId(id);
+                        },
+                        () -> this.canCreateMeasure(person, dto, indicator));
 
         Referent referent = convertToReferent(dto);
         referentService.enrich(referent, indicator);
@@ -100,9 +104,10 @@ public class MeasureService {
 
     /**
      * Валидирует измерение на возможность создания
-     * @param person человек
+     *
+     * @param person            человек
      * @param verifiableMeasure измерение на проверку
-     * @param indicatorDB - индикатор из базы данных
+     * @param indicatorDB       - индикатор из базы данных
      */
     public void canCreateMeasure(Person person, MeasureRequestDTO verifiableMeasure, Indicator indicatorDB) {
         // Проверка дубликатов такого индикатора на одну дату
@@ -128,14 +133,16 @@ public class MeasureService {
     /**
      * @param personId id человека
      * @return {@code ResponseEntity<Set<SummaryTableGroupDTO>>} - готовая сущность для таблицы.
-     * Строится из методов {@link #createSetMeasuresByName(List)} и {@link #createSetOfTableGroups(List, Map)}
+     * Строится из методов {@link #createSetMeasuresByName(List, String)} и {@link #createSetOfTableGroups(List, Map)}
      */
     public ResponseEntity<Set<SummaryTableGroupDTO>> createSummaryTable(int personId) {
+        Person person = peopleService.findById(personId);
+
         // Все измерения одного человека
         List<Measure> measures = this.findAllByPersonId(personId);
 
         // Карта
-        Map<String, Set<MeasureResponceDTO>> map = createSetMeasuresByName(measures);
+        Map<String, Set<MeasureResponceDTO>> map = createSetMeasuresByName(measures, person.getGender());
 
         // Важно чтобы выполнилось обновление групп индикаторов
         this.updateIndicatorGroups();
@@ -145,19 +152,43 @@ public class MeasureService {
         return ok(result);
     }
 
+    private Map<String, Transcript> getTranscriptsOptimized(List<Measure> measures, String gender) {
+        Set<String> transcriptNames =
+                measures
+                        .stream()
+                        .map(Measure::getIndicator)
+                        .map(Indicator::getEngName)
+                        .collect(toSet());
+
+        return transcriptService
+                .findAllByNameIn(transcriptNames, gender)
+                .stream()
+                .collect(toMap(Transcript::getName,
+                        transcript -> transcript));
+    }
+
+
     /**
-     * @param measures список существующий измерений человека
+     * @param measures список существующих измерений человека
      * @return {@code Map<String, Set<MeasureResponceDTO>>}
      * key-название индикатора,
      * value-множество упрощенных измерений (отсортированы по возрастанию даты)
      */
     @NotNull
-    private Map<String, Set<MeasureResponceDTO>> createSetMeasuresByName(List<Measure> measures) {
+    private Map<String, Set<MeasureResponceDTO>> createSetMeasuresByName(List<Measure> measures, String gender) {
         Map<String, Set<MeasureResponceDTO>> map = new HashMap<>();
+
+        // Оптимизированный запрос для получения всех нужных транскрипций
+        Map<String, Transcript> transcripts = getTranscriptsOptimized(measures, gender);
 
         // Заполняем карту
         for (Measure measure : measures) {
-            String indicatorName = measure.getIndicator().getRusName();
+            String indicatorRusName = measure.getIndicator().getRusName();
+            String indicatorEngName = measure.getIndicator().getEngName();
+
+            Transcript transcript = transcripts.get(indicatorEngName);
+            measure.getReferent().setTranscript(transcript);
+
             MeasureResponceDTO measureResponceDTO = convertToMeasureDTO(measure);
 
             // Если причина попадает в исключенные - не учитываем
@@ -165,10 +196,10 @@ public class MeasureService {
             measureResponceDTO.clearExReasons(exReasons);
 
 
-            if (!map.containsKey(indicatorName)) {
-                map.put(indicatorName, new TreeSet<>(of(measureResponceDTO)));
+            if (!map.containsKey(indicatorRusName)) {
+                map.put(indicatorRusName, new TreeSet<>(of(measureResponceDTO)));
             } else {
-                map.get(indicatorName).add(measureResponceDTO);
+                map.get(indicatorRusName).add(measureResponceDTO);
             }
         }
         return map;
@@ -176,7 +207,7 @@ public class MeasureService {
 
     /**
      * @param measures список существующий измерений человека
-     * @param map карта из метода {@linkplain #createSetMeasuresByName}
+     * @param map      карта из метода {@linkplain #createSetMeasuresByName}
      * @return {@code Set<SummaryTableGroupDTO>} - сущность для корректного отображения таблицы
      * (разбиение по группам индикаторов, именам индикаторов, датам)
      */
@@ -204,7 +235,7 @@ public class MeasureService {
     }
 
     /**
-     * @param measures список существующий измерений человека
+     * @param measures  список существующий измерений человека
      * @param groupName название группы индикаторов
      * @return {@code Set<LocalDate>} - составляет список дат, когда были сданы анализы, для определенной группы индикаторов
      */
@@ -236,7 +267,7 @@ public class MeasureService {
 
     /**
      * @param personId id человека
-     * @param date расшифровка составляется на эту дату
+     * @param date     расшифровка составляется на эту дату
      * @return {@code ResponseEntity<Map<String, DecryptValueDTO>>}
      */
     public ResponseEntity<Map<String, DecryptValueDTO>> getDecryptedMeasures(int personId, LocalDate date) {
@@ -250,7 +281,7 @@ public class MeasureService {
     }
 
     /**
-     * @param measures список существующий измерений человека
+     * @param measures        список существующий измерений человека
      * @param excludedReasons - список исключенных причин у человека (например: не курит)
      * @return {@code Map<String, DecryptValueDTO>} key - название причины, value - количество повторений причины + названия индикаторов в которых имеется
      */
@@ -293,7 +324,7 @@ public class MeasureService {
     /**
      * Обновляет локальный список групп индикаторов
      */
-    private void updateIndicatorGroups(){
+    private void updateIndicatorGroups() {
         this.indicatorGroups = groupService.findAll();
     }
 
@@ -313,7 +344,7 @@ public class MeasureService {
                         LinkedHashMap::new));
     }
 
-    private void validateMeasureByOwner(int personId, int measureId){
+    private void validateMeasureByOwner(int personId, int measureId) {
         Set<Integer> personMeasureIds = measureRepository
                 .findByPersonId(personId)
                 .stream()
@@ -321,7 +352,7 @@ public class MeasureService {
                 .collect(toSet());
         if (!personMeasureIds.contains(measureId)) {
             throw new EntityNotFoundException(
-                    format("Measure with id='%d' does not belong to person with id='%d'!", measureId,  personId));
+                    format("Measure with id='%d' does not belong to person with id='%d'!", measureId, personId));
         }
     }
 
@@ -330,6 +361,19 @@ public class MeasureService {
     }
 
     private static MeasureResponceDTO convertToMeasureDTO(Measure m) {
+        Indicator i = m.getIndicator();
+        Referent r = m.getReferent();
+        return new MeasureResponceDTO(m.getId(),
+                i.getMinValue(),
+                r.getCurrentValue(),
+                i.getMaxValue(),
+                r.getRegDate(),
+                i.getUnits(),
+                r.getStatus(),
+                r.getVerdict());
+    }
+
+    private static MeasureResponceDTO convertToMeasureDTO(Measure m, Transcript transcript) {
         Indicator i = m.getIndicator();
         Referent r = m.getReferent();
         return new MeasureResponceDTO(m.getId(),

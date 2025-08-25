@@ -12,6 +12,7 @@ import project.assay.models.Transcript;
 import project.assay.repositories.TranscriptRepository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static java.lang.String.format;
@@ -23,12 +24,12 @@ import static org.springframework.http.ResponseEntity.status;
 @Transactional(readOnly = true)
 public class TranscriptService {
 
-    private final TranscriptRepository transcriptRepository;
+    private final TranscriptRepository repo;
     private final ModelMapper modelMapper;
     private final ReasonsService reasonsService;
 
     @Autowired
-    public TranscriptService(TranscriptRepository transcriptRepository, ModelMapper modelMapper, ReasonsService reasonsService) {
+    public TranscriptService(TranscriptRepository repo, ModelMapper modelMapper, ReasonsService reasonsService) {
         modelMapper
                 .createTypeMap(TranscriptRequestDTO.class, Transcript.class)
                 .addMappings(mapper -> mapper.skip(Transcript::setId));
@@ -37,39 +38,44 @@ public class TranscriptService {
                 .setSkipNullEnabled(true);
 
         this.modelMapper = modelMapper;
-        this.transcriptRepository = transcriptRepository;
+        this.repo = repo;
         this.reasonsService = reasonsService;
     }
 
     public Transcript findById(int id) {
-        return transcriptRepository.findById(id)
+        return repo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(format("Transcript with id=%d not found", id)));
     }
 
     public Transcript findCorrect(String name, String gender) {
-        return transcriptRepository.findByNameAndGender(name, gender)
+        return repo.findByNameAndGender(name, gender)
                 .orElseThrow(() -> new EntityNotFoundException(
                         format("Transcript with name='%s' and gender='%s' not found", name, gender)));
     }
 
+    public Set<Transcript> findAllByNameIn(Set<String> names, String gender) {
+        return repo.findAllByNameIn(names, gender);
+    }
+
+
     public ResponseEntity<List<Transcript>> findAll() {
-        return ok(transcriptRepository.findAll());
+        return ok(repo.findAll());
     }
 
     @Transactional
     public ResponseEntity<Transcript> save(TranscriptRequestDTO dto) {
-        return ok(transcriptRepository.save(convertToEntity(dto)));
+        return ok(repo.save(convertToEntity(dto)));
     }
 
     @Transactional
     public ResponseEntity<Transcript> update(TranscriptRequestDTO dto, int id) {
-        Transcript updated = transcriptRepository.save(convertToEntity(dto, findById(id)));
+        Transcript updated = repo.save(convertToEntity(dto, findById(id)));
         return ok(updated);
     }
 
     @Transactional
     public ResponseEntity<String> delete(int id) {
-        transcriptRepository.deleteById(id);
+        repo.deleteById(id);
         return status(NO_CONTENT)
                 .body(format("Удалена транскрипция с id=%d", id));
     }
