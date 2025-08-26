@@ -19,7 +19,7 @@ public class UnitsController {
         this.service = service;
     }
 
-    @GetMapping("/all")
+    @GetMapping
     public ResponseEntity<List<Unit>> findAll() {
         return service.findAll();
     }

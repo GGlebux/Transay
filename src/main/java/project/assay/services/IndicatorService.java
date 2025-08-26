@@ -141,6 +141,12 @@ public class IndicatorService {
     }
 
     private String validateIndicator(Indicator toValidate) {
+        if (toValidate.getMinAge() < 0) {
+            return "'minAge' should be negative";
+        }
+        if (toValidate.getMaxAge() < 0) {
+            return "'maxAge' should be negative";
+        }
         if (toValidate.getMaxAge() <= toValidate.getMinAge()) {
             return format("maxAge '%d' should be greater than minAge '%d'", toValidate.getMaxAge(), toValidate.getMinAge());
         }
