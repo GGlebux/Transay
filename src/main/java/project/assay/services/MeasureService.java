@@ -1,6 +1,5 @@
 package project.assay.services;
 
-import org.apache.poi.ss.formula.functions.T;
 import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +17,6 @@ import project.assay.repositories.MeasureRepository;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static java.lang.String.format;
 import static java.util.Comparator.comparingInt;
@@ -73,6 +70,11 @@ public class MeasureService {
         // Есть ли такой индикатор?
         List<Indicator> indicators = indicatorService.findAllCorrectIndicators(person, dto);
         Indicator indicator = indicators.getFirst();
+
+        if (indicators.size() > 1) {
+            throw new EntityNotCreatedException(
+                    format("Founded %d correct indicators: %n%s", indicators.size(), indicators));
+        }
 
         // Можно ли создать такое измерение?
         // Изменяем без проверки или создаем с проверкой
