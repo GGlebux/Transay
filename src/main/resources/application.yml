@@ -18,6 +18,8 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     open-in-view: false
   mvc:
+    servlet:
+      path: /api
     hiddenmethod:
       filter:
         enabled: true
