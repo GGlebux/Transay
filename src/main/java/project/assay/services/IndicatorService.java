@@ -101,6 +101,7 @@ public class IndicatorService {
         }
         int age = getDaysBetween(dateOfBirth, regDate);
         return indicatorRepository.findAllCorrect(dto.getName(),
+                dto.getUnits(),
                 person.getGender(),
                 person.getIsGravid(),
                 age);

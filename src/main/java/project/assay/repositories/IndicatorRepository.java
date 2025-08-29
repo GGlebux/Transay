@@ -17,10 +17,12 @@ public interface IndicatorRepository extends JpaRepository<Indicator, Integer> {
   @EntityGraph(attributePaths = {"measure"})
   @Query("SELECT i FROM Indicator i " +
           "WHERE i.rusName = :name " +
+          "AND i.units = :units " +
           "AND (i.gender = :gender or i.gender = 'both') " +
           "AND i.isGravid = :isGravid " +
           "AND :age BETWEEN i.minAge and i.maxAge")
   List<Indicator> findAllCorrect(@Param(("name")) String name,
+                                 @Param("units") String units,
                                  @Param("gender") String gender,
                                  @Param("isGravid") Boolean isGravid,
                                  @Param("age") Integer age);

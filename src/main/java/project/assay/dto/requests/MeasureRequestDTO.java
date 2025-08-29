@@ -18,6 +18,9 @@ public class MeasureRequestDTO {
   @NotNull(message = "currentValue should not be empty")
   private double currentValue;
 
+  @NotNull(message = "units should not be empty")
+  private String units;
+
   @JsonFormat(pattern = "yyyy-MM-dd")
   @NotNull(message = "regDate should not be empty")
   private LocalDate regDate;

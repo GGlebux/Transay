@@ -155,11 +155,11 @@ public class PeopleService {
         boolean isMale = man.getGender().equals("male");
 
         if (man.getIsGravid() && isMale) {
-            throw new EntityNotCreatedException("Gender Male should be isGravid");
+            throw new EntityNotCreatedException("Gender Male should not be isGravid");
         }
 
         if (isFuture(man.getDateOfBirth())) {
-            throw new EntityNotCreatedException("Date of Birth should be past");
+            throw new EntityNotCreatedException("Date of Birth should not be future");
         }
 
     }

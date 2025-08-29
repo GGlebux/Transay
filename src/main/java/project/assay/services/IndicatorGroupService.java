@@ -12,9 +12,12 @@ import project.assay.exceptions.EntityNotFoundException;
 import project.assay.models.IndicatorGroup;
 import project.assay.repositories.IndicatorGroupRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.String.join;
+import static java.util.Arrays.copyOfRange;
+import static java.util.Arrays.stream;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.ResponseEntity.ok;
 import static org.springframework.http.ResponseEntity.status;
@@ -78,7 +81,12 @@ public class IndicatorGroupService {
         List<String> indicatorsWithUnit = dto
                 .getIndicators()
                 .stream()
-                .map(sid -> join("|", sid.getName(), sid.getUnits()))
+                .map((sid) -> {
+                    List<String> nameWithUnits = new ArrayList<>(5);
+                    nameWithUnits.add(sid.getName());
+                    nameWithUnits.addAll(sid.getUnits());
+                    return join("|", nameWithUnits);
+                })
                 .toList();
         entity.setIndicatorsWithUnit(indicatorsWithUnit);
         return entity;
@@ -95,7 +103,15 @@ public class IndicatorGroupService {
                 .stream()
                 .map(str -> {
                     String[] split = str.split("\\|");
-                    return new SimpleIndicatorDTO(split[0], split[1]);
+
+                    String name = split[0];
+                    List<String> units = stream
+                            (copyOfRange(split,
+                                    1,
+                                    split.length))
+                            .toList();
+
+                    return new SimpleIndicatorDTO(name, units);
                 })
                 .toList();
         dto.setIndicators(indicatorDTOS);
