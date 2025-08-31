@@ -25,6 +25,7 @@ import static java.util.Set.of;
 import static java.util.stream.Collectors.*;
 import static org.springframework.http.ResponseEntity.noContent;
 import static org.springframework.http.ResponseEntity.ok;
+import static project.assay.AssayApplication.DATE_FORMAT;
 
 @Service
 @Transactional(readOnly = true)
@@ -69,12 +70,22 @@ public class MeasureService {
         // ToDo: здесь может возникать непонимание если было найдено больше 1 индикатора
         // Есть ли такой индикатор?
         List<Indicator> indicators = indicatorService.findAllCorrectIndicators(person, dto);
-        Indicator indicator = indicators.getFirst();
+
+        if (indicators.isEmpty()) {
+            throw new EntityNotFoundException(
+                    format("Индикатор: {имя='%s',\nединицы измерения='%s'} \nдля вас: {%s} не найден!",
+                            dto.getName(),
+                            dto.getUnits(),
+                            person));
+        }
 
         if (indicators.size() > 1) {
             throw new EntityNotCreatedException(
-                    format("Founded %d correct indicators: %n%s", indicators.size(), indicators));
+                    format("Найдено '%d' корректных индикаторов: %n%s.\nСистема не может выбрать правильный!",
+                            indicators.size(),
+                            indicators));
         }
+        Indicator indicator = indicators.getFirst();
 
         // Можно ли создать такое измерение?
         // Изменяем без проверки или создаем с проверкой
@@ -99,7 +110,8 @@ public class MeasureService {
     }
 
     @Transactional
-    public ResponseEntity<HttpStatus> deleteById(int measureId) {
+    public ResponseEntity<HttpStatus> deleteById(int personId, int measureId) {
+        validateMeasureByOwner(personId, measureId);
         measureRepository.deleteById(measureId);
         return noContent().build();
     }
@@ -111,7 +123,7 @@ public class MeasureService {
      * @param verifiableMeasure измерение на проверку
      * @param indicatorDB       - индикатор из базы данных
      */
-    public void canCreateMeasure(Person person, MeasureRequestDTO verifiableMeasure, Indicator indicatorDB) {
+    private void canCreateMeasure(Person person, MeasureRequestDTO verifiableMeasure, Indicator indicatorDB) {
         // Проверка дубликатов такого индикатора на одну дату
         Set<LocalDate> referentsDates = person
                 .getMeasures()
@@ -125,9 +137,9 @@ public class MeasureService {
                 .map(Referent::getRegDate)
                 .collect(toSet());
         if (referentsDates.contains(verifiableMeasure.getRegDate())) {
-            throw new EntityNotCreatedException(format("Indicator with name='%s' and date='%tF' already exists!",
+            throw new EntityNotCreatedException(format("Измерение с именем='%s' и датой='%s' уже создано!",
                     indicatorDB.getRusName(),
-                    verifiableMeasure.getRegDate()));
+                    DATE_FORMAT.format(verifiableMeasure.getRegDate())));
         }
     }
 
@@ -166,7 +178,12 @@ public class MeasureService {
                 .findAllByNameIn(transcriptNames, gender)
                 .stream()
                 .collect(toMap(Transcript::getName,
-                        transcript -> transcript));
+                        transcript -> transcript,
+                        (oldValue, newValue) -> {
+                            oldValue.getFalls().addAll(newValue.getFalls());
+                            oldValue.getRaises().addAll(newValue.getRaises());
+                            return oldValue;
+                        }));
     }
 
 
@@ -251,7 +268,7 @@ public class MeasureService {
                 .filter(dto -> dto.getGroupName().equals(groupName))
                 .findFirst()
                 .orElseThrow(() -> new EntityNotFoundException(
-                        format("IndicatorGroup with name='%s' not found!", groupName)));
+                        format("Группа индикаторов с именем='%s' не найдена!", groupName)));
         Set<String> indicatorsNamesInGroup = group
                 .getIndicators()
                 .stream()
@@ -315,11 +332,20 @@ public class MeasureService {
                     valueToUpdate.increment();
                     decryptedMeasures.put(name, valueToUpdate);
                 } else {
-                    DecryptValueDTO newValue = new DecryptValueDTO(1, new HashSet<>(of(rusIndicatorName)));
+                    DecryptValueDTO newValue = new DecryptValueDTO(1, 0d, new HashSet<>(of(rusIndicatorName)));
                     decryptedMeasures.put(name, newValue);
                 }
             }
+
+            // Считаем проценты
+            int totalCount = decryptedMeasures.size();
+            decryptedMeasures
+                    .values()
+                    .forEach(val ->
+                            val.calculateAndSetPercentage(totalCount));
         }
+
+
         return decryptedMeasures;
     }
 
@@ -354,7 +380,7 @@ public class MeasureService {
                 .collect(toSet());
         if (!personMeasureIds.contains(measureId)) {
             throw new EntityNotFoundException(
-                    format("Measure with id='%d' does not belong to person with id='%d'!", measureId, personId));
+                    format("Измерение с id='%d' не принадлежит человеку с id='%d'!", measureId, personId));
         }
     }
 
@@ -363,19 +389,6 @@ public class MeasureService {
     }
 
     private static MeasureResponceDTO convertToMeasureDTO(Measure m) {
-        Indicator i = m.getIndicator();
-        Referent r = m.getReferent();
-        return new MeasureResponceDTO(m.getId(),
-                i.getMinValue(),
-                r.getCurrentValue(),
-                i.getMaxValue(),
-                r.getRegDate(),
-                i.getUnits(),
-                r.getStatus(),
-                r.getVerdict());
-    }
-
-    private static MeasureResponceDTO convertToMeasureDTO(Measure m, Transcript transcript) {
         Indicator i = m.getIndicator();
         Referent r = m.getReferent();
         return new MeasureResponceDTO(m.getId(),

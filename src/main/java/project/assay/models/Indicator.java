@@ -11,7 +11,11 @@ import java.util.List;
 import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
+import static java.lang.String.format;
 import static java.util.List.of;
+import static project.assay.models.AgeRange.daysToRange;
+import static project.assay.utils.StaticMethods.boolToWord;
+import static project.assay.utils.StaticMethods.genderToWord;
 
 @Entity
 @Table(name = "indicator")
@@ -20,54 +24,69 @@ import static java.util.List.of;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Indicator {
-  @Id
-  @GeneratedValue(strategy = IDENTITY)
-  @Column(name = "id")
-  private int id;
+    @Id
+    @GeneratedValue(strategy = IDENTITY)
+    @Column(name = "id")
+    private int id;
 
-  @Column(name = "eng_name")
-  private String engName;
+    @Column(name = "eng_name")
+    private String engName;
 
-  @Column(name = "rus_name")
-  private String rusName;
+    @Column(name = "rus_name")
+    private String rusName;
 
-  @Column(name = "gender")
-  private String gender;
+    @Column(name = "gender")
+    private String gender;
 
-  @Column(name = "is_gravid")
-  private boolean isGravid;
+    @Column(name = "is_gravid")
+    private boolean isGravid;
 
-  @Column(name = "min_age")
-  private int minAge;
+    @Column(name = "min_age")
+    private int minAge;
 
-  @Column(name = "max_age")
-  private int maxAge;
+    @Column(name = "max_age")
+    private int maxAge;
 
-  @Column(name = "min_value")
-  private double minValue;
+    @Column(name = "min_value")
+    private double minValue;
 
-  @Column(name = "max_value")
-  private double maxValue;
+    @Column(name = "max_value")
+    private double maxValue;
 
-  @Column(name = "units")
-  private String units;
+    @Column(name = "units")
+    private String units;
 
-  @OneToMany(mappedBy = "indicator", fetch = LAZY, cascade = ALL)
-  private List<Measure> measure = of();
+    @OneToMany(mappedBy = "indicator", fetch = LAZY, cascade = ALL)
+    private List<Measure> measure = of();
 
-  @Override
-  public String toString() {
-    return "Indicator{" +
-            "id=" + id +
-            ", eng_name='" + engName + '\'' +
-            ", rus_name='" + rusName + '\'' +
-            ", gender='" + gender + '\'' +
-            ", isGravid=" + isGravid +
-            ", minAge=" + minAge +
-            ", maxAge=" + maxAge +
-            ", minValue=" + minValue +
-            ", maxValue=" + maxValue +
-            ", units='" + units + '\'' +
-            '}';
-  }
+    @Override
+    public String toString() {
+        return format("""
+                        Индикатор: анг_имя='%s',\
+                        
+                        рус_имя='%s',\
+                        
+                        един_измерения='%s',\
+                        
+                        пол='%s',\
+                        
+                        беременность='%s',\
+                        
+                        мин_возраст='%s',\
+                        
+                        макс_возраст='%s' (не включительно),\
+                        
+                        мин_знач='%.3f',\
+                        
+                        макс_знач='%.3f'""",
+                engName,
+                rusName,
+                units,
+                genderToWord(gender),
+                boolToWord(isGravid),
+                daysToRange(minAge, false),
+                daysToRange(maxAge, true),
+                minValue,
+                maxValue);
+    }
 }

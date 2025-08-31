@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import static java.lang.String.format;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,15 +16,31 @@ public class AgeRange {
 
     public int calculateTotalDays(boolean isExcluded) {
         int resultDays = years * 365 + months * 30 + days;
-        return isExcluded ? resultDays -1 : resultDays;
+        return isExcluded ? resultDays - 1 : resultDays;
     }
 
-    // ToDo: Сделать как в методе выше, прибавление к максимальному значению 1
-    public static AgeRange convertToRange(int totalDays) {
+    public static AgeRange daysToRange(int totalDays, boolean isExcluded) {
         AgeRange ageRange = new AgeRange();
+        if (isExcluded) totalDays++;
         ageRange.years = totalDays / 365;
         ageRange.months = totalDays % 365 / 30;
         ageRange.days = totalDays % 365 % 30;
         return ageRange;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb
+                .append("Период: ")
+                .append(stringOf(days, "дни"))
+                .append(stringOf(months, "месяцы"))
+                .append(stringOf(years, "годы"));
+
+        return sb.toString();
+    }
+
+    private String stringOf(int value, String name) {
+        return value > 0 ? format("\n%s='%s'", name, value) : "";
     }
 }

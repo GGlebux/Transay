@@ -11,6 +11,7 @@ import project.assay.repositories.UnitRepository;
 
 import java.util.List;
 
+import static java.lang.String.format;
 import static java.util.Comparator.comparing;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.ResponseEntity.ok;
@@ -36,7 +37,9 @@ public class UnitsService {
     }
 
     public Unit findById(int id) {
-        return repository.findById(id).orElseThrow(()-> new EntityNotFoundException("Unit with id=" + id + " not found"));
+        return repository.findById(id).orElseThrow(()-> new EntityNotFoundException(
+                format("Единица измерения с id='%d' не найдена!",
+                        id)));
     }
 
 

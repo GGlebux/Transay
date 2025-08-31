@@ -11,15 +11,14 @@ import project.assay.models.Reason;
 import project.assay.models.Transcript;
 import project.assay.repositories.TranscriptRepository;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static java.lang.String.format;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.ResponseEntity.ok;
 import static org.springframework.http.ResponseEntity.status;
+import static project.assay.utils.StaticMethods.genderToWord;
 
 @Service
 @Transactional(readOnly = true)
@@ -45,14 +44,17 @@ public class TranscriptService {
 
     public Transcript findById(int id) {
         return repo.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(format("Транскрипция c id='%d' не найдена", id)));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        format("Транскрипция c id='%d' не найдена", id)));
     }
 
     public Set<Transcript> findCorrect(String name, String gender) {
         Set<Transcript> correctTranscripts = repo.findByNameAndGender(name, gender);
         if (correctTranscripts.isEmpty()) {
             throw new EntityNotFoundException(
-                    format("Транскрипция с именем='%s' и гендером='%s' не найдена", name, gender));
+                    format("Транскрипция с именем='%s' и полом='%s' не найдена",
+                            name,
+                            genderToWord(gender)));
         }
         return correctTranscripts;
 
@@ -83,7 +85,7 @@ public class TranscriptService {
     public ResponseEntity<String> delete(int id) {
         repo.deleteById(id);
         return status(NO_CONTENT)
-                .body(format("Удалена транскрипция с id=%d", id));
+                .body(format("Удалена транскрипция с id='%d'", id));
     }
 
     private Transcript convertToEntity(TranscriptRequestDTO dto) {

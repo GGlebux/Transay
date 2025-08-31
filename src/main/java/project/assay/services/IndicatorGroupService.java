@@ -15,6 +15,7 @@ import project.assay.repositories.IndicatorGroupRepository;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.String.format;
 import static java.lang.String.join;
 import static java.util.Arrays.copyOfRange;
 import static java.util.Arrays.stream;
@@ -51,7 +52,8 @@ public class IndicatorGroupService {
 
     private IndicatorGroup findById(int id) {
         return repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Entity with id=" + id +" not found!"));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        format("Группа индикаторов с id='%d' не найдена!", id)));
     }
 
     @Transactional
@@ -65,7 +67,7 @@ public class IndicatorGroupService {
         this.findById(id);
         IndicatorGroup newEntity = this.convertToEntity(dto);
         newEntity.setId(id);
-        return ok(convertToResponse( repository.save(newEntity)));
+        return ok(convertToResponse(repository.save(newEntity)));
     }
 
     @Transactional
@@ -94,7 +96,7 @@ public class IndicatorGroupService {
 
 
 
-    private IndicatorGroupResponseDTO convertToResponse(IndicatorGroup entity) {
+    public IndicatorGroupResponseDTO convertToResponse(IndicatorGroup entity) {
         IndicatorGroupResponseDTO dto = new IndicatorGroupResponseDTO();
         dto.setId(entity.getId());
         dto.setGroupName(entity.getGroupName());

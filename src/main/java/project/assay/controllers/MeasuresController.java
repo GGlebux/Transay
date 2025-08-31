@@ -85,8 +85,8 @@ public class MeasuresController {
      */
     @DeleteMapping("/{measureId}")
     public ResponseEntity<HttpStatus> delete(@PathVariable("measureId") int measureId,
-                                             @PathVariable String personId) {
-        return measureService.deleteById(measureId);
+                                             @PathVariable int personId) {
+        return measureService.deleteById(personId, measureId);
     }
 
 

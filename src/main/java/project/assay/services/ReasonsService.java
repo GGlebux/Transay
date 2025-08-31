@@ -32,7 +32,8 @@ public class ReasonsService {
 
     public Reason findById(int id) {
         return repo.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(format("Reason with id=%d not found", id)));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        format("Причина с id='%d' не найдена!", id)));
     }
 
     public Set<Reason> findByIdIn(Set<Integer> ids){
@@ -52,7 +53,7 @@ public class ReasonsService {
         return repo
                 .findByName(name)
                 .orElseThrow(() -> new EntityNotFoundException(
-                        format("Reason with name='%s' not found", name)));
+                        format("Причина c именем='%s' не найдена!", name)));
     }
     public Set<Reason> findByNameIn(Set<String> names){
         return repo

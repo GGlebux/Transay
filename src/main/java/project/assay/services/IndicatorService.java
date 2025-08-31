@@ -22,7 +22,8 @@ import static java.time.LocalDate.now;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.ResponseEntity.ok;
 import static org.springframework.http.ResponseEntity.status;
-import static project.assay.models.AgeRange.convertToRange;
+import static project.assay.AssayApplication.DATE_FORMAT;
+import static project.assay.models.AgeRange.daysToRange;
 import static project.assay.utils.StaticMethods.getDaysBetween;
 
 @Service
@@ -65,7 +66,8 @@ public class IndicatorService {
 
     public Indicator findById(int id) {
         return indicatorRepository.getIndicatorById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Indicator with id=" + id + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        format("Индикатор с id='%s' не найден!", id)));
     }
 
     @Transactional
@@ -94,10 +96,15 @@ public class IndicatorService {
     }
 
     protected List<Indicator> findAllCorrectIndicators(Person person, MeasureRequestDTO dto) {
-        LocalDate dateOfBirth = person.getDateOfBirth();
         LocalDate regDate = dto.getRegDate();
-        if (regDate.isBefore(dateOfBirth) || regDate.isAfter(now())) {
-            throw new EntityNotFoundException("'regDate' must be between 'dateOfBirth' and 'now'");
+        LocalDate dateOfBirth = person.getDateOfBirth();
+        LocalDate now = now();
+        if (regDate.isBefore(dateOfBirth) || regDate.isAfter(now)) {
+            throw new EntityNotFoundException(
+                    format("'Дата анализа (%s)' должна быть между 'датой рождения (%s)' и 'текущей датой (%s)'!",
+                            DATE_FORMAT.format(regDate),
+                            DATE_FORMAT.format(dateOfBirth),
+                            DATE_FORMAT.format(now)));
         }
         int age = getDaysBetween(dateOfBirth, regDate);
         return indicatorRepository.findAllCorrect(dto.getName(),
@@ -136,26 +143,26 @@ public class IndicatorService {
     private IndicatorResponceDTO convertToDTO(Indicator indicator) {
         IndicatorResponceDTO dto = new IndicatorResponceDTO();
         modelMapper.map(indicator, dto);
-        dto.setMinAge(convertToRange(indicator.getMinAge()));
-        dto.setMaxAge(convertToRange(indicator.getMaxAge()));
+        dto.setMinAge(daysToRange(indicator.getMinAge(), false));
+        dto.setMaxAge(daysToRange(indicator.getMaxAge(), true));
         return dto;
     }
 
     private String validateIndicator(Indicator toValidate) {
         if (toValidate.getMinAge() < 0) {
-            return "'minAge' should be negative";
+            return "Минимальный возраст не может быть отрицательным!";
         }
         if (toValidate.getMaxAge() < 0) {
-            return "'maxAge' should be negative";
+            return "Максимальный возраст не может быть отрицательным!";
         }
         if (toValidate.getMaxAge() <= toValidate.getMinAge()) {
-            return format("maxAge '%d' should be greater than minAge '%d'", toValidate.getMaxAge(), toValidate.getMinAge());
+            return format("Максимальный возраст='%d' должен быть больше чем Минимальный возраст='%d'!", toValidate.getMaxAge(), toValidate.getMinAge());
         }
         if (toValidate.getMaxValue() <= toValidate.getMinValue()) {
-            return format("maxValue '%.2f' should be greater than minValue '%.2f'", toValidate.getMaxValue(), toValidate.getMinValue());
+            return format("Максимальное значение='%.2f' должен быть больше чем Минимальное значение='%.2f'!", toValidate.getMaxValue(), toValidate.getMinValue());
         }
         if (toValidate.getGender().equals("male") && toValidate.isGravid()) {
-            return "male gender should be gravid";
+            return "Индикатор для мужчины не может быть со статусом беременный!";
         }
         return "ok";
     }

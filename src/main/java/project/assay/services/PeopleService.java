@@ -18,12 +18,14 @@ import project.assay.repositories.PeopleRepository;
 import java.util.List;
 import java.util.Set;
 
+import static java.lang.String.format;
 import static java.util.Comparator.comparingInt;
 import static java.util.Set.of;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.ResponseEntity.ok;
 import static org.springframework.http.ResponseEntity.status;
+import static project.assay.AssayApplication.DATE_FORMAT;
 import static project.assay.utils.StaticMethods.isFuture;
 
 @Service
@@ -62,7 +64,8 @@ public class PeopleService {
     public Person findById(int id) {
         return peopleRepository
                 .findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Person with id=" + id + " not found!"));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        format("Человек с id='%d' не найден!", id)));
     }
 
     public ResponseEntity<PersonResponseDTO> find(int id) {
@@ -71,8 +74,6 @@ public class PeopleService {
 
     @Transactional
     public ResponseEntity<PersonResponseDTO> save(PersonRequestDTO dto) {
-        boolean isMale = dto.getGender().equals("male");
-
         validatePerson(dto);
 
         Person saved = peopleRepository.save(convertToEntity(dto));
@@ -178,11 +179,13 @@ public class PeopleService {
         boolean isMale = man.getGender().equals("male");
 
         if (man.getIsGravid() && isMale) {
-            throw new EntityNotCreatedException("Gender Male should not be isGravid");
+            throw new EntityNotCreatedException("Мужчина не может быть беременным!");
         }
 
         if (isFuture(man.getDateOfBirth())) {
-            throw new EntityNotCreatedException("Date of Birth should not be future");
+            throw new EntityNotCreatedException(
+                    format("Дата рождения (%s) не может быть в будущем!",
+                            DATE_FORMAT.format(man.getDateOfBirth())));
         }
 
     }

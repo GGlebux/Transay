@@ -9,9 +9,14 @@ import java.util.Set;
 @AllArgsConstructor
 public class DecryptValueDTO{
     private int matchesCount;
+    private double percentage;
     private Set<String> indicators;
 
     public void increment(){
         matchesCount++;
+    }
+
+    public void calculateAndSetPercentage(int totalCount){
+        percentage = (double) matchesCount / totalCount;
     }
 }

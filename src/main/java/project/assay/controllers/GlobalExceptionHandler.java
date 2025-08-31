@@ -50,13 +50,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidFormatException.class)
     public ErrorResponse handleInvalidFormatException(InvalidFormatException e) {
         String errorField = e.getPath().getFirst().getFieldName();
-        String errorMessage = "";
+        String errorMessage;
         if (errorField.equals("dateOfBirth")) {
-            errorMessage = errorField + ": Invalid date format. Please use 'yyyy-MM-dd'";
+            errorMessage = errorField + ": Недопустимый формат даты. Пожалуйста используйте 'yyyy-MM-dd'";
         } else if (errorField.equals("isGravid")) {
-            errorMessage = errorField + ": Invalid isGravid format. Please use BOOLEAN";
+            errorMessage = errorField + ": Недопустимый формат isGravid. Пожалуйста используйте BOOLEAN";
         } else {
-            errorMessage = e.getOriginalMessage();
+            errorMessage = e.getLocalizedMessage();
         }
         return create(e, BAD_REQUEST, errorMessage);
     }
