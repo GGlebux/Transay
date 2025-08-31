@@ -189,7 +189,7 @@ public class MeasureService {
             String indicatorEngName = measure.getIndicator().getEngName();
 
             Transcript transcript = transcripts.get(indicatorEngName);
-            measure.getReferent().setTranscript(transcript);
+            measure.getReferent().setTranscripts(of(transcript));
 
             MeasureResponceDTO measureResponceDTO = convertToMeasureDTO(measure);
 

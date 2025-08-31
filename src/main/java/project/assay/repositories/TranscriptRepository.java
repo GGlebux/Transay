@@ -14,10 +14,11 @@ import java.util.Set;
 
 @Repository
 public interface TranscriptRepository extends JpaRepository<Transcript, Integer> {
+    @EntityGraph(attributePaths = {"falls", "raises"})
     @Query("SELECT t FROM Transcript t " +
             "WHERE t.name = :name " +
             "AND (t.gender = :gender or t.gender = 'both')")
-    Optional<Transcript> findByNameAndGender(@Param("name") String name,
+    Set<Transcript> findByNameAndGender(@Param("name") String name,
                                              @Param("gender") String gender);
 
 

@@ -7,6 +7,8 @@ import project.assay.models.Referent;
 import project.assay.models.Transcript;
 import project.assay.repositories.ReferentRepository;
 
+import java.util.Set;
+
 @Service
 @Transactional(readOnly = true)
 public class ReferentService {
@@ -24,7 +26,7 @@ public class ReferentService {
   public void enrich(Referent referent, Indicator indicator) {
     // Проверяем референтное состояние на данных момент
     String verdict = indicatorService.checkValue(indicator, referent.getCurrentValue());
-    Transcript transcript = transcriptService.findCorrect(indicator.getEngName(), indicator.getGender());
+    Set<Transcript> transcripts = transcriptService.findCorrect(indicator.getEngName(), indicator.getGender());
     switch (verdict) {
       case "fall":
         referent.setStatus("fall"); break;
@@ -33,7 +35,7 @@ public class ReferentService {
       case "ok":
         referent.setStatus("ok"); break;
     }
-    referent.setTranscript(transcript);
+    referent.setTranscripts(transcripts);
   }
 
   @Transactional

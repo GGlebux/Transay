@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Set;
 
 import static java.util.Comparator.comparingInt;
+import static java.util.Set.of;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.ResponseEntity.ok;
@@ -32,6 +33,15 @@ public class PeopleService {
     private final PeopleRepository peopleRepository;
     private final ModelMapper modelMapper;
     private final ReasonsService reasonsService;
+    private static final Set<String> maleExReasons;
+    private static final Set<String> femaleExReasons;
+
+    static {
+        maleExReasons = of("беременность",
+                "менструация",
+                "поликистоз яичников");
+        femaleExReasons = of("беременность");
+    }
 
     @Autowired
     public PeopleService(PeopleRepository peopleRepository, ModelMapper modelMapper, ReasonsService reasonsService) {
@@ -49,7 +59,7 @@ public class PeopleService {
                 .toList());
     }
 
-    public Person findById(int id){
+    public Person findById(int id) {
         return peopleRepository
                 .findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Person with id=" + id + " not found!"));
@@ -66,15 +76,15 @@ public class PeopleService {
         validatePerson(dto);
 
         Person saved = peopleRepository.save(convertToEntity(dto));
-        if (isMale) {
-            PersonResponseDTO realMan = beRealMan(saved);
-            return ok(realMan);
-        }
 
-        return status(CREATED).body(convertToResponseDTO(saved));
-
+        return switch (dto.getGender()) {
+            case "female" -> ok(beRealWoman(saved, femaleExReasons));
+            case "male" -> ok(beRealMan(saved, maleExReasons));
+            default -> status(CREATED).body(convertToResponseDTO(saved));
+        };
     }
 
+    // ToDo доработать (исключенные причины)
     @Transactional
     public ResponseEntity<PersonResponseDTO> update(int id, PersonRequestDTO personRequestDTO) {
         Person personFromDB = this.findById(id);
@@ -94,14 +104,27 @@ public class PeopleService {
     }
 
     @Transactional
-    public PersonResponseDTO beRealMan(Person man) {
+    public PersonResponseDTO beRealMan(Person man, Set<String> exReasons) {
         Set<Reason> maleExReasons = reasonsService
-                .findByNameIn(Set
-                        .of("беременность", "менструация"));
+                .findByNameIn(exReasons);
         man
                 .getExcludedReasons()
                 .addAll(maleExReasons);
         return convertToResponseDTO(peopleRepository.save(man));
+    }
+
+    @Transactional
+    public PersonResponseDTO beRealWoman(Person woman, Set<String> exReasons) {
+        // Если беременна, то не добавляем исключенные причины
+        if (woman.getIsGravid()){
+            return convertToResponseDTO(woman);
+        }
+        Set<Reason> femaleExReasons = reasonsService
+                .findByNameIn(exReasons);
+        woman
+                .getExcludedReasons()
+                .addAll(femaleExReasons);
+        return convertToResponseDTO(peopleRepository.save(woman));
     }
 
     public Set<Reason> findAllEx(int personId) {
@@ -115,7 +138,7 @@ public class PeopleService {
 
     @Transactional
     public ResponseEntity<Set<Reason>> createEx(int personId, int reasonId) {
-        return this.createManyEx(personId, Set.of(reasonId));
+        return this.createManyEx(personId, of(reasonId));
     }
 
     @Transactional
@@ -151,7 +174,7 @@ public class PeopleService {
         return modelMapper.map(person, PersonRequestDTO.class);
     }
 
-    private void validatePerson(PersonRequestDTO man){
+    private void validatePerson(PersonRequestDTO man) {
         boolean isMale = man.getGender().equals("male");
 
         if (man.getIsGravid() && isMale) {

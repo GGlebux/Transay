@@ -27,9 +27,4 @@ public class IndicatorGroup {
 
     @Column(name = "indicators")
     private List<String> indicatorsWithUnit;
-
-    public IndicatorGroup(String groupName, List<String> indicatorsWithUnit) {
-        this.groupName = groupName;
-        this.indicatorsWithUnit = indicatorsWithUnit;
-    }
 }

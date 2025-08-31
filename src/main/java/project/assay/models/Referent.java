@@ -9,9 +9,11 @@ import lombok.Setter;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static jakarta.persistence.FetchType.EAGER;
 import static jakarta.persistence.GenerationType.IDENTITY;
+import static java.util.stream.Collectors.toSet;
 
 @Entity
 @Table(name = "referent")
@@ -34,9 +36,13 @@ public class Referent {
     @Column(name = "status")
     private String status;
 
-    @OneToOne(fetch = EAGER)
-    @JoinColumn(name = "transcript_id", referencedColumnName = "id")
-    private Transcript transcript;
+    @ManyToMany(fetch = EAGER)
+    @JoinTable(
+            name = "referent_transcript",
+            joinColumns = @JoinColumn(name = "referent_id"),
+            inverseJoinColumns = @JoinColumn(name = "transcript_id")
+    )
+    private Set<Transcript> transcripts;
 
     @Override
     public String toString() {
@@ -45,16 +51,20 @@ public class Referent {
                 ", currentValue=" + currentValue +
                 ", regDate=" + regDate +
                 ", status='" + status + '\'' +
-                ", versict=" + transcript +
+                ", verdict=" + transcripts +
                 '}';
     }
 
-
-    // ToDo: узкое горлышко - оптимизировать
     public Set<Reason> getVerdict(){
         return switch (status) {
-            case "fall" -> transcript.getFalls();
-            case "raise" -> transcript.getRaises();
+            case "fall" -> transcripts
+                    .stream()
+                    .flatMap(t -> t.getFalls().stream())
+                    .collect(toSet());
+            case "raise" -> transcripts
+                    .stream()
+                    .flatMap(t -> t.getRaises().stream())
+                    .collect(toSet());
             default -> new HashSet<>();
         };
     }

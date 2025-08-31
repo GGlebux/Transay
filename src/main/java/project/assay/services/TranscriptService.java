@@ -11,6 +11,7 @@ import project.assay.models.Reason;
 import project.assay.models.Transcript;
 import project.assay.repositories.TranscriptRepository;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,13 +45,18 @@ public class TranscriptService {
 
     public Transcript findById(int id) {
         return repo.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(format("Transcript with id=%d not found", id)));
+                .orElseThrow(() -> new EntityNotFoundException(format("Транскрипция c id='%d' не найдена", id)));
     }
 
-    public Transcript findCorrect(String name, String gender) {
-        return repo.findByNameAndGender(name, gender)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        format("Transcript with name='%s' and gender='%s' not found", name, gender)));
+    public Set<Transcript> findCorrect(String name, String gender) {
+        Set<Transcript> correctTranscripts = repo.findByNameAndGender(name, gender);
+        if (correctTranscripts.isEmpty()) {
+            throw new EntityNotFoundException(
+                    format("Транскрипция с именем='%s' и гендером='%s' не найдена", name, gender));
+        }
+        return correctTranscripts;
+
+
     }
 
     public Set<Transcript> findAllByNameIn(Set<String> names, String gender) {
