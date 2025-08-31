@@ -24,4 +24,4 @@ spring:
       filter:
         enabled: true
 server:
-  address: ::
+  address: "::"
