@@ -23,5 +23,3 @@ spring:
     hiddenmethod:
       filter:
         enabled: true
-server:
-  address: "::"
