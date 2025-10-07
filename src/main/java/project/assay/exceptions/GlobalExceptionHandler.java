@@ -1,4 +1,4 @@
-package project.assay.controllers;
+package project.assay.exceptions;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import org.springframework.validation.FieldError;
@@ -6,8 +6,6 @@ import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import project.assay.exceptions.EntityNotCreatedException;
-import project.assay.exceptions.EntityNotFoundException;
 
 import java.util.HashMap;
 import java.util.List;

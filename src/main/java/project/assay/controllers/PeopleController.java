@@ -95,20 +95,20 @@ public class PeopleController {
 
     @PostMapping("/{personId}/ex_reasons")
     public ResponseEntity<Set<Reason>> addExReason(@PathVariable("personId") int personId,
-                                              @RequestBody Integer reasonId) {
-        return service.createEx(personId, reasonId);
+                                              @RequestBody String reason) {
+        return service.createEx(personId, reason);
     }
 
     @PostMapping("/{personId}/ex_reasons/many")
     public ResponseEntity<Set<Reason>> addExManyReason(@PathVariable("personId") int personId,
-                                              @RequestBody Set<Integer> reasonId) {
-        return service.createManyEx(personId, reasonId);
+                                              @RequestBody Set<String> reasons) {
+        return service.createManyEx(personId, reasons);
     }
 
-    @DeleteMapping("/{personId}/ex_reasons/{reasonId}")
+    @DeleteMapping("/{personId}/ex_reasons/{reason}")
     public ResponseEntity<HttpStatus> deleteExReason(@PathVariable("personId") int personId,
-                                                     @PathVariable("reasonId") int reasonId) {
-        return service.deleteEx(personId, reasonId);
+                                                     @PathVariable("reason") String reason) {
+        return service.deleteEx(personId, reason);
     }
 
 

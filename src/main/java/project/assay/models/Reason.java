@@ -8,7 +8,8 @@ import org.jetbrains.annotations.NotNull;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static java.lang.Integer.compare;
 
-@Entity(name = "reason")
+@Entity
+@Table(name = "reason", indexes = @Index(columnList = "name"))
 @Data
 @NoArgsConstructor
 public class Reason implements Comparable<Reason>{

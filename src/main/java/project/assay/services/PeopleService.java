@@ -138,24 +138,24 @@ public class PeopleService {
     }
 
     @Transactional
-    public ResponseEntity<Set<Reason>> createEx(int personId, int reasonId) {
-        return this.createManyEx(personId, of(reasonId));
+    public ResponseEntity<Set<Reason>> createEx(int personId, String reason) {
+        return this.createManyEx(personId, of(reason));
     }
 
     @Transactional
-    public ResponseEntity<Set<Reason>> createManyEx(int personId, Set<Integer> reasonIds) {
+    public ResponseEntity<Set<Reason>> createManyEx(int personId, Set<String> reasons) {
         Person person = this.findById(personId);
-        Set<Reason> reasons = reasonsService.findByIdIn(reasonIds);
-        person.getExcludedReasons().addAll(reasons);
+        Set<Reason> allFromDB = reasonsService.findByNameIn(reasons);
+        person.getExcludedReasons().addAll(allFromDB);
         return ok(peopleRepository
                 .save(person)
                 .getExcludedReasons());
     }
 
     @Transactional
-    public ResponseEntity<HttpStatus> deleteEx(int personId, int reasonId) {
+    public ResponseEntity<HttpStatus> deleteEx(int personId, String reason) {
         Person person = this.findById(personId);
-        Reason reason = reasonsService.findById(reasonId);
+        Reason fromDB = reasonsService.findByName(reason);
         person.getExcludedReasons().remove(reason);
         peopleRepository.save(person);
         return status(NO_CONTENT).build();
