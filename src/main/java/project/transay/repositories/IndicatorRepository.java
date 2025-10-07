@@ -1,0 +1,31 @@
+package project.transay.repositories;
+
+import java.util.List;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+import project.transay.models.ConditionEnum;
+import project.transay.models.GenderEnum;
+import project.transay.models.Indicator;
+
+@Repository
+public interface IndicatorRepository extends JpaRepository<Indicator, Integer> {
+
+  Optional<Indicator> getIndicatorById(int Id);
+
+  @EntityGraph(attributePaths = {"measure"})
+  @Query("SELECT i FROM Indicator i " +
+          "WHERE i.rusName = :name " +
+          "AND i.units = :units " +
+          "AND (i.gender = :gender or i.gender = project.transay.models.GenderEnum.BOTH) " +
+          "AND i.condition = :condition " +
+          "AND :age BETWEEN i.minAge and i.maxAge")
+  List<Indicator> findAllCorrect(@Param(("name")) String name,
+                                 @Param("units") String units,
+                                 @Param("gender") GenderEnum gender,
+                                 @Param("condition") ConditionEnum condition,
+                                 @Param("age") Integer age);
+}

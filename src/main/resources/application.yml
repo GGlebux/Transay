@@ -14,12 +14,12 @@ spring:
       hibernate:
         show_sql: true
         hbm2ddl:
-          auto: validate
+          auto: update
         dialect: org.hibernate.dialect.PostgreSQLDialect
     open-in-view: false
   mvc:
     servlet:
       path: /api
-    hiddenmethod:
+    hidden method:
       filter:
         enabled: true

@@ -1,0 +1,23 @@
+package project.transay.dto.responses;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+import java.util.Set;
+
+@Data
+@AllArgsConstructor
+public class DecryptReasonDTO {
+    private int reasonId;
+    private int matchesCount;
+    private double percentage;
+    private Set<String> indicators;
+
+    public void increment(){
+        matchesCount++;
+    }
+
+    public void calculateAndSetPercentage(int totalCount){
+        percentage = (double) matchesCount / totalCount;
+    }
+}
