@@ -93,22 +93,17 @@ public class PeopleController {
         return service.findAllExWithResponse(personId);
     }
 
-    @PostMapping("/{personId}/ex_reasons")
-    public ResponseEntity<Set<Reason>> addExReason(@PathVariable("personId") int personId,
-                                              @RequestBody String reason) {
-        return service.createEx(personId, reason);
-    }
 
-    @PostMapping("/{personId}/ex_reasons/many")
+    @PostMapping("/{personId}/ex_reasons")
     public ResponseEntity<Set<Reason>> addExManyReason(@PathVariable("personId") int personId,
-                                              @RequestBody Set<String> reasons) {
+                                              @RequestBody Set<Integer> reasons) {
         return service.createManyEx(personId, reasons);
     }
 
-    @DeleteMapping("/{personId}/ex_reasons/{reason}")
+    @DeleteMapping("/{personId}/ex_reasons/{reasonId}")
     public ResponseEntity<HttpStatus> deleteExReason(@PathVariable("personId") int personId,
-                                                     @PathVariable("reason") String reason) {
-        return service.deleteEx(personId, reason);
+                                                     @PathVariable("reasonId") Integer reasonId) {
+        return service.deleteEx(personId, reasonId);
     }
 
 

@@ -332,7 +332,7 @@ public class MeasureService {
                     valueToUpdate.increment();
                     decryptedMeasures.put(name, valueToUpdate);
                 } else {
-                    DecryptValueDTO newValue = new DecryptValueDTO(1, 0d, new HashSet<>(of(rusIndicatorName)));
+                    DecryptValueDTO newValue = new DecryptValueDTO(reason.getId(),1, 0d, new HashSet<>(of(rusIndicatorName)));
                     decryptedMeasures.put(name, newValue);
                 }
             }

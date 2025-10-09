@@ -137,15 +137,11 @@ public class PeopleService {
         return ok(this.findAllEx(personId));
     }
 
-    @Transactional
-    public ResponseEntity<Set<Reason>> createEx(int personId, String reason) {
-        return this.createManyEx(personId, of(reason));
-    }
 
     @Transactional
-    public ResponseEntity<Set<Reason>> createManyEx(int personId, Set<String> reasons) {
+    public ResponseEntity<Set<Reason>> createManyEx(int personId, Set<Integer> ids) {
         Person person = this.findById(personId);
-        Set<Reason> allFromDB = reasonsService.findByNameIn(reasons);
+        Set<Reason> allFromDB = reasonsService.findByIdIn(ids);
         person.getExcludedReasons().addAll(allFromDB);
         return ok(peopleRepository
                 .save(person)
@@ -153,10 +149,10 @@ public class PeopleService {
     }
 
     @Transactional
-    public ResponseEntity<HttpStatus> deleteEx(int personId, String reason) {
+    public ResponseEntity<HttpStatus> deleteEx(int personId, int reasonId) {
         Person person = this.findById(personId);
-        Reason fromDB = reasonsService.findByName(reason);
-        person.getExcludedReasons().remove(reason);
+        Reason fromDB = reasonsService.findById(reasonId);
+        person.getExcludedReasons().remove(fromDB);
         peopleRepository.save(person);
         return status(NO_CONTENT).build();
     }

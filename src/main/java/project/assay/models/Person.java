@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.util.Set;
 import java.util.TreeSet;
 
+import static jakarta.persistence.CascadeType.*;
 import static jakarta.persistence.FetchType.EAGER;
 import static jakarta.persistence.FetchType.LAZY;
 import static java.lang.String.format;
@@ -39,7 +40,7 @@ public class Person {
     @Column(name = "is_gravid")
     private Boolean isGravid;
 
-    @ManyToMany(fetch = EAGER)
+    @ManyToMany(fetch = EAGER, cascade = {MERGE, PERSIST, REFRESH})
     @JoinTable(
             name = "excluded_reason",
             joinColumns = @JoinColumn(name = "person_id"),

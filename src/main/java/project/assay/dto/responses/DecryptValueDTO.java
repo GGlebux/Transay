@@ -8,6 +8,7 @@ import java.util.Set;
 @Data
 @AllArgsConstructor
 public class DecryptValueDTO{
+    private int reasonId;
     private int matchesCount;
     private double percentage;
     private Set<String> indicators;

@@ -9,12 +9,12 @@ import project.assay.exceptions.EntityNotFoundException;
 import project.assay.models.Reason;
 import project.assay.repositories.ReasonRepository;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
 import static java.lang.String.format;
-import static java.util.stream.Collectors.toSet;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.ResponseEntity.ok;
@@ -36,7 +36,8 @@ public class ReasonsService {
                         format("Причина с id='%d' не найдена!", id)));
     }
 
-    public Set<Reason> findByIdIn(Set<Integer> ids){
+    @Transactional
+    public Set<Reason> findByIdIn(Set<Integer> ids) {
         return new TreeSet<>(repo.findAllById(ids));
     }
 
@@ -45,22 +46,21 @@ public class ReasonsService {
         return ok(repo.findAll());
     }
 
-    public ResponseEntity<Reason> findByIdWithResponse(int id){
+    public ResponseEntity<Reason> findByIdWithResponse(int id) {
         return ok(this.findById(id));
     }
 
-    public Reason findByName(String name){
+    public Reason findByName(String name) {
         return repo
                 .findByName(name)
                 .orElseThrow(() -> new EntityNotFoundException(
                         format("Причина c именем='%s' не найдена!", name)));
     }
-    public Set<Reason> findByNameIn(Set<String> names){
-        return repo
-                .findByNameIn(names)
-                .stream()
-                .limit(names.size())
-                .collect(toSet());
+
+    @Transactional
+    public Set<Reason> findByNameIn(Set<String> names) {
+        List<Reason> byNameIn = repo.findByNameIn(names);
+        return new HashSet<>(byNameIn);
     }
 
     @Transactional
