@@ -10,8 +10,6 @@ import project.assay.repositories.ReferentRepository;
 
 import java.util.Set;
 
-import static project.assay.models.enums.IndicatorGender.convert;
-
 @Service
 @Transactional(readOnly = true)
 public class ReferentService {
@@ -34,7 +32,7 @@ public class ReferentService {
 
     Set<Transcript> transcripts = transcriptService
             .findCorrect(indicator.getEngName(),
-                    convert((indicator.getGender())));
+                    indicator.getGender());
 
     referent.setStatus(verdict);
     referent.setTranscripts(transcripts);

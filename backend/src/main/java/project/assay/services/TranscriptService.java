@@ -8,7 +8,7 @@ import project.assay.dto.requests.TranscriptRequestDTO;
 import project.assay.exceptions.EntityNotFoundException;
 import project.assay.models.Reason;
 import project.assay.models.Transcript;
-import project.assay.models.enums.PersonGender;
+import project.assay.models.enums.IndicatorGender;
 import project.assay.repositories.TranscriptRepository;
 
 import java.util.List;
@@ -44,7 +44,7 @@ public class TranscriptService {
                         format("Транскрипция c id='%d' не найдена", id)));
     }
 
-    public Set<Transcript> findCorrect(String name, PersonGender gender) {
+    public Set<Transcript> findCorrect(String name, IndicatorGender gender) {
         Set<Transcript> correctTranscripts = repo.findByNameAndGender(name, gender);
         if (correctTranscripts.isEmpty()) {
             throw new EntityNotFoundException(
@@ -55,7 +55,7 @@ public class TranscriptService {
         return correctTranscripts;
     }
 
-    public Set<Transcript> findAllByNameIn(Set<String> names, PersonGender gender) {
+    public Set<Transcript> findAllByNameIn(Set<String> names, IndicatorGender gender) {
         return repo.findAllByNameIn(names, gender);
     }
 

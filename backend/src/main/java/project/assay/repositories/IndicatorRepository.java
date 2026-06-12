@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import project.assay.models.Indicator;
 import project.assay.models.enums.Condition;
-import project.assay.models.enums.PersonGender;
+import project.assay.models.enums.IndicatorGender;
 
 @Repository
 public interface IndicatorRepository extends JpaRepository<Indicator, Integer> {
@@ -25,7 +25,7 @@ public interface IndicatorRepository extends JpaRepository<Indicator, Integer> {
           "AND :age BETWEEN i.minAge and i.maxAge")
   List<Indicator> findAllCorrect(@Param(("name")) String name,
                                  @Param("units") String units,
-                                 @Param("gender") PersonGender gender,
+                                 @Param("gender") IndicatorGender gender,
                                  @Param("condition") Condition condition,
                                  @Param("age") Integer age);
 }

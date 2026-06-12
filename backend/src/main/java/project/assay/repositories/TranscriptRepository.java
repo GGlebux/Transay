@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import project.assay.models.Transcript;
-import project.assay.models.enums.PersonGender;
+import project.assay.models.enums.IndicatorGender;
 
 import java.util.Set;
 
@@ -17,7 +17,7 @@ public interface TranscriptRepository extends JpaRepository<Transcript, Integer>
             "WHERE t.name = :name " +
             "AND (t.gender = :gender or t.gender = project.assay.models.enums.IndicatorGender.BOTH)")
     Set<Transcript> findByNameAndGender(@Param("name") String name,
-                                             @Param("gender") PersonGender gender);
+                                             @Param("gender") IndicatorGender gender);
 
 
     @EntityGraph(attributePaths = {"falls", "raises"})
@@ -25,5 +25,5 @@ public interface TranscriptRepository extends JpaRepository<Transcript, Integer>
             " WHERE t.name IN :names " +
             "AND (t.gender = :gender or t.gender = project.assay.models.enums.IndicatorGender.BOTH)")
     Set<Transcript> findAllByNameIn(@Param("names") Set<String> names,
-                                        @Param("gender") PersonGender gender);
+                                        @Param("gender") IndicatorGender gender);
 }

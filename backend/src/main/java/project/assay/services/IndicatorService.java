@@ -11,6 +11,7 @@ import project.assay.exceptions.EntityNotFoundException;
 import project.assay.exceptions.ValidationException;
 import project.assay.models.Indicator;
 import project.assay.models.Person;
+import project.assay.models.enums.IndicatorGender;
 import project.assay.models.enums.ReferentStatus;
 import project.assay.repositories.IndicatorRepository;
 
@@ -106,7 +107,7 @@ public class IndicatorService {
         int age = getDaysBetween(dateOfBirth, regDate);
         return indicatorRepository.findAllCorrect(dto.getName(),
                 dto.getUnits(),
-                person.getGender(),
+                IndicatorGender.valueOf(person.getGender().name()),
                 person.getCondition(),
                 age);
     }
