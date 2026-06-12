@@ -5,6 +5,9 @@
 FROM maven:3.9-eclipse-temurin-23 AS build
 WORKDIR /app
 
+# Повторные попытки на флакающий Maven Central (иногда обрывает соединение).
+ENV MAVEN_OPTS="-Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true -Dmaven.wagon.httpconnectionManager.ttlSeconds=120"
+
 # Сначала только pom.xml — слой с зависимостями кешируется, пока pom не меняется.
 COPY pom.xml .
 RUN mvn -q -B dependency:go-offline

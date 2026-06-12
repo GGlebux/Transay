@@ -53,24 +53,59 @@ npm run dev                                # Vite на :5173
 
 `vite.config.ts` проксирует `/api` → `http://localhost:8081`, так что фронт работает с тем же бэком.
 
-## Запуск на сервере
+## Запуск на сервере (из готовых образов, без исходников)
 
-1. Установи Docker + Compose, склонируй репозиторий.
-2. Создай `.env` с **боевыми** значениями:
-   - сильный `POSTGRES_PASSWORD` и совпадающий `DB_PASS`;
-   - новый `JWT_SECRET` — ровно 32 байта в base64: `openssl rand -base64 32`;
-   - `FRONT_URL=https://твой-домен`;
-   - реальные `EMAIL_*`, если нужна почта.
-3. `docker compose up -d --build`.
-4. Поставь перед стеком reverse-proxy с TLS (Caddy/Traefik/nginx): домен → `frontend` (порт 3000
-   или поменяй маппинг на `80:80`). Наружу публикуй только фронт; порты `8081`/`5433` оставь для
-   локальной отладки или убери из `ports`.
+Образы собирает CI и кладёт в DockerHub, поэтому на сервере нужны только **два файла** —
+`docker-compose.prod.yml` и `.env` (с боевыми секретами). Исходный код клонировать не надо.
 
-### Образы и CI
+```bash
+mkdir transay && cd transay
+curl -fsSL https://raw.githubusercontent.com/GGlebux/Transay/main/docker-compose.prod.yml -o docker-compose.prod.yml
+curl -fsSL https://raw.githubusercontent.com/GGlebux/Transay/main/.env.example -o .env
+nano .env          # вписать боевые значения (см. ниже), ОДИН раз
+docker compose -f docker-compose.prod.yml up -d --pull always
+```
+
+Эта же команда обновляет стек: `--pull always` тянет свежие образы перед перезапуском.
+Открыто наружу только `frontend` (порт 80); backend и postgres — во внутренней сети.
+
+Боевой `.env` (отличия от dev-дефолтов):
+- сильный `POSTGRES_PASSWORD` и совпадающий `DB_PASS`;
+- новый `JWT_SECRET` — ровно 32 байта в base64: `openssl rand -base64 32`;
+- `FRONT_URL=https://твой-домен`;
+- реальные `EMAIL_*`, если нужна почта.
+
+> **Секреты не коммить.** В репозитории только `.env.example` (шаблон). Реальный `.env` живёт
+> на сервере. Если репозиторий приватный — тяни raw-файлы с заголовком `Authorization: token <PAT>`
+> или копируй их по scp.
+
+### TLS / домен
+Перед стеком поставь reverse-proxy с автоматическим HTTPS. Минимальный Caddy рядом с prod-стеком:
+
+```bash
+# Caddyfile:  твой-домен { reverse_proxy transay-frontend:80 }
+docker run -d --name caddy --restart unless-stopped \
+  --network transay_default -p 80:80 -p 443:443 \
+  -v $PWD/Caddyfile:/etc/caddy/Caddyfile -v caddy_data:/data \
+  caddy
+```
+(тогда в `docker-compose.prod.yml` у `frontend` маппинг порта `80:80` можно убрать — наружу торчит только Caddy.)
+
+### CI/CD
 `.github/workflows/build-and-push.yml` на push в `main` собирает и пушит
 `gglebux/transay-backend:latest` и `gglebux/transay-frontend:latest` в DockerHub
-(нужны секреты репозитория `DOCKER_USERNAME` / `DOCKER_PASSWORD`). На сервере можно либо собирать
-локально (`--build`), либо тянуть готовые образы (убрать блоки `build:` и оставить `image:`).
+(нужны секреты репозитория `DOCKER_USERNAME` / `DOCKER_PASSWORD` — Docker Hub access token).
+
+Автодеплой без ручного `up`: подними watchtower (он раз в минуту проверяет DockerHub и
+перезапускает помеченные контейнеры на новых образах):
+```bash
+docker compose --profile autoupdate -f docker-compose.prod.yml up -d --pull always
+```
+Полный цикл: `git push` → CI собирает и пушит образы → watchtower на сервере подхватывает.
+
+### Сборка из исходников на сервере (альтернатива)
+Если не хочешь DockerHub — склонируй репо и собери на месте: `docker compose up -d --build`
+(использует `docker-compose.yml`, который собирает образы локально).
 
 ## Заметки
 - `frontend/.env.production` зашивает `VITE_API_BASE_URL=/api` в сборку — менять не нужно для
