@@ -2,10 +2,8 @@ import { useEffect, useState } from "react";
 import { peopleApi } from "../../api/peopleApi";
 import type { Person } from "../../api/types";
 import { formatShort } from "../../utils/date";
+import { enumLabel } from "../../utils/labels";
 import "../../styles/admin.css";
-
-const GENDER_RU: Record<string, string> = { MALE: "Мужской", FEMALE: "Женский" };
-const COND_RU: Record<string, string> = { BASE: "Базовое", GRAVID: "Беременность", MENSES: "Менструация" };
 
 const calcAge = (iso: string): string => {
   if (!iso) return "";
@@ -75,10 +73,10 @@ export default function PeopleList() {
                 <tr key={p.id}>
                   <td>{p.id}</td>
                   <td>{p.name}</td>
-                  <td>{GENDER_RU[p.gender] ?? p.gender}</td>
+                  <td>{enumLabel(p.gender)}</td>
                   <td>{formatShort(p.dateOfBirth)}</td>
                   <td>{calcAge(p.dateOfBirth)}</td>
-                  <td>{COND_RU[p.condition] ?? p.condition}</td>
+                  <td>{enumLabel(p.condition)}</td>
                   <td>
                     {p.excludedReasons?.length ? (
                       p.excludedReasons.map((r) => (

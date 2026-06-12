@@ -1,18 +1,21 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 
+type Role = "ADMIN" | "EDITOR" | "USER";
+
 export const RequireRole = ({
   roleRequired,
   children,
 }: {
-  roleRequired: "ADMIN" | "EDITOR" | "USER";
+  roleRequired: Role | Role[];
   children: React.ReactNode;
 }) => {
   const { role, loading } = useAuth();
 
   if (loading) return null;
 
-  if (role !== roleRequired) {
+  const allowed = Array.isArray(roleRequired) ? roleRequired : [roleRequired];
+  if (!role || !allowed.includes(role)) {
     return <Navigate to="/cabinet" replace />;
   }
 

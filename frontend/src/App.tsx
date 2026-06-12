@@ -60,14 +60,14 @@ export default function App() {
         <Route
           path="/admin"
           element={
-            <RequireRole roleRequired="ADMIN">
+            <RequireRole roleRequired={["ADMIN", "EDITOR"]}>
               <Layout>
                 <AdminLayout />
               </Layout>
             </RequireRole>
           }
         >
-          <Route index element={<Navigate to="users" replace />} />
+          <Route index element={<Navigate to="indicators" replace />} />
           <Route path="users" element={<Users />} />
           <Route path="people" element={<PeopleList />} />
           <Route path="indicators" element={<Indicators />} />

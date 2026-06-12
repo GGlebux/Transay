@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { customersApi } from "../../api/customersApi";
 import type { Customer, CustomerRole } from "../../api/types";
+import { enumLabel } from "../../utils/labels";
 import "../../styles/admin.css";
 
 const ROLES: CustomerRole[] = ["USER", "EDITOR", "ADMIN"];
@@ -78,7 +79,7 @@ export default function Users() {
                 <tr key={u.id}>
                   <td>{u.id}</td>
                   <td>{u.email}</td>
-                  <td><span className="admin-muted">{u.status}</span></td>
+                  <td><span className="admin-muted">{enumLabel(u.status)}</span></td>
                   <td>
                     <span className={`status-badge ${u.verified ? "ok" : "no"}`}>
                       {u.verified ? "✓" : "✗"}
@@ -88,7 +89,7 @@ export default function Users() {
                   <td className="admin-muted">{String(u.createdAt).slice(0, 10)}</td>
                   <td>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span className={`role-pill role-${u.role}`}>{u.role}</span>
+                      <span className={`role-pill role-${u.role}`}>{enumLabel(u.role)}</span>
                       <select
                         className="admin-search"
                         style={{ minWidth: 110 }}
@@ -97,7 +98,7 @@ export default function Users() {
                         onChange={(e) => changeRole(u, e.target.value as CustomerRole)}
                       >
                         {ROLES.map((r) => (
-                          <option key={r} value={r}>{r}</option>
+                          <option key={r} value={r}>{enumLabel(r)}</option>
                         ))}
                       </select>
                     </div>

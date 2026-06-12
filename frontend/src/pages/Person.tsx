@@ -295,10 +295,7 @@ export default function Person() {
       setValue("");
     } catch (err: any) {
       console.error(err);
-      const status = err?.response?.status;
-      if (status === 500) alert("Ошибка: измерение на эту дату уже существует!");
-      else if (status === 400) alert("Ошибка валидации: проверьте введённые данные.");
-      else alert(`Ошибка при сохранении (${status || "нет кода"})`);
+      alert(err?.response?.data?.detail || "Ошибка при сохранении измерения");
     } finally {
       setSaving(false);
     }
@@ -341,7 +338,10 @@ export default function Person() {
   }, [displayGroups.length]);
 
   const handleDecrypt = async () => {
-    if (!decryptDate) return;
+    if (!decryptDate) {
+      alert("Выберите дату для расшифровки");
+      return;
+    }
     setLoadingDecrypt(true);
     try {
       const data = await measuresApi.decrypt(decryptDate);
@@ -358,6 +358,7 @@ export default function Person() {
         largeValues: dataItems.slice(0, 8),
         smallValues: dataItems.slice(8),
       });
+      if (dataItems.length === 0) alert("На выбранную дату нет данных для расшифровки");
     } catch (e) {
       console.error("Ошибка при расшифровке:", e);
       alert("Ошибка при загрузке расшифровки");

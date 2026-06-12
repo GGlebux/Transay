@@ -31,12 +31,14 @@ export default function Sidebar({ isOpen = false, onClose }: Props) {
                 <img src={User} alt="" /> Профиль
               </NavLink>
             </li>
-            <li>
-              <NavLink to="/measures" onClick={onClose} className={({ isActive }) => (isActive ? "active" : "")}>
-                <img src={Users} alt="" /> Мои анализы
-              </NavLink>
-            </li>
-            {role === "ADMIN" && (
+            {role === "USER" && (
+              <li>
+                <NavLink to="/measures" onClick={onClose} className={({ isActive }) => (isActive ? "active" : "")}>
+                  <img src={Users} alt="" /> Мои анализы
+                </NavLink>
+              </li>
+            )}
+            {(role === "ADMIN" || role === "EDITOR") && (
               <li>
                 <NavLink to="/admin" onClick={onClose} className={({ isActive }) => (isActive ? "active" : "")}>
                   <img src={Forms} alt="" /> Админка

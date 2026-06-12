@@ -4,6 +4,7 @@ import { transcriptsApi } from "../../api/transcriptsApi";
 import { reasonsApi } from "../../api/reasonsApi";
 import { MultiSelectWithSearch } from "../../components/Trans_Indicat/MultiSelectWithSearch";
 import type { Transcript, TranscriptPayload, IndicatorGender, Reason } from "../../api/types";
+import { enumLabel } from "../../utils/labels";
 import "../../styles/admin.css";
 
 const GENDERS: IndicatorGender[] = ["MALE", "FEMALE", "BOTH"];
@@ -120,7 +121,7 @@ export default function Transcripts() {
                 <tr key={t.id}>
                   <td>{t.id}</td>
                   <td>{t.name}</td>
-                  <td>{t.gender}</td>
+                  <td>{enumLabel(t.gender)}</td>
                   <td>
                     {t.falls?.length ? (
                       t.falls.map((r) => <span key={r.id} className="chip">{r.name}</span>)
@@ -166,7 +167,7 @@ export default function Transcripts() {
               <div className="admin-field">
                 <label>Пол</label>
                 <select value={form.gender} onChange={(e) => setForm({ ...form, gender: e.target.value as IndicatorGender })}>
-                  {GENDERS.map((g) => <option key={g} value={g}>{g}</option>)}
+                  {GENDERS.map((g) => <option key={g} value={g}>{enumLabel(g)}</option>)}
                 </select>
               </div>
             </div>

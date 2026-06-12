@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import { indicatorsApi } from "../../api/indicatorsApi";
 import { unitsApi } from "../../api/unitsApi";
 import type { Indicator, IndicatorPayload, IndicatorGender, Condition, AgeRange } from "../../api/types";
+import { enumLabel } from "../../utils/labels";
 import "../../styles/admin.css";
 
 const GENDERS: IndicatorGender[] = ["MALE", "FEMALE", "BOTH"];
@@ -159,8 +160,8 @@ export default function Indicators() {
                   <td>{it.id}</td>
                   <td>{it.rusName}</td>
                   <td className="admin-muted">{it.engName}</td>
-                  <td>{it.gender}</td>
-                  <td>{it.condition}</td>
+                  <td>{enumLabel(it.gender)}</td>
+                  <td>{enumLabel(it.condition)}</td>
                   <td className="admin-muted">{ageToStr(it.minAge)} – {ageToStr(it.maxAge)}</td>
                   <td>{it.minValue} – {it.maxValue}</td>
                   <td>{it.units || "—"}</td>
@@ -202,13 +203,13 @@ export default function Indicators() {
               <div className="admin-field">
                 <label>Пол</label>
                 <select value={form.gender} onChange={(e) => setForm({ ...form, gender: e.target.value as IndicatorGender })}>
-                  {GENDERS.map((g) => <option key={g} value={g}>{g}</option>)}
+                  {GENDERS.map((g) => <option key={g} value={g}>{enumLabel(g)}</option>)}
                 </select>
               </div>
               <div className="admin-field">
                 <label>Состояние</label>
                 <select value={form.condition} onChange={(e) => setForm({ ...form, condition: e.target.value as Condition })}>
-                  {CONDITIONS.map((c) => <option key={c} value={c}>{c}</option>)}
+                  {CONDITIONS.map((c) => <option key={c} value={c}>{enumLabel(c)}</option>)}
                 </select>
               </div>
             </div>
