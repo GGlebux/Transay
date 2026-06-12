@@ -1,0 +1,14 @@
+# Не тащим в build-контекст локальные (Windows) зависимости и артефакты —
+# иначе COPY . . перезатрёт linux-node_modules и vite/esbuild сломаются.
+node_modules
+dist
+.git
+.gitignore
+*.local
+npm-debug.log*
+.vscode
+.idea
+Dockerfile
+.dockerignore
+docker-compose.yml
+README.md

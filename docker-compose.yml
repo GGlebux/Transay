@@ -1,0 +1,52 @@
+# Полный стек Transay: PostgreSQL + backend (Spring Boot) + frontend (nginx).
+# Локальный запуск:  docker compose up --build   →  http://localhost:3000
+# Переменные берутся из .env в этой же папке (скопируй из .env.example).
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: transay-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-transay}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"           # хост:контейнер — наружу 5433, чтобы не конфликтовать с локальным PG
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-transay}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+    image: gglebux/transay-backend:latest
+    container_name: transay-backend      # имя используется фронт-nginx'ом как upstream
+    env_file:
+      - .env
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+    depends_on:
+      postgres:
+        condition: service_healthy        # стартуем бэк только когда БД готова принимать соединения
+    ports:
+      - "8081:8080"           # бэк доступен на хосте :8081 (для vite-dev-прокси и отладки)
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+    image: gglebux/transay-frontend:latest
+    container_name: transay-frontend
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"             # открой http://localhost:3000
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

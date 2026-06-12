@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/Transay?rewriteBatchedInserts=true
+    username: postgres
+    password: postgres
+
+  jpa:
+    properties:
+      hibernate:
+        show_sql: true
+        hbm2ddl:
+          auto: none
+
+app:
+  front-url: "http://localhost:3000"
+  cookie:
+    secure: false
+#    domain: localhost
+    ttl-days: 7

@@ -1,0 +1,366 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
+
+/* Сброс базовых отступов */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Основные цвета */
+:root {
+  --primary-color: #1977DB; /* синий основной цвет */
+  --primary-color-hover: #ffffff; /* синий основной цвет */
+  --background-color: #F5F7FA; /* светлый фон */
+  --sidebar-bg: #ffffff;
+  --header-bg: #ffffff;
+  --border-color: #CBD5E1; /* светло-серая граница */
+  --text-color: #1F2937; /* темно-серый текст */
+  --hover-bg: #E0E7FF; /* легкий синий hover */
+}
+
+
+/* Общий контейнер layout */
+.layout {
+  display: flex;
+  height: 100vh;
+  background-color: var(--background-color);
+}
+
+.forms-wrapper{
+  display: flex;
+  gap: 2rem;
+  margin: 0 auto;
+  justify-content: space-around;
+  flex-wrap: wrap;
+}
+
+
+
+.nunito {
+  font-family: "Nunito", sans-serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* Сайдбар */
+.sidebar {
+  width: 220px;
+  background: var(--sidebar-bg);
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  transition: background 0.3s;
+}
+
+.sidebar__logo {
+  text-align: center;
+  font-size: 1.6rem;
+  margin-bottom: 2rem;
+  color: var(--primary-color);
+  letter-spacing: 1px;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.sidebar li {
+  margin: 0.5rem 0;
+}
+
+.sidebar a,
+.sidebar-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-decoration: none;
+  color: var(--text-color);
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  transition: background 0.2s, color 0.2s;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+}
+
+.sidebar a.active,
+.sidebar-toggle.open {
+  background-color: var(--hover-bg);
+  color: var(--primary-color);
+}
+
+.sidebar a:hover,
+.sidebar-toggle:hover {
+  background-color: var(--hover-bg);
+  color: var(--primary-color);
+}
+
+.menu-icon {
+  font-size: 1.1rem;
+}
+
+/* Стрелка */
+.arrow-icon {
+  margin-left: auto;
+  width: 24px;
+  height: 24px;
+  transition: transform 0.5s ease;
+}
+
+.arrow-icon.rotated {
+  transform: rotate(90deg); /* или 180deg если хочешь вниз */
+}
+
+
+/* Подменю */
+.submenu {
+
+  margin: 6px 0 0 20px;
+  padding-left: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease;
+}
+
+.submenu.open {
+  max-height: 200px; /* достаточно для двух пунктов */
+
+}
+
+.submenu li {
+  margin: 4px 0;
+}
+
+
+/* Header */
+.header {
+  height: 60px;
+  background: var(--header-bg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  color: var(--primary-color);
+  font-weight: 500;
+}
+.header__right {
+  display: flex;
+  gap: 10px;
+  
+}
+
+
+
+
+.header__search input {
+  padding: 6px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+/* Основная область контента */
+.layout__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* Мелкие стили для аккуратности */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--primary-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.submenu { margin: 6px 0 0 14px; }
+.submenu li { margin: 4px 0; }
+
+.brand {
+  width: 35vh;
+}
+
+.brandLogo {
+  width: min(440px, 70%);
+  height: auto;
+  max-height: 150px;
+  margin-bottom: 10px;
+}
+
+/* header */
+
+
+/* burger */
+.burger {
+  display: none;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(25, 119, 219, 0.10);
+  cursor: pointer;
+  padding: 10px;
+}
+
+.burger span {
+  display: block;
+  height: 2px;
+  background: var(--primary-color);
+  margin: 5px 0;
+  border-radius: 2px;
+}
+
+/* sidebar top row */
+.sidebarTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* close button (mobile) */
+.sidebarClose {
+  text-align: center;
+  display: none;
+  width: 36px;
+  height: 35px;
+  border-radius: 10px;
+  border: 0;
+  background: rgba(25, 119, 219, 0.10);
+  color: var(--primary-color);
+  cursor: pointer;
+  font-size: 23px;
+  line-height: 1;
+}
+.sidebarClose:hover {
+  color: var(--primary-color-hover);
+}
+
+.sidebarOverlay {
+  display: none;
+}
+
+/* fix invalid padding */
+.layout__content {
+
+  padding: 1rem;
+  flex: 1;
+  background-color: var(--background-color);
+  overflow-y: auto;
+}
+
+.burger {
+  display: none; /* покажем на <=870 */
+  width: 44px;
+  height: 44px;
+  background: none;
+  cursor: pointer;
+
+  /* 3 полоски */
+  background-image:
+    linear-gradient(var(--primary-color), var(--primary-color)),
+    linear-gradient(var(--primary-color), var(--primary-color)),
+    linear-gradient(var(--primary-color), var(--primary-color));
+  background-repeat: no-repeat;
+  background-size: 22px 2px, 22px 2px, 22px 2px;
+  background-position: center 14px, center 21px, center 28px;
+
+  transition: background-color 0.15s ease, transform 0.03s ease, border-color 0.15s ease;
+}
+
+
+
+
+@media (min-width: 870px) {
+  .header {
+    display: none;
+  }
+  .layout__content {
+  padding: 0;
+  background-color: var(--background-color);
+  overflow-y: auto;
+}
+  
+}
+/* mobile <= 870 */
+@media (max-width: 870px) {
+  .burger {
+    display: inline-block;
+  }
+
+  .brandLogo {
+  width: min(130px, 70%);
+  max-height: 150px;
+  margin-bottom: 10px;
+}
+.layout {
+    display: block;     
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .layout__main {
+    width: 100%;
+  }
+
+  button:hover {
+    background-color: none;
+  }
+
+  .layout__content {
+  padding: 0;
+  background-color: var(--background-color);
+  overflow-y: auto;
+}
+
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 1001;
+    width: 260px;
+    transform: translateX(-110%);
+    transition: transform 0.25s ease;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebarClose {
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sidebarOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.35);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+    display: block;
+  }
+
+  .sidebarOverlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
