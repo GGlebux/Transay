@@ -1,0 +1,29 @@
+name: Release deploy bundle
+
+# На каждый тег vX.Y.Z собирает архив для деплоя (compose + шаблон env)
+# и публикует его в GitHub Release. Пользователь тянет ОДИН архив, а не файлы по отдельности.
+on:
+  push:
+    tags: [ "v*" ]
+
+permissions:
+  contents: write          # нужно, чтобы создать релиз и приложить файл
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Package deploy bundle
+        run: |
+          mkdir -p transay
+          cp docker-compose.yml .env.example transay/
+          tar -czf transay-deploy.tar.gz transay
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: transay-deploy.tar.gz
+          generate_release_notes: true

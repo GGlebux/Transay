@@ -1,4 +1,4 @@
-# Прод: запуск из готовых образов DockerHub. См. README.
+# Dev: сборка из исходников. См. README.
 services:
   postgres:
     image: postgres:16
@@ -6,9 +6,11 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-transay}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-transay}"]
       interval: 5s
@@ -17,6 +19,8 @@ services:
     restart: unless-stopped
 
   backend:
+    build:
+      context: ./backend
     image: gglebux/transay-backend:latest
     container_name: transay-backend
     env_file:
@@ -32,29 +36,20 @@ services:
       timeout: 5s
       retries: 12
       start_period: 45s
+    ports:
+      - "8081:8080"
     restart: unless-stopped
-    labels:
-      com.centurylinklabs.watchtower.enable: "true"
 
   frontend:
+    build:
+      context: ./frontend
     image: gglebux/transay-frontend:latest
     container_name: transay-frontend
     depends_on:
       backend:
         condition: service_healthy
     ports:
-      - "80:80"
-    restart: unless-stopped
-    labels:
-      com.centurylinklabs.watchtower.enable: "true"
-
-  watchtower:
-    image: containrrr/watchtower
-    container_name: transay-watchtower
-    profiles: ["autoupdate"]
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    command: --interval 60 --cleanup --label-enable
+      - "3000:80"
     restart: unless-stopped
 
 volumes:

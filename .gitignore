@@ -3,6 +3,9 @@
 *.local
 secret.env
 
+# ===== Заметки для Claude (не публикуем) =====
+CLAUDE.md
+
 # ===== Backend (Java / Maven) =====
 target/
 HELP.md
