@@ -114,6 +114,44 @@
     .grid2 {
         grid-template-columns: 1fr;
     }
+
+    /* Логин&Пароль: инпуты в один столбец, чтобы помещались */
+    .securityInBox {
+        grid-template-columns: 1fr;
+    }
+
+    /* Компактная верхняя карточка: аватар+имя в строку, меню — горизонтально */
+    .dashboardLeft {
+        width: 100%;
+        padding: 16px 20px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px 16px;
+        text-align: left;
+    }
+    .avatar img {
+        width: 72px;
+        height: 72px;
+    }
+    .dashboardLeft h2 {
+        font-size: 1.15rem;
+        margin: 0;
+    }
+    .roleText {
+        margin: 0;
+    }
+    .sideMenu {
+        flex-direction: row;
+        flex-wrap: wrap;
+        width: 100%;
+        margin-top: 4px;
+        gap: 8px;
+    }
+    .menuItem {
+        padding: 8px 12px;
+        border-radius: 10px;
+    }
 }
 
 .genderToggle {

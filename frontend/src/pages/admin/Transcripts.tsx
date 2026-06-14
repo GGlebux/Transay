@@ -105,7 +105,7 @@ export default function Transcripts() {
         <div className="admin-loading">Загрузка...</div>
       ) : (
         <div className="admin-table-wrap">
-          <table className="admin-table">
+          <table className="admin-table admin-table--wide">
             <thead>
               <tr>
                 <th style={{ width: 50 }}>ID</th>

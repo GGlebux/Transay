@@ -3,7 +3,6 @@ import "../../styles/layout.css";
 import { useAuth } from "../../authe/AuthContext";
 import User from "../../assets/User.png";
 import Users from "../../assets/Users.png";
-import Forms from "../../assets/Forms.svg";
 import logo from "../../assets/Logo.png";
 
 type Props = {
@@ -11,8 +10,20 @@ type Props = {
   onClose?: () => void;
 };
 
+const ADMIN_NAV = [
+  { to: "/admin/users", label: "Пользователи", icon: "👥", adminOnly: true },
+  { to: "/admin/people", label: "Люди", icon: "🧑", adminOnly: true },
+  { to: "/admin/indicators", label: "Индикаторы", icon: "🧪", adminOnly: false },
+  { to: "/admin/groups", label: "Группы", icon: "🗂️", adminOnly: false },
+  { to: "/admin/transcripts", label: "Транскрипции", icon: "📝", adminOnly: false },
+  { to: "/admin/reasons", label: "Причины", icon: "⚠️", adminOnly: false },
+  { to: "/admin/units", label: "Единицы", icon: "📐", adminOnly: false },
+];
+
 export default function Sidebar({ isOpen = false, onClose }: Props) {
   const { role } = useAuth();
+  const isStaff = role === "ADMIN" || role === "EDITOR";
+  const adminNav = ADMIN_NAV.filter((t) => !t.adminOnly || role === "ADMIN");
 
   return (
     <>
@@ -31,6 +42,7 @@ export default function Sidebar({ isOpen = false, onClose }: Props) {
                 <img src={User} alt="" /> Профиль
               </NavLink>
             </li>
+
             {role === "USER" && (
               <li>
                 <NavLink to="/measures" onClick={onClose} className={({ isActive }) => (isActive ? "active" : "")}>
@@ -38,13 +50,14 @@ export default function Sidebar({ isOpen = false, onClose }: Props) {
                 </NavLink>
               </li>
             )}
-            {(role === "ADMIN" || role === "EDITOR") && (
-              <li>
-                <NavLink to="/admin" onClick={onClose} className={({ isActive }) => (isActive ? "active" : "")}>
-                  <img src={Forms} alt="" /> Админка
+
+            {isStaff && adminNav.map((t) => (
+              <li key={t.to}>
+                <NavLink to={t.to} onClick={onClose} className={({ isActive }) => (isActive ? "active" : "")}>
+                  <span className="nav-ico" aria-hidden="true">{t.icon}</span> {t.label}
                 </NavLink>
               </li>
-            )}
+            ))}
           </ul>
         </nav>
       </aside>

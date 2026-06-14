@@ -18,6 +18,16 @@
   --border-color: #CBD5E1; /* светло-серая граница */
   --text-color: #1F2937; /* темно-серый текст */
   --hover-bg: #E0E7FF; /* легкий синий hover */
+
+  /* Семантическая палитра (одно имя = один цвет) */
+  --brand: #1977DB;
+  --brand-hover: #0056b3;
+  --brand-soft: #e8f2ff;       /* светло-синий фон/чип */
+  --brand-soft-text: #1d4ed8;
+  --danger: #dc2626;
+  --danger-hover: #b91c1c;
+  --danger-soft: #fee2e2;
+  --content-max: 1100px;       /* единая ширина контента на всех страницах */
 }
 
 
@@ -147,6 +157,18 @@
   padding: 0 1rem;
   color: var(--primary-color);
   font-weight: 500;
+  position: sticky;
+  top: 0;
+  z-index: 900;
+  box-shadow: 0 1px 6px rgba(0, 51, 102, 0.06);
+}
+
+/* Иконка-эмодзи в сайдбаре (слева от названия) */
+.sidebar .nav-ico {
+  width: 22px;
+  font-size: 1.05rem;
+  text-align: center;
+  flex: 0 0 22px;
 }
 .header__right {
   display: flex;

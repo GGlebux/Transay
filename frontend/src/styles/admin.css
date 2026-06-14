@@ -2,30 +2,9 @@
 
 .admin {
   padding: 16px clamp(12px, 3vw, 32px);
-  max-width: 1200px;
+  max-width: var(--content-max);
   margin: 0 auto;
 }
-
-.admin-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 20px;
-  border-bottom: 1px solid #e5e7eb;
-  padding-bottom: 10px;
-}
-
-.admin-tab {
-  padding: 8px 14px;
-  border-radius: 8px;
-  text-decoration: none;
-  color: #475569;
-  font-weight: 500;
-  transition: background 0.15s, color 0.15s;
-  white-space: nowrap;
-}
-.admin-tab:hover { background: #f1f5f9; }
-.admin-tab.active { background: #6d28d9; color: #fff; }
 
 .admin-header {
   display: flex;
@@ -38,8 +17,8 @@
 .admin-title { font-size: 1.3rem; font-weight: 700; color: #1e293b; }
 
 .admin-search {
-  flex: 1;
-  min-width: 180px;
+  width: 100%;
+  max-width: 320px;
   padding: 9px 12px;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
@@ -50,30 +29,34 @@
   padding: 9px 16px;
   border: none;
   border-radius: 8px;
-  background: #6d28d9;
+  background: var(--brand);
   color: #fff;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s, opacity 0.15s;
 }
-.admin-btn:hover { background: #5b21b6; }
+.admin-btn:hover { background: var(--brand-hover); }
 .admin-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 .admin-btn--ghost { background: #f1f5f9; color: #334155; }
 .admin-btn--ghost:hover { background: #e2e8f0; }
-.admin-btn--danger { background: #dc2626; }
-.admin-btn--danger:hover { background: #b91c1c; }
+.admin-btn--danger { background: var(--danger); }
+.admin-btn--danger:hover { background: var(--danger-hover); }
 
 .admin-table-wrap {
   overflow-x: auto;
+  max-width: 100%;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   background: #fff;
+  -webkit-overflow-scrolling: touch;
 }
 .admin-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.9rem;
 }
+/* широкие таблицы (много колонок) скроллятся по горизонтали, а не сжимаются */
+.admin-table--wide { min-width: 760px; }
 .admin-table th,
 .admin-table td {
   padding: 10px 12px;
@@ -89,9 +72,15 @@
   top: 0;
 }
 .admin-table tr:last-child td { border-bottom: none; }
-.admin-table tr:hover td { background: #faf5ff; }
+.admin-table tr:hover td { background: var(--brand-soft); }
 
-.admin-actions { display: flex; gap: 6px; flex-wrap: nowrap; }
+/* первая колонка прижата влево, столбец действий — вправо */
+.admin-table th:first-child,
+.admin-table td:first-child { width: 1%; white-space: nowrap; }
+.admin-table th:last-child,
+.admin-table td:last-child { text-align: right; }
+
+.admin-actions { display: flex; gap: 6px; flex-wrap: nowrap; justify-content: flex-end; }
 .icon-btn {
   border: none;
   background: #f1f5f9;
@@ -111,8 +100,8 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #ede9fe;
-  color: #5b21b6;
+  background: var(--brand-soft);
+  color: var(--brand-soft-text);
   border-radius: 999px;
   padding: 2px 10px;
   font-size: 0.8rem;
@@ -121,7 +110,7 @@
 .chip button {
   border: none;
   background: transparent;
-  color: #7c3aed;
+  color: var(--brand);
   cursor: pointer;
   font-size: 0.9rem;
   line-height: 1;

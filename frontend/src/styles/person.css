@@ -18,6 +18,8 @@ body {
 /* === PAGE LAYOUT === */
 .person-page {
   padding: 1rem;
+  max-width: var(--content-max);
+  margin: 0 auto;
 }
 
 .person-header {
@@ -712,6 +714,30 @@ body {
   }
 }
 
+/* Мобайл: расшифровка столбцом — график, затем причины, затем остальные */
+@media (max-width: 900px) {
+  .decrypt-chart-wrapper.active {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .decrypt-chart-wrapper.active .recharts-responsive-container {
+    order: 1;
+    width: 100% !important;
+  }
+  .decrypt-chart-wrapper.active .chart-legend-left {
+    order: 2;
+    width: 100%;
+  }
+  .decrypt-chart-wrapper.active .small-values-list {
+    order: 3;
+    width: 100%;
+  }
+  .exclude-button {
+    left: auto;
+    right: 0;
+  }
+}
+
 @media (max-width: 360px) {
   .person-input-row {
   width: 100%;
@@ -736,8 +762,6 @@ body {
     right: 8px !important;
   }
 }
-
------------------перебит--------------------------------------------------------------
 
 /* DESKTOP: широкая первая колонка, текст в одну строку */
 .person-grid .sticky-col,
@@ -767,4 +791,3 @@ body {
     text-overflow: clip;
   }
 }
---------------------------перебит------------------------------
