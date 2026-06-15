@@ -18,6 +18,7 @@ const ADMIN_NAV = [
   { to: "/admin/transcripts", label: "Транскрипции", icon: "📝", adminOnly: false },
   { to: "/admin/reasons", label: "Причины", icon: "⚠️", adminOnly: false },
   { to: "/admin/units", label: "Единицы", icon: "📐", adminOnly: false },
+  { to: "/admin/system", label: "Мониторинг", icon: "📊", adminOnly: true },
 ];
 
 export default function Sidebar({ isOpen = false, onClose }: Props) {

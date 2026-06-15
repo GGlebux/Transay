@@ -109,3 +109,42 @@ export type DecryptItem = {
   indicators: string[];
 };
 export type DecryptResponse = Record<string, DecryptItem>;
+
+// --- Технический мониторинг (админка) ---
+
+export type Page<T> = {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+};
+
+export type HttpLogSummary = {
+  id: number;
+  createdAt: string;
+  method: string;
+  uri: string;
+  status: number;
+  durationMs: number;
+  error: boolean;
+};
+
+export type HttpLogDetail = HttpLogSummary & {
+  queryString: string | null;
+  clientIp: string | null;
+  principal: string | null;
+  requestBody: string | null;
+  responseBody: string | null;
+};
+
+export type HealthComponent = { status: string; details?: Record<string, unknown> };
+export type Health = {
+  status: string;
+  components?: Record<string, HealthComponent>;
+};
+
+export type LoggersResponse = {
+  levels: string[];
+  loggers: Record<string, { configuredLevel: string | null; effectiveLevel: string }>;
+};

@@ -18,6 +18,7 @@ import Groups from "./pages/admin/Groups";
 import Transcripts from "./pages/admin/Transcripts";
 import Reasons from "./pages/admin/Reasons";
 import Units from "./pages/admin/Units";
+import System from "./pages/admin/System";
 
 import { RequireAuth } from "./authe/RequireAuth";
 import { RequireRole } from "./authe/RequireRole";
@@ -75,6 +76,14 @@ export default function App() {
           <Route path="transcripts" element={<Transcripts />} />
           <Route path="reasons" element={<Reasons />} />
           <Route path="units" element={<Units />} />
+          <Route
+            path="system"
+            element={
+              <RequireRole roleRequired="ADMIN">
+                <System />
+              </RequireRole>
+            }
+          />
         </Route>
 
         {/* DEFAULT */}
