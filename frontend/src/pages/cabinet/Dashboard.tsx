@@ -309,8 +309,8 @@ export default function Dashboard() {
     <div className="dashboardPage">
       <div className="dashboardCard">
         <div className="dashboardLeft">
-          <div className="avatar">
-            <img src="https://i.pravatar.cc/200" alt="Avatar" />
+          <div className="avatar" aria-hidden="true">
+            {(form.name || customer.email || "?").trim().charAt(0).toUpperCase()}
           </div>
 
           <h2>{form.name || "Ваш профиль"}</h2>

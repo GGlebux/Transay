@@ -29,10 +29,20 @@
     border-radius: 20px;
 }
 
-.avatar img {
+.avatar {
     width: 130px;
     height: 130px;
     border-radius: 50%;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--brand-soft, #e0ecff);
+    color: var(--brand, #1d4ed8);
+    font-size: 3.4rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    user-select: none;
 }
 
 .dashboardRight {
@@ -130,9 +140,10 @@
         gap: 12px 16px;
         text-align: left;
     }
-    .avatar img {
+    .avatar {
         width: 72px;
         height: 72px;
+        font-size: 1.8rem;
     }
     .dashboardLeft h2 {
         font-size: 1.15rem;
