@@ -61,18 +61,14 @@ export default function Login() {
     const user = await login(res.accessToken);
 
     // ✅ редирект здесь
-    if (user.role === "ADMIN") {
-      navigate("/admin/users", { replace: true });
+    if (user.role === "ADMIN" || user.role === "EDITOR") {
+      navigate("/admin", { replace: true });
       return;
     }
 
-    if (user.role === "USER") {
-      if (!user.personId) {
-        navigate("/cabinet/create-profile", { replace: true });
-      } else {
-        navigate("/cabinet", { replace: true });
-      }
-    }
+    // USER → личный кабинет.
+    // Если профиля ещё нет (personId == null), Dashboard сам покажет форму создания.
+    navigate("/cabinet", { replace: true });
 
   } catch {
     setError("Не удалось войти. Проверьте данные и попробуйте снова.");
