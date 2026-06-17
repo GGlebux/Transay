@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import type { FormEvent } from "react";
 import { FloatingTextInput, FloatingSelect } from "../components/Trans_Indicat/FloatingTextField";
 import { SearchSelect } from "../components/Trans_Indicat/SearchSelect";
+import { useToast, useConfirm } from "../components/ui/Feedback";
 import "../styles/person.css";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
@@ -39,6 +40,9 @@ export default function Person({ personId }: { personId?: number } = {}) {
   // Если задан personId — работаем с членом семьи (эндпоинты /people/family/{id}/...),
   // иначе со «своими» данными текущего пользователя.
   const isFamily = personId != null;
+
+  const notify = useToast();
+  const confirm = useConfirm();
 
   const loadPerson = () =>
     isFamily ? peopleApi.getFamilyMember(personId!) : peopleApi.getMe();
@@ -322,9 +326,9 @@ export default function Person({ personId }: { personId?: number } = {}) {
 
   const onSave = async (e: FormEvent) => {
     e.preventDefault();
-    if (!selectedIndicator) return alert("Выберите индикатор");
-    if (!unit) return alert("Выберите единицы измерения");
-    if (!value || !date) return alert("Заполните значение и дату");
+    if (!selectedIndicator) return notify("Выберите индикатор", "error");
+    if (!unit) return notify("Выберите единицы измерения", "error");
+    if (!value || !date) return notify("Заполните значение и дату", "error");
 
     setSaving(true);
     try {
@@ -336,9 +340,10 @@ export default function Person({ personId }: { personId?: number } = {}) {
       });
       await reloadSummary();
       setValue("");
+      notify("Измерение сохранено", "success");
     } catch (err: any) {
       console.error(err);
-      alert(err?.response?.data?.detail || "Ошибка при сохранении измерения");
+      notify(err?.response?.data?.detail || "Ошибка при сохранении измерения", "error");
     } finally {
       setSaving(false);
     }
@@ -382,7 +387,7 @@ export default function Person({ personId }: { personId?: number } = {}) {
 
   const handleDecrypt = async () => {
     if (!decryptDate) {
-      alert("Выберите дату для расшифровки");
+      notify("Выберите дату для расшифровки", "error");
       return;
     }
     setLoadingDecrypt(true);
@@ -401,10 +406,10 @@ export default function Person({ personId }: { personId?: number } = {}) {
         largeValues: dataItems.slice(0, 8),
         smallValues: dataItems.slice(8),
       });
-      if (dataItems.length === 0) alert("На выбранную дату нет данных для расшифровки");
+      if (dataItems.length === 0) notify("На выбранную дату нет данных для расшифровки", "info");
     } catch (e) {
       console.error("Ошибка при расшифровке:", e);
-      alert("Ошибка при загрузке расшифровки");
+      notify("Ошибка при загрузке расшифровки", "error");
     } finally {
       setLoadingDecrypt(false);
     }
@@ -414,7 +419,7 @@ export default function Person({ personId }: { personId?: number } = {}) {
     e.preventDefault();
     if (editingMeasureId == null) return;
     if (!editName || !editUnits) {
-      alert("Укажите имя индикатора и единицы измерения");
+      notify("Укажите имя индикатора и единицы измерения", "error");
       return;
     }
     try {
@@ -427,9 +432,10 @@ export default function Person({ personId }: { personId?: number } = {}) {
       setEditModalOpen(false);
       setEditingMeasureId(null);
       await reloadSummary();
+      notify("Измерение обновлено", "success");
     } catch (err) {
       console.error(err);
-      alert("Ошибка при редактировании измерения");
+      notify("Ошибка при редактировании измерения", "error");
     }
   };
 
@@ -577,7 +583,7 @@ export default function Person({ personId }: { personId?: number } = {}) {
                     className="exclude-button"
                     disabled={loadingExclusion}
                     onClick={async () => {
-                      if (!window.confirm("Вы уверены, что хотите исключить эту причину?")) return;
+                      if (!(await confirm("Исключить эту причину из расшифровок?", { title: "Исключение причины", okText: "Исключить" }))) return;
                       setLoadingExclusion(true);
                       try {
                         await addExclusions([item.id]);
@@ -585,9 +591,10 @@ export default function Person({ personId }: { personId?: number } = {}) {
                           largeValues: prev.largeValues.filter((x) => x.id !== item.id),
                           smallValues: prev.smallValues.filter((s) => s.id !== item.id),
                         }));
+                        notify("Причина исключена", "success");
                       } catch (e) {
                         console.error(e);
-                        alert("Ошибка при исключении причины");
+                        notify("Ошибка при исключении причины", "error");
                       } finally {
                         setLoadingExclusion(false);
                       }
@@ -683,14 +690,15 @@ export default function Person({ personId }: { personId?: number } = {}) {
                 <button
                   type="button"
                   onClick={async () => {
-                    if (!window.confirm("Удалить это измерение?")) return;
+                    if (!(await confirm("Удалить это измерение?", { title: "Удаление измерения", okText: "Удалить", danger: true }))) return;
                     try {
                       await removeMeasure(infoData.id!);
                       await reloadSummary();
                       closeInfo();
+                      notify("Измерение удалено", "success");
                     } catch (err) {
                       console.error(err);
-                      alert("Ошибка при удалении измерения");
+                      notify("Ошибка при удалении измерения", "error");
                     }
                   }}
                 >

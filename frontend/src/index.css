@@ -22,7 +22,12 @@ input, select {
   font-family: "Nunito Sans", sans-serif;
 }
 
+/* Поля даты — светлая тема, чтобы иконка календаря была тёмной и видимой
+   на белом фоне инпутов (раньше invert(1) делал её белой = невидимой). */
+input[type="date"] {
+  color-scheme: light;
+}
 input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(1); /* меняет цвет на белый для синего фона */
+  opacity: 1;
   cursor: pointer;
 }

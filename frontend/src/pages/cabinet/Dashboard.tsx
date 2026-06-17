@@ -11,8 +11,6 @@ type FormState = {
   name: string;
   gender: "male" | "female";
   dateOfBirth: string; // формат для input: yyyy-MM-dd
-  isGravid: boolean;
-
 };
 
 type TabType = "profile" | "security";
@@ -43,7 +41,6 @@ export default function Dashboard() {
     name: "",
     gender: "male",
     dateOfBirth: "",
-    isGravid: false,
   });
 
   const navigate = useNavigate();
@@ -78,8 +75,6 @@ export default function Dashboard() {
         name: data.name ?? "",
         gender: data.gender === "FEMALE" ? "female" : "male",
         dateOfBirth: toInputDate(data.dateOfBirth),
-        // У бэка нет isGravid — состояние едет в condition (GRAVID/MENSES/BASE)
-        isGravid: data.condition === "GRAVID",
       };
 
       setForm(mapped);
@@ -120,18 +115,12 @@ export default function Dashboard() {
       setError("");
       setSuccess("");
 
-      const condition =
-        form.gender === "male"
-          ? "BASE"
-          : form.isGravid
-            ? "GRAVID"
-            : "MENSES";
-
       const payload: PersonPayload = {
         name: form.name.trim(),
         gender: form.gender === "male" ? "MALE" : "FEMALE",
         dateOfBirth: serverDate,
-        condition
+        // Состояние пока всегда BASE; GRAVID/MENSES — задел на будущее.
+        condition: "BASE",
       };
 
       if (!customer?.personId) {
@@ -154,7 +143,7 @@ export default function Dashboard() {
 
   const hasChanges =
     initialForm === null
-      ? form.name !== "" || form.dateOfBirth !== "" || form.gender !== "male" || form.isGravid !== false
+      ? form.name !== "" || form.dateOfBirth !== "" || form.gender !== "male"
       : JSON.stringify(form) !== JSON.stringify(initialForm);
 
   if (!customer) return null;
@@ -205,10 +194,7 @@ export default function Dashboard() {
             <button
               type="button"
               className={`genderBtn ${form.gender === "male" ? "active" : ""}`}
-              onClick={() => {
-                handleChange("gender", "male");
-                handleChange("isGravid", false);
-              }}
+              onClick={() => handleChange("gender", "male")}
             >
               Мужчина
             </button>
@@ -251,29 +237,6 @@ export default function Dashboard() {
                 onChange={(e) => handleChange("dateOfBirth", e.target.value)}
               />
             </div>
-
-            {form.gender === "female" && (
-              <div className="field">
-                <label>Беременность</label>
-                <div className="genderToggle">
-                  <button
-                    type="button"
-                    className={`genderBtn ${form.isGravid ? "active" : ""}`}
-                    onClick={() => handleChange("isGravid", true)}
-                  >
-                    Да
-                  </button>
-
-                  <button
-                    type="button"
-                    className={`genderBtn ${!form.isGravid ? "active" : ""}`}
-                    onClick={() => handleChange("isGravid", false)}
-                  >
-                    Нет
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
 
           {error && <div className="errorBox">{error}</div>}

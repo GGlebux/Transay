@@ -67,7 +67,7 @@ public class Person {
 
     @Override
     public String toString() {
-        return format("Человек: имя='%s',\nпол='%s',\nвозраст в днях='%d',\nбеременность='%s'",
+        return format("Человек: имя='%s',\nпол='%s',\nвозраст в днях='%d',\nсостояние='%s'",
                 name,
                 gender.getValue(),
                 getDaysBetween(dateOfBirth, now()),

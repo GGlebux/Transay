@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { peopleApi } from "../api/peopleApi";
 import type { Person, PersonPayload } from "../api/types";
 import { isoToServer, toInputDate } from "../utils/date";
+import { useToast, useConfirm } from "../components/ui/Feedback";
 import "../styles/dashboard.css";
 import "../styles/family.css";
 
@@ -10,14 +11,12 @@ type FormState = {
   name: string;
   gender: "male" | "female";
   dateOfBirth: string; // yyyy-MM-dd для input
-  isGravid: boolean;
 };
 
 const emptyForm: FormState = {
   name: "",
   gender: "male",
   dateOfBirth: "",
-  isGravid: false,
 };
 
 const calcAge = (iso: string): string => {
@@ -35,11 +34,12 @@ const personToForm = (p: Person): FormState => ({
   name: p.name ?? "",
   gender: p.gender === "FEMALE" ? "female" : "male",
   dateOfBirth: toInputDate(p.dateOfBirth),
-  isGravid: p.condition === "GRAVID",
 });
 
 export default function Family() {
   const navigate = useNavigate();
+  const notify = useToast();
+  const confirm = useConfirm();
 
   const [members, setMembers] = useState<Person[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,7 +56,7 @@ export default function Family() {
       setMembers(await peopleApi.getFamily());
     } catch (e) {
       console.error(e);
-      alert("Ошибка загрузки списка семьи");
+      notify("Ошибка загрузки списка семьи", "error");
     } finally {
       setLoading(false);
     }
@@ -96,14 +96,12 @@ export default function Family() {
       return;
     }
 
-    const condition =
-      form.gender === "male" ? "BASE" : form.isGravid ? "GRAVID" : "MENSES";
-
     const payload: PersonPayload = {
       name: form.name.trim(),
       gender: form.gender === "male" ? "MALE" : "FEMALE",
       dateOfBirth: serverDate,
-      condition,
+      // Состояние пока всегда BASE; GRAVID/MENSES — задел на будущее.
+      condition: "BASE",
     };
 
     setSaving(true);
@@ -112,6 +110,7 @@ export default function Family() {
       else await peopleApi.updateFamily(editingId, payload);
       setModalOpen(false);
       await load();
+      notify(editingId == null ? "Член семьи добавлен" : "Изменения сохранены", "success");
     } catch (e: any) {
       setError(e?.response?.data?.detail || "Ошибка сохранения");
     } finally {
@@ -120,13 +119,14 @@ export default function Family() {
   };
 
   const remove = async (p: Person) => {
-    if (!window.confirm(`Удалить «${p.name}» и все его анализы?`)) return;
+    if (!(await confirm(`Удалить «${p.name}» и все его анализы?`, { title: "Удаление", okText: "Удалить", danger: true }))) return;
     try {
       await peopleApi.removeFamily(p.id);
       setMembers((prev) => prev.filter((x) => x.id !== p.id));
+      notify("Удалено", "success");
     } catch (e) {
       console.error(e);
-      alert("Ошибка при удалении");
+      notify("Ошибка при удалении", "error");
     }
   };
 
@@ -202,10 +202,7 @@ export default function Family() {
               <button
                 type="button"
                 className={`genderBtn ${form.gender === "male" ? "active" : ""}`}
-                onClick={() => {
-                  change("gender", "male");
-                  change("isGravid", false);
-                }}
+                onClick={() => change("gender", "male")}
               >
                 Мужчина
               </button>
@@ -239,28 +236,6 @@ export default function Family() {
                 />
               </div>
             </div>
-
-            {form.gender === "female" && (
-              <div className="field" style={{ marginTop: 12 }}>
-                <label>Беременность</label>
-                <div className="genderToggle" style={{ marginBottom: 0 }}>
-                  <button
-                    type="button"
-                    className={`genderBtn ${form.isGravid ? "active" : ""}`}
-                    onClick={() => change("isGravid", true)}
-                  >
-                    Да
-                  </button>
-                  <button
-                    type="button"
-                    className={`genderBtn ${!form.isGravid ? "active" : ""}`}
-                    onClick={() => change("isGravid", false)}
-                  >
-                    Нет
-                  </button>
-                </div>
-              </div>
-            )}
 
             {error && <div className="errorBox">{error}</div>}
 

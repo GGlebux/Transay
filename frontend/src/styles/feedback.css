@@ -1,0 +1,116 @@
+/* Тосты-уведомления */
+.toast-stack {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 4000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: min(380px, calc(100vw - 32px));
+}
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18);
+  border-left: 4px solid #94a3b8;
+  cursor: pointer;
+  animation: feedback-in 0.2s ease;
+}
+@keyframes feedback-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.toast--error { border-left-color: var(--danger, #dc2626); }
+.toast--success { border-left-color: #16a34a; }
+.toast--info { border-left-color: var(--brand, #1977db); }
+
+.toast__icon {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  margin-top: 1px;
+}
+.toast--error .toast__icon { background: var(--danger, #dc2626); }
+.toast--success .toast__icon { background: #16a34a; }
+.toast--info .toast__icon { background: var(--brand, #1977db); }
+
+.toast__body {
+  font-size: 0.9rem;
+  color: #1e293b;
+  line-height: 1.35;
+  white-space: pre-line;
+  word-break: break-word;
+}
+
+/* Диалог подтверждения */
+.confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 4100;
+  padding: 16px;
+  animation: feedback-in 0.15s ease;
+}
+.confirm-card {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 420px;
+  padding: 22px 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+}
+.confirm-card h4 {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+  color: #1e293b;
+}
+.confirm-card p {
+  margin: 0;
+  color: #475569;
+  font-size: 0.92rem;
+  line-height: 1.4;
+  white-space: pre-line;
+}
+.confirm-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+.confirm-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 9px 16px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.confirm-btn--ghost { background: #f1f5f9; color: #475569; }
+.confirm-btn--ghost:hover { background: #e2e8f0; }
+.confirm-btn--primary { background: var(--brand, #1977db); color: #fff; }
+.confirm-btn--primary:hover { background: var(--brand-hover, #0056b3); }
+.confirm-btn--danger { background: var(--danger, #dc2626); color: #fff; }
+.confirm-btn--danger:hover { background: var(--danger-hover, #b91c1c); }
+
+@media (max-width: 520px) {
+  .toast-stack {
+    left: 16px;
+    right: 16px;
+    max-width: none;
+  }
+}
