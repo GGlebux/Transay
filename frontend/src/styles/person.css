@@ -106,6 +106,17 @@ body {
   margin-top: -2px;
 }
 
+/* Поисковый комбобокс индикатора выравниваем со встроенными floating-инпутами строки */
+.person-input-row .combo {
+  margin: 0.25rem 0;
+  min-width: 100px;
+}
+.person-input-row .combo__input {
+  height: 36px;
+  padding: 0.5rem 0.6rem;
+  font-size: 0.9rem;
+}
+
 /* === TABLE === */
 .table-wrapper {
   overflow-x: auto;
@@ -677,7 +688,8 @@ body {
     flex-wrap: wrap;
   }
 
-  .person-input-row .text-field {
+  .person-input-row .text-field,
+  .person-input-row .combo {
     flex: 1 1 calc(50% - 10px);
   }
 

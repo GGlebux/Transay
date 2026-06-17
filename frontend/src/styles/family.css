@@ -1,0 +1,166 @@
+.family-page {
+  max-width: var(--content-max, 1100px);
+  margin: 0 auto;
+}
+
+.family-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+.family-head h1 {
+  font-size: 1.5rem;
+  color: #1e293b;
+  margin: 0;
+}
+.family-add-btn {
+  background: var(--brand, #1977db);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.family-add-btn:hover {
+  background: var(--brand-hover, #0056b3);
+}
+
+.family-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.family-card {
+  background: #fff;
+  border: 1px solid #e6edf6;
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.family-card:hover {
+  box-shadow: 0 12px 28px rgba(25, 119, 219, 0.14);
+  transform: translateY(-2px);
+}
+
+.family-card__top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+.family-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--brand-soft, #e8f2ff);
+  color: var(--brand-soft-text, #1d4ed8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  flex: 0 0 auto;
+}
+.family-card__name {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+.family-card__meta {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.family-card__actions {
+  display: flex;
+  gap: 8px;
+}
+.family-card__actions button {
+  flex: 1;
+  border: none;
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.family-open-btn {
+  background: var(--brand-soft, #e8f2ff);
+  color: var(--brand-soft-text, #1d4ed8);
+}
+.family-open-btn:hover {
+  background: #d7e8ff;
+}
+.family-edit-btn {
+  background: #f1f5f9;
+  color: #475569;
+}
+.family-edit-btn:hover {
+  background: #e2e8f0;
+}
+.family-del-btn {
+  background: var(--danger-soft, #fee2e2);
+  color: var(--danger-hover, #b91c1c);
+}
+.family-del-btn:hover {
+  background: #fecaca;
+}
+
+.family-empty {
+  text-align: center;
+  color: #94a3b8;
+  padding: 48px 16px;
+  background: #fff;
+  border-radius: 16px;
+  border: 1px dashed #cbd5e1;
+}
+
+/* Модалка создания/редактирования */
+.family-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+.family-modal {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 480px;
+  padding: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.family-modal h3 {
+  margin: 0 0 16px;
+  font-size: 1.15rem;
+  color: #1e293b;
+}
+.family-modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+@media (max-width: 520px) {
+  .family-grid {
+    grid-template-columns: 1fr;
+  }
+  .family-add-btn {
+    width: 100%;
+  }
+}

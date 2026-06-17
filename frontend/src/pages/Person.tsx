@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import type { FormEvent } from "react";
 import { FloatingTextInput, FloatingSelect } from "../components/Trans_Indicat/FloatingTextField";
+import { SearchSelect } from "../components/Trans_Indicat/SearchSelect";
 import "../styles/person.css";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
@@ -34,7 +35,26 @@ const normStatus = (s: string | undefined): Status => {
   return v === "raise" ? "raise" : v === "fall" ? "fall" : "ok";
 };
 
-export default function Person() {
+export default function Person({ personId }: { personId?: number } = {}) {
+  // Если задан personId — работаем с членом семьи (эндпоинты /people/family/{id}/...),
+  // иначе со «своими» данными текущего пользователя.
+  const isFamily = personId != null;
+
+  const loadPerson = () =>
+    isFamily ? peopleApi.getFamilyMember(personId!) : peopleApi.getMe();
+  const loadSummary = () =>
+    isFamily ? measuresApi.getSummaryFor(personId!) : measuresApi.getSummary();
+  const createMeasure = (payload: Parameters<typeof measuresApi.create>[0]) =>
+    isFamily ? measuresApi.createFor(personId!, payload) : measuresApi.create(payload);
+  const updateMeasure = (id: number, payload: Parameters<typeof measuresApi.update>[1]) =>
+    isFamily ? measuresApi.updateFor(personId!, id, payload) : measuresApi.update(id, payload);
+  const removeMeasure = (id: number) =>
+    isFamily ? measuresApi.removeFor(personId!, id) : measuresApi.remove(id);
+  const decryptMeasures = (dateISO: string) =>
+    isFamily ? measuresApi.decryptFor(personId!, dateISO) : measuresApi.decrypt(dateISO);
+  const addExclusions = (ids: number[]) =>
+    isFamily ? exReasonsApi.addFor(personId!, ids) : exReasonsApi.add(ids);
+
   const [personName, setPersonName] = useState<string>("");
   const [blocks, setBlocks] = useState<SummaryGroup[]>([]);
   const [loading, setLoading] = useState(true);
@@ -146,7 +166,7 @@ export default function Person() {
   const [editName, setEditName] = useState<string>("");
 
   const reloadSummary = async () => {
-    const arr = await measuresApi.getSummary();
+    const arr = await loadSummary();
     setBlocks(arr);
   };
 
@@ -156,8 +176,8 @@ export default function Person() {
     (async () => {
       try {
         const [person, summary, groupsArr] = await Promise.all([
-          peopleApi.getMe().catch(() => null),
-          measuresApi.getSummary().catch(() => [] as SummaryGroup[]),
+          loadPerson().catch(() => null),
+          loadSummary().catch(() => [] as SummaryGroup[]),
           groupsApi.getAll().catch(() => [] as IndicatorGroup[]),
         ]);
         if (!alive) return;
@@ -277,6 +297,29 @@ export default function Person() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedIndicator]);
 
+  // Выбор индикатора из общего поиска (по всем группам).
+  // После выбора автоматически переключаем сводную таблицу на нужную группу,
+  // добавляя её во вкладки, если она ещё не отображается.
+  const handlePickIndicator = (key: string) => {
+    setIndicatorKey(key);
+    const opt = indicatorOptions.find((o) => o.key === key);
+    if (!opt) return;
+    setUnit(opt.units[0] ?? "");
+
+    const present = displayGroups.findIndex((g) => g.groupName === opt.groupName);
+    if (present >= 0) {
+      setGroupIndex(present);
+      return;
+    }
+    setExtraGroups((prev) => {
+      const next = prev.includes(opt.groupName) ? prev : [...prev, opt.groupName];
+      const allNames = [...blocks.map((b) => b.groupName), ...next];
+      const idx = allNames.findIndex((n) => n === opt.groupName);
+      setTimeout(() => setGroupIndex(idx >= 0 ? idx : 0), 0);
+      return next;
+    });
+  };
+
   const onSave = async (e: FormEvent) => {
     e.preventDefault();
     if (!selectedIndicator) return alert("Выберите индикатор");
@@ -285,7 +328,7 @@ export default function Person() {
 
     setSaving(true);
     try {
-      await measuresApi.create({
+      await createMeasure({
         name: selectedIndicator.name,
         units: unit,
         currentValue: Number(value),
@@ -344,7 +387,7 @@ export default function Person() {
     }
     setLoadingDecrypt(true);
     try {
-      const data = await measuresApi.decrypt(decryptDate);
+      const data = await decryptMeasures(decryptDate);
       const dataItems: DecryptDataItem[] = Object.entries(data)
         .map(([name, val]) => ({
           id: val.reasonId,
@@ -375,7 +418,7 @@ export default function Person() {
       return;
     }
     try {
-      await measuresApi.update(editingMeasureId, {
+      await updateMeasure(editingMeasureId, {
         name: editName,
         units: editUnits,
         currentValue: Number(editValue),
@@ -436,12 +479,12 @@ export default function Person() {
       <div className="decrypt-section">
         <h3 className="text-grupp">Сохранить индикатор:</h3>
         <form className="form-card person-input-row" onSubmit={onSave}>
-          <FloatingSelect
+          <SearchSelect
             id="indicator"
-            label="Выберите индикатор"
             value={indicatorKey}
-            onChange={(e) => setIndicatorKey(e.target.value)}
-            options={optionsForCurrentGroup.map((o) => ({ value: o.key, label: o.label }))}
+            onChange={handlePickIndicator}
+            options={indicatorOptions.map((o) => ({ value: o.key, label: o.label, sub: o.groupName }))}
+            placeholder="Поиск индикатора..."
           />
           <FloatingTextInput id="value" type="number" label="Значение" value={value} onChange={(e) => setValue(e.target.value)} />
           <FloatingSelect
@@ -537,7 +580,7 @@ export default function Person() {
                       if (!window.confirm("Вы уверены, что хотите исключить эту причину?")) return;
                       setLoadingExclusion(true);
                       try {
-                        await exReasonsApi.add([item.id]);
+                        await addExclusions([item.id]);
                         setDecryptData((prev) => ({
                           largeValues: prev.largeValues.filter((x) => x.id !== item.id),
                           smallValues: prev.smallValues.filter((s) => s.id !== item.id),
@@ -642,7 +685,7 @@ export default function Person() {
                   onClick={async () => {
                     if (!window.confirm("Удалить это измерение?")) return;
                     try {
-                      await measuresApi.remove(infoData.id!);
+                      await removeMeasure(infoData.id!);
                       await reloadSummary();
                       closeInfo();
                     } catch (err) {

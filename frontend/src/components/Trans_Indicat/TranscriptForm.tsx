@@ -35,12 +35,6 @@ export default function TranscriptForm({
 
 
 
-  const handleRemove = (type: "raise" | "lower", id: number) => {
-    const list = type === "raise" ? raiseReasons : lowerReasons;
-    const setter = type === "raise" ? setRaiseReasons : setLowerReasons;
-    setter(list.filter((r) => r.id !== id));
-  };
-
   const resetForm = () => {
     setEngName("");
     setGender("");
@@ -101,44 +95,25 @@ export default function TranscriptForm({
         ]}
       />
 
+      <label className="multi-select__label">Причины понижения</label>
       <MultiSelectWithSearch
-        label="Причины понижения"
         options={allReasons}
         selected={lowerReasons.map((r) => r.id)}
         onChange={(ids) => {
           setLowerReasons(allReasons.filter((r) => ids.includes(r.id)));
         }}
+        placeholder="Поиск причины..."
       />
-      <div className="tag-container">
-        {lowerReasons.map((r) => (
-          <span key={r.id} className="tag">
-            {r.name}
-            <button type="button" onClick={() => handleRemove("lower", r.id)}>
-              ×
-            </button>
-          </span>
-        ))}
-      </div>
 
+      <label className="multi-select__label">Причины повышения</label>
       <MultiSelectWithSearch
-        label="Причины повышения"
         options={allReasons}
         selected={raiseReasons.map((r) => r.id)}
         onChange={(ids) => {
           setRaiseReasons(allReasons.filter((r) => ids.includes(r.id)));
         }}
+        placeholder="Поиск причины..."
       />
-
-      <div className="tag-container">
-        {raiseReasons.map((r) => (
-          <span key={r.id} className="tag">
-            {r.name}
-            <button type="button" onClick={() => handleRemove("raise", r.id)}>
-              ×
-            </button>
-          </span>
-        ))}
-      </div>
 
       <div className="btn-container">
         <button

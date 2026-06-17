@@ -61,6 +61,10 @@ public class Person {
     @OneToOne(mappedBy = "person")
     private Customer customer;
 
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "owner_id")
+    private Customer owner;
+
     @Override
     public String toString() {
         return format("Человек: имя='%s',\nпол='%s',\nвозраст в днях='%d',\nбеременность='%s'",

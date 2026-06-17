@@ -31,4 +31,32 @@ export const measuresApi = {
   async remove(measureId: number): Promise<void> {
     await http.delete(`/people/measures/${measureId}`);
   },
+
+  /* ---------- Те же операции для члена семьи (по personId) ---------- */
+
+  async getSummaryFor(personId: number): Promise<SummaryGroup[]> {
+    const { data } = await http.get<SummaryGroup[]>(`/people/family/${personId}/measures`);
+    return Array.isArray(data) ? data : [];
+  },
+
+  async decryptFor(personId: number, dateISO: string): Promise<DecryptResponse> {
+    const { data } = await http.get<DecryptResponse>(`/people/family/${personId}/measures/decrypt`, {
+      params: { date: dateISO },
+    });
+    return data ?? {};
+  },
+
+  async createFor(personId: number, payload: MeasurePayload): Promise<Measure> {
+    const { data } = await http.post<Measure>(`/people/family/${personId}/measures`, payload);
+    return data;
+  },
+
+  async updateFor(personId: number, measureId: number, payload: MeasurePayload): Promise<Measure> {
+    const { data } = await http.patch<Measure>(`/people/family/${personId}/measures/${measureId}`, payload);
+    return data;
+  },
+
+  async removeFor(personId: number, measureId: number): Promise<void> {
+    await http.delete(`/people/family/${personId}/measures/${measureId}`);
+  },
 };

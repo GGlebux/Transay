@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { indicatorsApi } from "../../api/indicatorsApi";
 import { unitsApi } from "../../api/unitsApi";
@@ -37,6 +37,15 @@ export default function Indicators() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState<IndicatorPayload>(emptyForm());
   const [saving, setSaving] = useState(false);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+
+  const toggleGroup = (name: string) =>
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
+      return next;
+    });
 
   const load = async () => {
     setLoading(true);
@@ -123,6 +132,38 @@ export default function Indicators() {
     [items, search]
   );
 
+  // Схлопываем индикаторы с одинаковым русским названием в одну раскрывающуюся группу
+  const groups = useMemo(() => {
+    const map = new Map<string, Indicator[]>();
+    for (const it of filtered) {
+      const arr = map.get(it.rusName);
+      if (arr) arr.push(it);
+      else map.set(it.rusName, [it]);
+    }
+    return [...map.entries()]
+      .sort((a, b) => a[0].localeCompare(b[0], "ru"))
+      .map(([rusName, list]) => ({ rusName, list }));
+  }, [filtered]);
+
+  const renderRow = (it: Indicator, child = false) => (
+    <tr key={it.id} className={child ? "ind-child-row" : undefined}>
+      <td>{it.id}</td>
+      <td className={child ? "ind-child-name" : undefined}>{it.rusName}</td>
+      <td className="admin-muted">{it.engName}</td>
+      <td>{enumLabel(it.gender)}</td>
+      <td>{enumLabel(it.condition)}</td>
+      <td className="admin-muted">{ageToStr(it.minAge)} – {ageToStr(it.maxAge)}</td>
+      <td>{it.minValue} – {it.maxValue}</td>
+      <td>{it.units || "—"}</td>
+      <td>
+        <div className="admin-actions">
+          <button className="icon-btn" onClick={() => openEdit(it)}>✏️</button>
+          <button className="icon-btn icon-btn--danger" onClick={() => remove(it)}>🗑</button>
+        </div>
+      </td>
+    </tr>
+  );
+
   return (
     <div className="admin">
       <div className="admin-header">
@@ -155,25 +196,27 @@ export default function Indicators() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((it) => (
-                <tr key={it.id}>
-                  <td>{it.id}</td>
-                  <td>{it.rusName}</td>
-                  <td className="admin-muted">{it.engName}</td>
-                  <td>{enumLabel(it.gender)}</td>
-                  <td>{enumLabel(it.condition)}</td>
-                  <td className="admin-muted">{ageToStr(it.minAge)} – {ageToStr(it.maxAge)}</td>
-                  <td>{it.minValue} – {it.maxValue}</td>
-                  <td>{it.units || "—"}</td>
-                  <td>
-                    <div className="admin-actions">
-                      <button className="icon-btn" onClick={() => openEdit(it)}>✏️</button>
-                      <button className="icon-btn icon-btn--danger" onClick={() => remove(it)}>🗑</button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {filtered.length === 0 && (
+              {groups.map((g) =>
+                g.list.length === 1 ? (
+                  renderRow(g.list[0])
+                ) : (
+                  <Fragment key={g.rusName}>
+                    <tr className="ind-group-row" onClick={() => toggleGroup(g.rusName)}>
+                      <td className="ind-group-toggle">{expanded.has(g.rusName) ? "▾" : "▸"}</td>
+                      <td>
+                        <span className="ind-group-name">{g.rusName}</span>
+                        <span className="ind-group-badge">{g.list.length}</span>
+                      </td>
+                      <td className="admin-muted" colSpan={6}>
+                        {g.list.length} вариантов по полу / возрасту / состоянию — нажмите, чтобы раскрыть
+                      </td>
+                      <td></td>
+                    </tr>
+                    {expanded.has(g.rusName) && g.list.map((it) => renderRow(it, true))}
+                  </Fragment>
+                )
+              )}
+              {groups.length === 0 && (
                 <tr>
                   <td colSpan={9} className="admin-empty">Ничего не найдено</td>
                 </tr>

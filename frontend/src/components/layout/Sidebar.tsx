@@ -45,11 +45,18 @@ export default function Sidebar({ isOpen = false, onClose }: Props) {
             </li>
 
             {role === "USER" && (
-              <li>
-                <NavLink to="/measures" onClick={onClose} className={({ isActive }) => (isActive ? "active" : "")}>
-                  <img src={Users} alt="" /> Мои анализы
-                </NavLink>
-              </li>
+              <>
+                <li>
+                  <NavLink to="/measures" onClick={onClose} className={({ isActive }) => (isActive ? "active" : "")}>
+                    <img src={Users} alt="" /> Мои анализы
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/family" onClick={onClose} className={({ isActive }) => (isActive ? "active" : "")}>
+                    <span className="nav-ico" aria-hidden="true">👪</span> Семья
+                  </NavLink>
+                </li>
+              </>
             )}
 
             {isStaff && adminNav.map((t) => (

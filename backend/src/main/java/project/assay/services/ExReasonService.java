@@ -16,37 +16,58 @@ public class ExReasonService {
     private final CustomerService customerService;
     private final ReasonsService reasonsService;
     private final PeopleRepository peopleRepository;
+    private final PeopleService peopleService;
 
     @Autowired
-    public ExReasonService(CustomerService customerService, ReasonsService reasonsService, PeopleRepository peopleRepository) {
+    public ExReasonService(CustomerService customerService, ReasonsService reasonsService,
+                           PeopleRepository peopleRepository, PeopleService peopleService) {
         this.customerService = customerService;
         this.reasonsService = reasonsService;
         this.peopleRepository = peopleRepository;
+        this.peopleService = peopleService;
     }
 
     public List<Reason> findAllExWithResponse() {
-        return this.findAllEx().stream().toList();
+        return findAllExFor(customerService.getPersonFromAuth());
     }
 
+    public List<Reason> findAllExForPerson(long personId) {
+        return findAllExFor(peopleService.getOwnedPerson(personId));
+    }
 
     @Transactional
     public List<Reason> addExcludedReasons(Set<Integer> ids) {
-        Person person = customerService.getPersonFromAuth();
+        return addExcludedReasonsFor(customerService.getPersonFromAuth(), ids);
+    }
+
+    @Transactional
+    public List<Reason> addExcludedReasonsForPerson(long personId, Set<Integer> ids) {
+        return addExcludedReasonsFor(peopleService.getOwnedPerson(personId), ids);
+    }
+
+    @Transactional
+    public void deleteEx(int reasonId) {
+        deleteExFor(customerService.getPersonFromAuth(), reasonId);
+    }
+
+    @Transactional
+    public void deleteExForPerson(long personId, int reasonId) {
+        deleteExFor(peopleService.getOwnedPerson(personId), reasonId);
+    }
+
+    private List<Reason> findAllExFor(Person person) {
+        return person.getExcludedReasons().stream().toList();
+    }
+
+    private List<Reason> addExcludedReasonsFor(Person person, Set<Integer> ids) {
         Set<Reason> allFromDB = reasonsService.findByIdIn(ids);
         person.getExcludedReasons().addAll(allFromDB);
         return person.getExcludedReasons().stream().toList();
     }
 
-    @Transactional
-    public void deleteEx(int reasonId) {
-        Person person = customerService.getPersonFromAuth();
+    private void deleteExFor(Person person, int reasonId) {
         Reason fromDB = reasonsService.findById(reasonId);
         person.getExcludedReasons().remove(fromDB);
         peopleRepository.save(person);
-    }
-
-    public Set<Reason> findAllEx() {
-        Person person = customerService.getPersonFromAuth();
-        return person.getExcludedReasons();
     }
 }

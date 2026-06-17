@@ -1,33 +1,52 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import "../../styles/combo.css";
 
 type Reason = { id: number; name: string };
 
+/**
+ * Комбобокс множественного выбора с поиском.
+ * Выбранные значения показываются чипами над полем ввода; клик по чипу убирает его.
+ * В выпадающем списке остаются только ещё не выбранные варианты — клик добавляет.
+ */
 export function MultiSelectWithSearch({
-  label,
   options,
   selected,
   onChange,
+  placeholder = "Поиск...",
 }: {
-  label: string;
+  label?: string;
   options: Reason[];
   selected: number[];
   onChange: (ids: number[]) => void;
+  placeholder?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const ref = useRef<HTMLDivElement>(null);
 
-  const filtered = options.filter((o) =>
-    o.name.toLowerCase().includes(search.toLowerCase())
+  const selectedOptions = useMemo(
+    () =>
+      selected
+        .map((id) => options.find((o) => o.id === id))
+        .filter((o): o is Reason => Boolean(o)),
+    [selected, options]
   );
 
-  const toggleSelect = (id: number) => {
-    if (selected.includes(id)) {
-      onChange(selected.filter((s) => s !== id));
-    } else {
-      onChange([...selected, id]);
-    }
+  const filtered = useMemo(
+    () =>
+      options.filter(
+        (o) =>
+          !selected.includes(o.id) &&
+          o.name.toLowerCase().includes(search.toLowerCase())
+      ),
+    [options, selected, search]
+  );
+
+  const add = (id: number) => {
+    onChange([...selected, id]);
+    setSearch("");
   };
+  const remove = (id: number) => onChange(selected.filter((s) => s !== id));
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -40,37 +59,51 @@ export function MultiSelectWithSearch({
   }, []);
 
   return (
-    <div className="multi-select text-field__input " ref={ref}>
-      <label className="multi-select__label" htmlFor="multi-select-input">
-        {label}
-      </label>
+    <div className="combo" ref={ref}>
+      {selectedOptions.length > 0 && (
+        <div className="combo__tags">
+          {selectedOptions.map((o) => (
+            <span
+              key={o.id}
+              className="combo__tag"
+              onClick={() => remove(o.id)}
+              title="Убрать"
+            >
+              {o.name}
+              <span className="combo__tag-x" aria-hidden="true">
+                ×
+              </span>
+            </span>
+          ))}
+        </div>
+      )}
+
       <input
-        id="multi-select-input"
         type="text"
-        placeholder="Поиск..."
+        className="combo__input"
+        placeholder={placeholder}
         value={search}
         onChange={(e) => {
           setSearch(e.target.value);
-          setOpen(true); // открыть дропдаун при вводе
+          setOpen(true);
         }}
-        onFocus={() => setOpen(true)} // открыть при фокусе
-        className="multi-select__input"
+        onFocus={() => setOpen(true)}
       />
+
       {open && (
-        <div className="multi-select__dropdown">
+        <div className="combo__dropdown">
           {filtered.length > 0 ? (
-            filtered.map((opt) => (
-              <label key={opt.id} className="multi-select__option">
-                <input
-                  type="checkbox"
-                  checked={selected.includes(opt.id)}
-                  onChange={() => toggleSelect(opt.id)}
-                />
-                {opt.name}
-              </label>
+            filtered.map((o) => (
+              <div
+                key={o.id}
+                className="combo__option"
+                onClick={() => add(o.id)}
+              >
+                {o.name}
+              </div>
             ))
           ) : (
-            <div className="multi-select__no-options">Ничего не найдено</div>
+            <div className="combo__empty">Ничего не найдено</div>
           )}
         </div>
       )}

@@ -30,6 +30,7 @@ public class MeasureService {
     private final ReferentService referentService;
     private final ModelMapper modelMapper;
     private final CustomerService customerService;
+    private final PeopleService peopleService;
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
@@ -38,6 +39,7 @@ public class MeasureService {
                           ReferentService referentService,
                           ModelMapper modelMapper,
                           CustomerService customerService,
+                          PeopleService peopleService,
                           JdbcTemplate jdbcTemplate) {
         this.measureRepository = measureRepository;
         this.indicatorService = indicatorService;
@@ -48,12 +50,21 @@ public class MeasureService {
                 .createTypeMap(MeasureRequestDTO.class, Referent.class)
                 .addMappings(mapper -> mapper.skip(Referent::setId));
         this.customerService = customerService;
+        this.peopleService = peopleService;
         this.jdbcTemplate = jdbcTemplate;
     }
 
     @Transactional
     public MeasureResponseDTO save(MeasureRequestDTO dto, Optional<Integer> measureId) {
-        Person person = customerService.getPersonFromAuth();
+        return doSave(customerService.getPersonFromAuth(), dto, measureId);
+    }
+
+    @Transactional
+    public MeasureResponseDTO saveForPerson(long personId, MeasureRequestDTO dto, Optional<Integer> measureId) {
+        return doSave(peopleService.getOwnedPerson(personId), dto, measureId);
+    }
+
+    private MeasureResponseDTO doSave(Person person, MeasureRequestDTO dto, Optional<Integer> measureId) {
         Measure measure = new Measure();
 
         // ToDo: здесь может возникать непонимание если было найдено больше 1 индикатора
@@ -100,7 +111,15 @@ public class MeasureService {
 
     @Transactional
     public void deleteById(int measureId) {
-        Person person = customerService.getPersonFromAuth();
+        deleteForPerson(customerService.getPersonFromAuth(), measureId);
+    }
+
+    @Transactional
+    public void deleteByIdForPerson(long personId, int measureId) {
+        deleteForPerson(peopleService.getOwnedPerson(personId), measureId);
+    }
+
+    private void deleteForPerson(Person person, int measureId) {
         validateMeasureByOwner(person.getId(), measureId);
         measureRepository.deleteById(measureId);
     }
@@ -141,7 +160,14 @@ public class MeasureService {
      * @return готовый JSON сводной таблицы
      */
     public String createSummaryTable() {
-        Person person = customerService.getPersonFromAuth();
+        return summaryTableFor(customerService.getPersonFromAuth());
+    }
+
+    public String createSummaryTable(long personId) {
+        return summaryTableFor(peopleService.getOwnedPerson(personId));
+    }
+
+    private String summaryTableFor(Person person) {
         return querySingleJson(
                 "SELECT get_summary_table(?)::text",
                 "Не удалось построить сводную таблицу анализов",
@@ -157,7 +183,14 @@ public class MeasureService {
      * @return готовый JSON расшифровки
      */
     public String getDecryptedMeasures(LocalDate date) {
-        Person person = customerService.getPersonFromAuth();
+        return decryptFor(customerService.getPersonFromAuth(), date);
+    }
+
+    public String getDecryptedMeasures(long personId, LocalDate date) {
+        return decryptFor(peopleService.getOwnedPerson(personId), date);
+    }
+
+    private String decryptFor(Person person, LocalDate date) {
         return querySingleJson(
                 "SELECT get_decrypt(?, ?)::text",
                 "Не удалось получить расшифровку анализов",

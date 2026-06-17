@@ -9,6 +9,8 @@ import project.assay.dto.requests.PersonRequestDTO;
 import project.assay.dto.responses.PersonResponseDTO;
 import project.assay.exceptions.EntityNotCreatedException;
 import project.assay.exceptions.EntityNotFoundException;
+import project.assay.exceptions.InvalidOperationException;
+import project.assay.models.Customer;
 import project.assay.models.Person;
 import project.assay.models.Reason;
 import project.assay.repositories.PeopleRepository;
@@ -120,6 +122,90 @@ public class PeopleService {
     public void delete() {
         Person person = customerService.getPersonFromAuth();
         peopleRepository.deleteById(person.getId());
+    }
+
+    /* ---------- Семья: несколько людей у одного аккаунта ---------- */
+
+    /**
+     * Возвращает человека, принадлежащего текущему аккаунту (как член семьи
+     * по owner_id, так и собственная анкета по customer.person_id), иначе бросает ошибку.
+     */
+    public Person getOwnedPerson(long personId) {
+        Customer customer = customerService.getAuthenticatedCustomer();
+        Person person = findById(personId);
+
+        boolean ownsAsFamily = person.getOwner() != null
+                && person.getOwner().getId() == customer.getId();
+        boolean ownsAsSelf = customer.getPerson() != null
+                && customer.getPerson().getId().equals(person.getId());
+
+        if (!ownsAsFamily && !ownsAsSelf) {
+            throw new InvalidOperationException(
+                    "Человек с id='%d' не принадлежит вам!".formatted(personId));
+        }
+        return person;
+    }
+
+    public List<PersonResponseDTO> findFamily() {
+        Customer customer = customerService.getAuthenticatedCustomer();
+        Long selfId = customer.getPerson() == null ? null : customer.getPerson().getId();
+        return peopleRepository.findByOwnerId(customer.getId())
+                .stream()
+                .filter(p -> selfId == null || !selfId.equals(p.getId()))
+                .sorted(comparingLong(Person::getId))
+                .map(this::convertToResponseDTO)
+                .toList();
+    }
+
+    public PersonResponseDTO findFamilyMember(long personId) {
+        return convertToResponseDTO(getOwnedPerson(personId));
+    }
+
+    @Transactional
+    public PersonResponseDTO createFamilyMember(PersonRequestDTO dto) {
+        validatePerson(dto);
+
+        Customer customer = customerService.getAuthenticatedCustomer();
+        Person personToSave = convertToEntity(dto);
+        personToSave.setOwner(customer);
+
+        Person saved = peopleRepository.save(personToSave);
+
+        return switch (dto.getGender()) {
+            case MALE -> beRealMan(saved, maleExReasons);
+            case FEMALE -> beRealWoman(saved, femaleExReasons);
+        };
+    }
+
+    @Transactional
+    public PersonResponseDTO updateFamilyMember(long personId, PersonRequestDTO dto) {
+        Person personFromDB = getFamilyMemberStrict(personId);
+
+        Person personToUpdate = convertToEntity(dto, personFromDB);
+        personToUpdate.setId(personFromDB.getId());
+        personToUpdate.setExcludedReasons(personFromDB.getExcludedReasons());
+
+        validatePerson(convertToRequestDTO(personToUpdate));
+
+        return convertToResponseDTO(peopleRepository.save(personToUpdate));
+    }
+
+    @Transactional
+    public void deleteFamilyMember(long personId) {
+        Person person = getFamilyMemberStrict(personId);
+        peopleRepository.deleteById(person.getId());
+    }
+
+    /** Член семьи (но не собственная анкета пользователя — её правят в личном кабинете). */
+    private Person getFamilyMemberStrict(long personId) {
+        Customer customer = customerService.getAuthenticatedCustomer();
+        Person person = getOwnedPerson(personId);
+        Long selfId = customer.getPerson() == null ? null : customer.getPerson().getId();
+        if (selfId != null && selfId.equals(person.getId())) {
+            throw new InvalidOperationException(
+                    "Свою анкету редактируйте в личном кабинете, а не в разделе «Семья».");
+        }
+        return person;
     }
 
     @Transactional

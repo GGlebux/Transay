@@ -96,6 +96,27 @@
 .admin-empty { text-align: center; color: #94a3b8; padding: 24px; }
 .admin-muted { color: #94a3b8; font-size: 0.85rem; }
 
+/* Схлопнутые дубликаты индикаторов */
+.ind-group-row { cursor: pointer; }
+.ind-group-row:hover td { background: var(--brand-soft); }
+.ind-group-toggle { color: var(--brand); font-weight: 700; text-align: center; }
+.ind-group-name { font-weight: 600; }
+.ind-group-badge {
+  display: inline-block;
+  margin-left: 8px;
+  min-width: 20px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--brand-soft);
+  color: var(--brand-soft-text);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+}
+.ind-child-row td { background: #f8fbff; }
+.ind-child-row td:first-child { box-shadow: inset 3px 0 0 var(--brand); }
+.ind-child-name { padding-left: 6px; }
+
 .chip {
   display: inline-flex;
   align-items: center;

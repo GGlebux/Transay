@@ -11,4 +11,7 @@ import java.util.List;
 public interface PeopleRepository extends JpaRepository<Person, Long> {
     @EntityGraph(attributePaths = {"excludedReasons", "measures"})
     List<Person> findAll();
+
+    @EntityGraph(attributePaths = {"excludedReasons"})
+    List<Person> findByOwnerId(int ownerId);
 }

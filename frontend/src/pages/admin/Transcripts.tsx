@@ -175,29 +175,21 @@ export default function Transcripts() {
             <div className="admin-field">
               <label>Причины понижения</label>
               <MultiSelectWithSearch
-                label="Выберите причины понижения"
                 options={reasons}
                 selected={form.fallsIds}
                 onChange={(ids) => setForm({ ...form, fallsIds: ids })}
+                placeholder="Поиск причины..."
               />
-              <div>{form.fallsIds.map((id) => {
-                const r = reasons.find((x) => x.id === id);
-                return r ? <span key={id} className="chip">{r.name}</span> : null;
-              })}</div>
             </div>
 
             <div className="admin-field">
               <label>Причины повышения</label>
               <MultiSelectWithSearch
-                label="Выберите причины повышения"
                 options={reasons}
                 selected={form.raisesIds}
                 onChange={(ids) => setForm({ ...form, raisesIds: ids })}
+                placeholder="Поиск причины..."
               />
-              <div>{form.raisesIds.map((id) => {
-                const r = reasons.find((x) => x.id === id);
-                return r ? <span key={id} className="chip">{r.name}</span> : null;
-              })}</div>
             </div>
 
             <div className="admin-modal-actions">

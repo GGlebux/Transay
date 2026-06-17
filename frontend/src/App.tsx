@@ -9,6 +9,8 @@ import ForgotPassword from "./pages/Auth/ForgotPassword";
 
 import Cabinet from "./pages/cabinet/Dashboard";
 import Measures from "./pages/Person";
+import Family from "./pages/Family";
+import FamilyMember from "./pages/FamilyMember";
 
 import AdminLayout from "./pages/admin/AdminLayout";
 import Users from "./pages/admin/Users";
@@ -52,6 +54,28 @@ export default function App() {
             <RequireAuth>
               <Layout>
                 <Measures />
+              </Layout>
+            </RequireAuth>
+          }
+        />
+
+        {/* СЕМЬЯ: список людей аккаунта и их анализы */}
+        <Route
+          path="/family"
+          element={
+            <RequireAuth>
+              <Layout>
+                <Family />
+              </Layout>
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/family/:personId"
+          element={
+            <RequireAuth>
+              <Layout>
+                <FamilyMember />
               </Layout>
             </RequireAuth>
           }
