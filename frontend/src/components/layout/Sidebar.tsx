@@ -2,8 +2,6 @@ import { NavLink } from "react-router-dom";
 import type { ComponentType } from "react";
 import "../../styles/layout.css";
 import { useAuth } from "../../authe/AuthContext";
-import User from "../../assets/User.png";
-import Users from "../../assets/Users.png";
 import logo from "../../assets/Logo.png";
 import {
   UsersIcon,
@@ -15,6 +13,8 @@ import {
   RulerIcon,
   ChartIcon,
   FamilyIcon,
+  ProfileIcon,
+  AnalysisIcon,
   type IconProps,
 } from "../icons/Icons";
 
@@ -60,7 +60,7 @@ export default function Sidebar({ isOpen = false, onClose }: Props) {
           <ul>
             <li>
               <NavLink to="/cabinet" onClick={onClose} className={({ isActive }) => (isActive ? "active" : "")}>
-                <img src={User} alt="" /> Профиль
+                <span className="nav-ico"><ProfileIcon /></span> Профиль
               </NavLink>
             </li>
 
@@ -68,7 +68,7 @@ export default function Sidebar({ isOpen = false, onClose }: Props) {
               <>
                 <li>
                   <NavLink to="/measures" onClick={onClose} className={({ isActive }) => (isActive ? "active" : "")}>
-                    <img src={Users} alt="" /> Мои анализы
+                    <span className="nav-ico"><AnalysisIcon /></span> Мои анализы
                   </NavLink>
                 </li>
                 <li>

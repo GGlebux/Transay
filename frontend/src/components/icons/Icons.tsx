@@ -118,6 +118,28 @@ export function FamilyIcon(p: IconProps) {
   );
 }
 
+/** Профиль — аккаунт пользователя */
+export function ProfileIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <circle cx="12" cy="12" r="9.5" opacity={0.5} />
+      <circle cx="12" cy="9.5" r="3" />
+      <path d="M5.8 19.3C6.7 16.4 9.1 14.5 12 14.5C14.9 14.5 17.3 16.4 18.2 19.3" />
+    </Svg>
+  );
+}
+
+/** Мои анализы — отчёт с пульсом */
+export function AnalysisIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M9 4.5H7.5C5.84 4.5 4.5 5.84 4.5 7.5V17.5C4.5 19.16 5.84 20.5 7.5 20.5H16.5C18.16 20.5 19.5 19.16 19.5 17.5V7.5C19.5 5.84 18.16 4.5 16.5 4.5H15" />
+      <path d="M8.5 4.5C8.5 3.4 9.4 2.5 10.5 2.5H13.5C14.6 2.5 15.5 3.4 15.5 4.5C15.5 5.6 14.6 6.5 13.5 6.5H10.5C9.4 6.5 8.5 5.6 8.5 4.5Z" />
+      <path d="M7.5 14H9.5L10.8 11L12.4 16L13.6 13.5H16.5" opacity={0.5} />
+    </Svg>
+  );
+}
+
 /** Редактировать — карандаш (по мотивам Pen.svg) */
 export function EditIcon({ size = 18, className }: IconProps) {
   return (
