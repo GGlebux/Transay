@@ -163,12 +163,21 @@
   box-shadow: 0 1px 6px rgba(0, 51, 102, 0.06);
 }
 
-/* Иконка-эмодзи в сайдбаре (слева от названия) */
+/* Иконка в сайдбаре (слева от названия) */
 .sidebar .nav-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 22px;
-  font-size: 1.05rem;
-  text-align: center;
   flex: 0 0 22px;
+  color: var(--brand);
+}
+.sidebar .nav-ico svg {
+  display: block;
+}
+.sidebar a.active .nav-ico,
+.sidebar a:hover .nav-ico {
+  color: var(--primary-color);
 }
 .header__right {
   display: flex;

@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import { groupsApi } from "../../api/groupsApi";
 import type { IndicatorGroup, IndicatorGroupPayload, SimpleIndicator } from "../../api/types";
 import { getApiErrorMessage } from "../../utils/errors";
+import { EditIcon, TrashIcon } from "../../components/icons/Icons";
 import "../../styles/admin.css";
 
 const emptyForm = (): IndicatorGroupPayload => ({ groupName: "", indicators: [{ name: "", units: [] }] });
@@ -135,8 +136,8 @@ export default function Groups() {
                   </td>
                   <td>
                     <div className="admin-actions">
-                      <button className="icon-btn" onClick={() => openEdit(g)}>✏️</button>
-                      <button className="icon-btn icon-btn--danger" onClick={() => remove(g)}>🗑</button>
+                      <button className="icon-btn" onClick={() => openEdit(g)} title="Изменить" aria-label="Изменить"><EditIcon /></button>
+                      <button className="icon-btn icon-btn--danger" onClick={() => remove(g)} title="Удалить" aria-label="Удалить"><TrashIcon /></button>
                     </div>
                   </td>
                 </tr>

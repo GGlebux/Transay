@@ -5,6 +5,7 @@ import { unitsApi } from "../../api/unitsApi";
 import type { Indicator, IndicatorPayload, IndicatorGender, Condition, AgeRange } from "../../api/types";
 import { enumLabel } from "../../utils/labels";
 import { getApiErrorMessage } from "../../utils/errors";
+import { EditIcon, TrashIcon } from "../../components/icons/Icons";
 import "../../styles/admin.css";
 
 const GENDERS: IndicatorGender[] = ["MALE", "FEMALE", "BOTH"];
@@ -158,8 +159,8 @@ export default function Indicators() {
       <td>{it.units || "—"}</td>
       <td>
         <div className="admin-actions">
-          <button className="icon-btn" onClick={() => openEdit(it)}>✏️</button>
-          <button className="icon-btn icon-btn--danger" onClick={() => remove(it)}>🗑</button>
+          <button className="icon-btn" onClick={() => openEdit(it)} title="Изменить" aria-label="Изменить"><EditIcon /></button>
+          <button className="icon-btn icon-btn--danger" onClick={() => remove(it)} title="Удалить" aria-label="Удалить"><TrashIcon /></button>
         </div>
       </td>
     </tr>

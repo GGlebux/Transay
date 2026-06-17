@@ -82,6 +82,9 @@
 
 .admin-actions { display: flex; gap: 6px; flex-wrap: nowrap; justify-content: flex-end; }
 .icon-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   border: none;
   background: #f1f5f9;
   border-radius: 6px;
@@ -89,6 +92,7 @@
   cursor: pointer;
   font-size: 0.85rem;
 }
+.icon-btn svg { display: block; }
 .icon-btn:hover { background: #e2e8f0; }
 .icon-btn--danger { background: #fee2e2; color: #b91c1c; }
 .icon-btn--danger:hover { background: #fecaca; }

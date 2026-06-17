@@ -6,6 +6,7 @@ import { MultiSelectWithSearch } from "../../components/Trans_Indicat/MultiSelec
 import type { Transcript, TranscriptPayload, IndicatorGender, Reason } from "../../api/types";
 import { enumLabel } from "../../utils/labels";
 import { getApiErrorMessage } from "../../utils/errors";
+import { EditIcon, TrashIcon } from "../../components/icons/Icons";
 import "../../styles/admin.css";
 
 const GENDERS: IndicatorGender[] = ["MALE", "FEMALE", "BOTH"];
@@ -139,8 +140,8 @@ export default function Transcripts() {
                   </td>
                   <td>
                     <div className="admin-actions">
-                      <button className="icon-btn" onClick={() => openEdit(t)}>✏️</button>
-                      <button className="icon-btn icon-btn--danger" onClick={() => remove(t)}>🗑</button>
+                      <button className="icon-btn" onClick={() => openEdit(t)} title="Изменить" aria-label="Изменить"><EditIcon /></button>
+                      <button className="icon-btn icon-btn--danger" onClick={() => remove(t)} title="Удалить" aria-label="Удалить"><TrashIcon /></button>
                     </div>
                   </td>
                 </tr>

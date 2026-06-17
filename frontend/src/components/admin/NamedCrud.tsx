@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { getApiErrorMessage } from "../../utils/errors";
+import { EditIcon, TrashIcon } from "../icons/Icons";
 import "../../styles/admin.css";
 
 type Named = { id: number; name: string };
@@ -157,14 +158,16 @@ export default function NamedCrud({
                         <>
                           <button
                             className="icon-btn"
+                            title="Изменить"
+                            aria-label="Изменить"
                             onClick={() => {
                               setEditingId(item.id);
                               setEditValue(item.name);
                             }}
                           >
-                            ✏️
+                            <EditIcon />
                           </button>
-                          <button className="icon-btn icon-btn--danger" disabled={busyId === item.id} onClick={() => remove(item)}>🗑</button>
+                          <button className="icon-btn icon-btn--danger" disabled={busyId === item.id} onClick={() => remove(item)} title="Удалить" aria-label="Удалить"><TrashIcon /></button>
                         </>
                       )}
                     </div>
