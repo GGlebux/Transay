@@ -675,6 +675,7 @@ export default function Person({ personId }: { personId?: number } = {}) {
               <div className="modal-actions" style={{ marginTop: 12 }}>
                 <button
                   type="button"
+                  className="btn-primary"
                   onClick={() => {
                     setEditingMeasureId(infoData.id!);
                     setEditValue(String(infoData.value ?? ""));
@@ -689,6 +690,7 @@ export default function Person({ personId }: { personId?: number } = {}) {
                 </button>
                 <button
                   type="button"
+                  className="btn-danger"
                   onClick={async () => {
                     if (!(await confirm("Удалить это измерение?", { title: "Удаление измерения", okText: "Удалить", danger: true }))) return;
                     try {

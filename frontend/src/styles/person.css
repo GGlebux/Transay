@@ -472,12 +472,47 @@ body {
   gap: 8px;
 }
 
-.modal-actions button {
-  margin-top: 12px;
+.modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  border: none !important;
+}
+
+.modal-actions button {
+  border: none;
+  border-radius: 0.5rem;
+  padding: 8px 18px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn-primary {
+  background: #1977DB;
+  color: #fff;
+}
+.btn-primary:hover {
+  background: #0056b3;
+  color: #fff;
+}
+
+.btn-danger {
+  background: #dc2626;
+  color: #fff;
+}
+.btn-danger:hover {
+  background: #b91c1c;
+  color: #fff;
+}
+
+.btn-ghost {
+  background: #f1f5f9;
+  color: #475569;
+}
+.btn-ghost:hover {
+  background: #e2e8f0;
+  color: #475569;
 }
 
 /* === LOADING === */
