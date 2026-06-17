@@ -16,7 +16,6 @@ import project.assay.models.HttpLog;
 import project.assay.repositories.HttpLogRepository;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
@@ -84,8 +83,8 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
         log.setError(status >= 500);
 
         if (!req.getRequestURI().startsWith("/api/auth/")) {
-            log.setRequestBody(asText(req.getContentAsByteArray(), req.getCharacterEncoding()));
-            log.setResponseBody(asText(resp.getContentAsByteArray(), resp.getCharacterEncoding()));
+            log.setRequestBody(asText(req.getContentAsByteArray()));
+            log.setResponseBody(asText(resp.getContentAsByteArray()));
         }
 
         repository.save(log);
@@ -107,12 +106,13 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
         return auth.getName();
     }
 
-    private String asText(byte[] body, String encoding) {
+    private String asText(byte[] body) {
         if (body == null || body.length == 0) {
             return null;
         }
-        Charset charset = encoding != null ? Charset.forName(encoding) : StandardCharsets.UTF_8;
-        String text = new String(body, charset);
+        // Всегда декодируем как UTF-8: весь стек (фронт, JSON, БД) в UTF-8, а
+        // getCharacterEncoding() иногда отдаёт ISO-8859-1 → кириллица превращалась в «кашу».
+        String text = new String(body, StandardCharsets.UTF_8);
         if (text.length() > MAX_BODY) {
             return text.substring(0, MAX_BODY) + "...[truncated]";
         }
