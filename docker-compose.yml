@@ -52,6 +52,10 @@ services:
     image: containrrr/watchtower
     container_name: transay-watchtower
     profiles: ["autoupdate"]
+    environment:
+      # Старый клиент watchtower по умолчанию согласует API 1.25, а свежий
+      # Docker-демон требует минимум 1.40 — форсируем поддерживаемую версию.
+      DOCKER_API_VERSION: "1.44"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --interval 60 --cleanup --label-enable
