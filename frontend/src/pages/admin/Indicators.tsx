@@ -4,6 +4,7 @@ import { indicatorsApi } from "../../api/indicatorsApi";
 import { unitsApi } from "../../api/unitsApi";
 import type { Indicator, IndicatorPayload, IndicatorGender, Condition, AgeRange } from "../../api/types";
 import { enumLabel } from "../../utils/labels";
+import { getApiErrorMessage } from "../../utils/errors";
 import "../../styles/admin.css";
 
 const GENDERS: IndicatorGender[] = ["MALE", "FEMALE", "BOTH"];
@@ -58,7 +59,7 @@ export default function Indicators() {
       setUnits(us.map((u) => u.name));
     } catch (e) {
       console.error(e);
-      alert("Ошибка загрузки индикаторов");
+      alert(getApiErrorMessage(e, "Ошибка загрузки индикаторов"));
     } finally {
       setLoading(false);
     }
@@ -103,7 +104,7 @@ export default function Indicators() {
       setOpen(false);
       await load();
     } catch (err: any) {
-      alert(err?.response?.data?.detail || err?.message || "Ошибка сохранения");
+      alert(getApiErrorMessage(err, "Ошибка сохранения"));
     } finally {
       setSaving(false);
     }
@@ -115,7 +116,7 @@ export default function Indicators() {
       await indicatorsApi.remove(it.id);
       setItems((prev) => prev.filter((x) => x.id !== it.id));
     } catch (err: any) {
-      alert(err?.response?.data?.detail || err?.message || "Ошибка удаления");
+      alert(getApiErrorMessage(err, "Ошибка удаления"));
     }
   };
 

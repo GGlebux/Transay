@@ -12,6 +12,7 @@ import { groupsApi } from "../api/groupsApi";
 import { exReasonsApi } from "../api/exReasonsApi";
 import type { Reason, SummaryGroup, IndicatorGroup } from "../api/types";
 import { isoToServer, formatShort, todayISO } from "../utils/date";
+import { getApiErrorMessage } from "../utils/errors";
 
 /* ---------- Локальные типы вьюхи ---------- */
 type Status = "ok" | "raise" | "fall";
@@ -343,7 +344,7 @@ export default function Person({ personId }: { personId?: number } = {}) {
       notify("Измерение сохранено", "success");
     } catch (err: any) {
       console.error(err);
-      notify(err?.response?.data?.detail || "Ошибка при сохранении измерения", "error");
+      notify(getApiErrorMessage(err, "Ошибка при сохранении измерения"), "error");
     } finally {
       setSaving(false);
     }
@@ -409,7 +410,7 @@ export default function Person({ personId }: { personId?: number } = {}) {
       if (dataItems.length === 0) notify("На выбранную дату нет данных для расшифровки", "info");
     } catch (e) {
       console.error("Ошибка при расшифровке:", e);
-      notify("Ошибка при загрузке расшифровки", "error");
+      notify(getApiErrorMessage(e, "Ошибка при загрузке расшифровки"), "error");
     } finally {
       setLoadingDecrypt(false);
     }
@@ -435,7 +436,7 @@ export default function Person({ personId }: { personId?: number } = {}) {
       notify("Измерение обновлено", "success");
     } catch (err) {
       console.error(err);
-      notify("Ошибка при редактировании измерения", "error");
+      notify(getApiErrorMessage(err, "Ошибка при редактировании измерения"), "error");
     }
   };
 
@@ -594,7 +595,7 @@ export default function Person({ personId }: { personId?: number } = {}) {
                         notify("Причина исключена", "success");
                       } catch (e) {
                         console.error(e);
-                        notify("Ошибка при исключении причины", "error");
+                        notify(getApiErrorMessage(e, "Ошибка при исключении причины"), "error");
                       } finally {
                         setLoadingExclusion(false);
                       }
@@ -700,7 +701,7 @@ export default function Person({ personId }: { personId?: number } = {}) {
                       notify("Измерение удалено", "success");
                     } catch (err) {
                       console.error(err);
-                      notify("Ошибка при удалении измерения", "error");
+                      notify(getApiErrorMessage(err, "Ошибка при удалении измерения"), "error");
                     }
                   }}
                 >

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import styles from "./Auth.module.css";
 import logo from "../../assets/Logo.png";
 import { authApi } from "../../api/authApi";
+import { getApiErrorMessage } from "../../utils/errors";
 
 type RegisterForm = {
     email: string;
@@ -85,10 +86,7 @@ export default function Register() {
 
                 setSuccess("Письмо отправлено повторно.");
             } catch (e: any) {
-                setError(
-                    e?.response?.data?.detail ||
-                    "Не удалось отправить письмо повторно."
-                );
+                setError(getApiErrorMessage(e, "Не удалось отправить письмо повторно."));
             }
         };
 
@@ -112,11 +110,7 @@ export default function Register() {
             setCanResend(true);
             setResendCooldown(60);
         } catch (e: any) {
-            const serverMsg =
-                e?.response?.data?.errors?.password ||
-                e?.response?.data?.detail ||
-                "Не удалось зарегистрироваться. Попробуйте снова.";
-            setError(serverMsg);
+            setError(getApiErrorMessage(e, "Не удалось зарегистрироваться. Попробуйте снова."));
         } finally {
             setIsLoading(false);
         }

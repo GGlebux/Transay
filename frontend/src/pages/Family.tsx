@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { peopleApi } from "../api/peopleApi";
 import type { Person, PersonPayload } from "../api/types";
 import { isoToServer, toInputDate } from "../utils/date";
+import { getApiErrorMessage } from "../utils/errors";
 import { useToast, useConfirm } from "../components/ui/Feedback";
 import "../styles/dashboard.css";
 import "../styles/family.css";
@@ -56,7 +57,7 @@ export default function Family() {
       setMembers(await peopleApi.getFamily());
     } catch (e) {
       console.error(e);
-      notify("Ошибка загрузки списка семьи", "error");
+      notify(getApiErrorMessage(e, "Ошибка загрузки списка семьи"), "error");
     } finally {
       setLoading(false);
     }
@@ -112,7 +113,7 @@ export default function Family() {
       await load();
       notify(editingId == null ? "Член семьи добавлен" : "Изменения сохранены", "success");
     } catch (e: any) {
-      setError(e?.response?.data?.detail || "Ошибка сохранения");
+      setError(getApiErrorMessage(e, "Ошибка сохранения"));
     } finally {
       setSaving(false);
     }
@@ -126,7 +127,7 @@ export default function Family() {
       notify("Удалено", "success");
     } catch (e) {
       console.error(e);
-      notify("Ошибка при удалении", "error");
+      notify(getApiErrorMessage(e, "Ошибка при удалении"), "error");
     }
   };
 

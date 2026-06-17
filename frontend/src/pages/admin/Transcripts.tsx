@@ -5,6 +5,7 @@ import { reasonsApi } from "../../api/reasonsApi";
 import { MultiSelectWithSearch } from "../../components/Trans_Indicat/MultiSelectWithSearch";
 import type { Transcript, TranscriptPayload, IndicatorGender, Reason } from "../../api/types";
 import { enumLabel } from "../../utils/labels";
+import { getApiErrorMessage } from "../../utils/errors";
 import "../../styles/admin.css";
 
 const GENDERS: IndicatorGender[] = ["MALE", "FEMALE", "BOTH"];
@@ -33,7 +34,7 @@ export default function Transcripts() {
       setReasons(rs);
     } catch (e) {
       console.error(e);
-      alert("Ошибка загрузки транскрипций");
+      alert(getApiErrorMessage(e, "Ошибка загрузки транскрипций"));
     } finally {
       setLoading(false);
     }
@@ -70,7 +71,7 @@ export default function Transcripts() {
       setOpen(false);
       await load();
     } catch (err: any) {
-      alert(err?.response?.data?.detail || err?.message || "Ошибка сохранения");
+      alert(getApiErrorMessage(err, "Ошибка сохранения"));
     } finally {
       setSaving(false);
     }
@@ -82,7 +83,7 @@ export default function Transcripts() {
       await transcriptsApi.remove(t.id);
       setItems((prev) => prev.filter((x) => x.id !== t.id));
     } catch (err: any) {
-      alert(err?.response?.data?.detail || err?.message || "Ошибка удаления");
+      alert(getApiErrorMessage(err, "Ошибка удаления"));
     }
   };
 

@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import axios from "axios";
 import { FloatingTextInput, FloatingSelect } from "../Trans_Indicat/FloatingTextField";
 import { API } from "../../apiConfig";
+import { getApiErrorMessage } from "../../utils/errors";
 import { MultiSelectWithSearch } from "../Trans_Indicat/MultiSelectWithSearch";
 
 export default function TranscriptForm({
@@ -64,7 +65,7 @@ export default function TranscriptForm({
       alert("Данные успешно отправлены!");
     } catch (err) {
       console.error(err);
-      alert("Ошибка при отправке данных");
+      alert(getApiErrorMessage(err, "Ошибка при отправке данных"));
     } finally {
       setLoading(false); // 🔹 заканчиваем загрузку
     }

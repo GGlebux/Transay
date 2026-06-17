@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import axios from "axios";
 import { API } from "../../apiConfig";
+import { getApiErrorMessage } from "../../utils/errors";
 import { FloatingTextInput } from "../../components/Trans_Indicat/FloatingTextField";
 
 type Named = { id: number; name: string };
@@ -73,7 +74,7 @@ function UnitsBlock() {
       await load();
       alert("Unit создан");
     } catch (err: any) {
-      alert(err?.response?.data?.message || err.message || "Ошибка");
+      alert(getApiErrorMessage(err, "Ошибка"));
     } finally { setLoading(false); }
   };
 
@@ -86,7 +87,7 @@ function UnitsBlock() {
       await axios.delete(`${API.INDICATOR_UNITS}/${id}`);
       setItems((prev) => prev.filter((u) => u.id !== id));
     } catch (err: any) {
-      alert(err?.response?.data?.message || err.message || "Ошибка удаления");
+      alert(getApiErrorMessage(err, "Ошибка удаления"));
     } finally { setDeletingId(null); }
   };
 
@@ -148,7 +149,7 @@ function ReasonsBlock() {
       await load();
       alert("Reason создан");
     } catch (err: any) {
-      alert(err?.response?.data?.message || err.message || "Ошибка");
+      alert(getApiErrorMessage(err, "Ошибка"));
     } finally { setLoading(false); }
   };
 
@@ -161,7 +162,7 @@ function ReasonsBlock() {
       await axios.delete(`${API.REASONS}/${id}`);
       setItems((prev) => prev.filter((r) => r.id !== id));
     } catch (err: any) {
-      alert(err?.response?.data?.message || err.message || "Ошибка удаления");
+      alert(getApiErrorMessage(err, "Ошибка удаления"));
     } finally { setDeletingId(null); }
   };
 

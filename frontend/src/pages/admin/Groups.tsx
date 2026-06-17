@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { groupsApi } from "../../api/groupsApi";
 import type { IndicatorGroup, IndicatorGroupPayload, SimpleIndicator } from "../../api/types";
+import { getApiErrorMessage } from "../../utils/errors";
 import "../../styles/admin.css";
 
 const emptyForm = (): IndicatorGroupPayload => ({ groupName: "", indicators: [{ name: "", units: [] }] });
@@ -23,7 +24,7 @@ export default function Groups() {
       setItems([...data].sort((a, b) => a.groupName.localeCompare(b.groupName, "ru")));
     } catch (e) {
       console.error(e);
-      alert("Ошибка загрузки групп");
+      alert(getApiErrorMessage(e, "Ошибка загрузки групп"));
     } finally {
       setLoading(false);
     }
@@ -76,7 +77,7 @@ export default function Groups() {
       setOpen(false);
       await load();
     } catch (err: any) {
-      alert(err?.response?.data?.detail || err?.message || "Ошибка сохранения");
+      alert(getApiErrorMessage(err, "Ошибка сохранения"));
     } finally {
       setSaving(false);
     }
@@ -88,7 +89,7 @@ export default function Groups() {
       await groupsApi.remove(g.id);
       setItems((prev) => prev.filter((x) => x.id !== g.id));
     } catch (err: any) {
-      alert(err?.response?.data?.detail || err?.message || "Ошибка удаления");
+      alert(getApiErrorMessage(err, "Ошибка удаления"));
     }
   };
 

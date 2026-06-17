@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { customersApi } from "../../api/customersApi";
 import type { Customer, CustomerRole } from "../../api/types";
 import { enumLabel } from "../../utils/labels";
+import { getApiErrorMessage } from "../../utils/errors";
 import "../../styles/admin.css";
 
 const ROLES: CustomerRole[] = ["USER", "EDITOR", "ADMIN"];
@@ -19,7 +20,7 @@ export default function Users() {
       setUsers([...data].sort((a, b) => a.id - b.id));
     } catch (e) {
       console.error(e);
-      alert("Ошибка загрузки пользователей");
+      alert(getApiErrorMessage(e, "Ошибка загрузки пользователей"));
     } finally {
       setLoading(false);
     }
@@ -37,7 +38,7 @@ export default function Users() {
       await customersApi.upgrade(user.id, role);
       setUsers((prev) => prev.map((u) => (u.id === user.id ? { ...u, role } : u)));
     } catch (err: any) {
-      alert(err?.response?.data?.detail || err?.message || "Ошибка смены роли");
+      alert(getApiErrorMessage(err, "Ошибка смены роли"));
     } finally {
       setBusyId(null);
     }

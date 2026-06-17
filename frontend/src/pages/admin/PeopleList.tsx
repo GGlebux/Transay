@@ -3,6 +3,7 @@ import { peopleApi } from "../../api/peopleApi";
 import type { Person } from "../../api/types";
 import { formatShort } from "../../utils/date";
 import { enumLabel } from "../../utils/labels";
+import { getApiErrorMessage } from "../../utils/errors";
 import "../../styles/admin.css";
 
 const calcAge = (iso: string): string => {
@@ -28,7 +29,7 @@ export default function PeopleList() {
         setPeople(Array.isArray(data) ? data : []);
       } catch (e) {
         console.error(e);
-        alert("Ошибка загрузки списка людей");
+        alert(getApiErrorMessage(e, "Ошибка загрузки списка людей"));
       } finally {
         setLoading(false);
       }

@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { API } from "../apiConfig";
+import { getApiErrorMessage } from "../utils/errors";
 import "../styles/people.css";
 import Pen from "../assets/Pen.svg";
 import Trash from "../assets/Trash.svg";
@@ -129,7 +130,7 @@ export default function People() {
     } catch (e) {
       console.error(e);
       setPeople([]); // не даём упасть на filter()
-      alert("Ошибка загрузки списка людей");
+      alert(getApiErrorMessage(e, "Ошибка загрузки списка людей"));
     } finally {
       setLoading(false);
     }
@@ -185,7 +186,7 @@ export default function People() {
       setModalOpen(false);
     } catch (err) {
       console.error(err);
-      alert("Ошибка при сохранении");
+      alert(getApiErrorMessage(err, "Ошибка при сохранении"));
     }
   };
 
@@ -196,7 +197,7 @@ export default function People() {
       setPeople((prev) => prev.filter((p) => p.id !== person.id));
     } catch (err) {
       console.error(err);
-      alert("Ошибка при удалении");
+      alert(getApiErrorMessage(err, "Ошибка при удалении"));
     }
   };
 

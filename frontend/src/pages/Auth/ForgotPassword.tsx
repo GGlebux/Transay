@@ -3,6 +3,7 @@ import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import styles from "./Auth.module.css";
 import logo from "../../assets/Logo.png";
 import { authApi } from "../../api/authApi";
+import { getApiErrorMessage } from "../../utils/errors";
 
 type Step = "start" | "end";
 
@@ -65,7 +66,7 @@ export default function ForgotPassword() {
 
             setSuccess("Мы отправили письмо для восстановления пароля. Проверьте почту.");
         } catch (e: any) {
-            setError(e?.response?.data?.detail || "Не удалось отправить письмо. Попробуйте снова.");
+            setError(getApiErrorMessage(e, "Не удалось отправить письмо. Попробуйте снова."));
         } finally {
             setLoading(false);
         }
@@ -89,7 +90,7 @@ export default function ForgotPassword() {
             setSuccess("Пароль успешно изменён. Теперь можно войти.");
             navigate("/login", { replace: true });
         } catch (e: any) {
-            setError(e?.response?.data?.detail || "Не удалось изменить пароль. Проверьте token и попробуйте снова.");
+            setError(getApiErrorMessage(e, "Не удалось изменить пароль. Проверьте token и попробуйте снова."));
         } finally {
             setLoading(false);
         }

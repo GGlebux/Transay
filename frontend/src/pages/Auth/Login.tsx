@@ -6,6 +6,7 @@ import { useAuth } from "../../authe/AuthContext";
 
 
 import { authApi } from "../../api/authApi";
+import { getApiErrorMessage } from "../../utils/errors";
 
 
 
@@ -70,8 +71,10 @@ export default function Login() {
     // Если профиля ещё нет (personId == null), Dashboard сам покажет форму создания.
     navigate("/cabinet", { replace: true });
 
-  } catch {
-    setError("Не удалось войти. Проверьте данные и попробуйте снова.");
+  } catch (err) {
+    const msg = getApiErrorMessage(err, "Не удалось войти. Проверьте данные и попробуйте снова.");
+    // Spring отдаёт "Bad credentials" по-английски — показываем человекочитаемый текст.
+    setError(/bad credentials/i.test(msg) ? "Неверный email или пароль." : msg);
   } finally {
     setIsLoading(false);
   }

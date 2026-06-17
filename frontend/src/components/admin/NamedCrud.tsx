@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
+import { getApiErrorMessage } from "../../utils/errors";
 import "../../styles/admin.css";
 
 type Named = { id: number; name: string };
@@ -37,7 +38,7 @@ export default function NamedCrud({
       setItems([...data].sort((a, b) => a.name.localeCompare(b.name, "ru")));
     } catch (e) {
       console.error(e);
-      alert("Ошибка загрузки списка");
+      alert(getApiErrorMessage(e, "Ошибка загрузки списка"));
     } finally {
       setLoading(false);
     }
@@ -57,7 +58,7 @@ export default function NamedCrud({
       setValue("");
       await load();
     } catch (err: any) {
-      alert(err?.response?.data?.detail || err?.message || "Ошибка создания");
+      alert(getApiErrorMessage(err, "Ошибка создания"));
     } finally {
       setCreating(false);
     }
@@ -71,7 +72,7 @@ export default function NamedCrud({
       setEditingId(null);
       await load();
     } catch (err: any) {
-      alert(err?.response?.data?.detail || err?.message || "Ошибка сохранения");
+      alert(getApiErrorMessage(err, "Ошибка сохранения"));
     } finally {
       setBusyId(null);
     }
@@ -84,7 +85,7 @@ export default function NamedCrud({
       await api.remove(item.id);
       setItems((prev) => prev.filter((x) => x.id !== item.id));
     } catch (err: any) {
-      alert(err?.response?.data?.detail || err?.message || "Ошибка удаления");
+      alert(getApiErrorMessage(err, "Ошибка удаления"));
     } finally {
       setBusyId(null);
     }

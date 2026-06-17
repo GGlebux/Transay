@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import axios from "axios";
 import { FloatingTextInput, FloatingSelect } from "../Trans_Indicat/FloatingTextField";
 import { API } from "../../apiConfig"; // импорт API
+import { getApiErrorMessage } from "../../utils/errors";
 
 const genders = ["male", "female", "both"];
 
@@ -76,12 +77,7 @@ export default function IndicatorForm({ engName, setEngName }: Props) {
       alert("Данные успешно отправлены!");
     } catch (err: any) {
       console.error(err);
-      const errorMsg =
-        err.response?.data?.message ||
-        err.response?.data ||
-        err.message ||
-        "Неизвестная ошибка";
-      alert(`Ошибка при отправке данных: ${errorMsg}`);
+      alert(`Ошибка при отправке данных: ${getApiErrorMessage(err, "Неизвестная ошибка")}`);
     } finally {
       setLoading(false);
     }

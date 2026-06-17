@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../../authe/AuthContext";
 import { peopleApi } from "../../api/peopleApi";
 import type { PersonPayload } from "../../api/peopleApi";
+import { getApiErrorMessage } from "../../utils/errors";
 import "../../styles/dashboard.css";
 import { authApi } from "../../api/authApi";
 import { useNavigate } from "react-router-dom";
@@ -135,7 +136,7 @@ export default function Dashboard() {
       setInitialForm(form);
     } catch (e) {
       console.error(e);
-      setError("Ошибка сохранения. Попробуйте позже.");
+      setError(getApiErrorMessage(e, "Ошибка сохранения. Попробуйте позже."));
     } finally {
       setLoading(false);
     }
